@@ -697,7 +697,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  // STEP 4: Customize Match Modes
+  // STEP 4: Customize Activities & Modes
   Widget _buildModesCustomizationPage() {
     final selectedGames = _catalogGames.where((g) => g.isSelected).toList();
 
@@ -706,10 +706,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Match Types & Modes', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+          const Text('Activities & Modes', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
           const Text(
-            'Enable the modes you actually queue for. Uncheck modes you don\'t play.',
+            'Enable the activities you actually play. Uncheck modes you don\'t play.',
             style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
@@ -1240,7 +1240,7 @@ class _GameSelectRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(game.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                    Text('${game.modes.length} match modes', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                    Text('${game.activities.length} activities & modes', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
                   ],
                 ),
               ),

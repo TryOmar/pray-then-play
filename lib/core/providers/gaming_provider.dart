@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
 import '../models/game_profile.dart';
+import '../models/game_session_record.dart';
 import '../models/gaming_window.dart';
 import '../services/storage_service.dart';
 import 'prayer_provider.dart';
@@ -29,16 +30,59 @@ class UserGamesNotifier extends StateNotifier<List<GameProfile>> {
     StorageService.setUserGames(state);
   }
 
-  void toggleModeEnabled(String gameId, String modeName) {
+  void toggleActivityEnabled(String gameId, String activityId) {
     state = state.map((g) {
       if (g.id == gameId) {
-        final updatedModes = g.modes.map((m) {
-          if (m.name == modeName) {
-            return m.copyWith(isEnabled: !m.isEnabled);
+        final updatedActivities = g.activities.map((a) {
+          if (a.id == activityId || a.name == activityId) {
+            return a.copyWith(isEnabled: !a.isEnabled);
           }
-          return m;
+          return a;
         }).toList();
-        return g.copyWith(modes: updatedModes);
+        return g.copyWith(activities: updatedActivities);
+      }
+      return g;
+    }).toList();
+    StorageService.setUserGames(state);
+  }
+
+  // Backwards compatibility alias
+  void toggleModeEnabled(String gameId, String modeName) =>
+      toggleActivityEnabled(gameId, modeName);
+
+  void addCustomActivity(String gameId, GameActivity activity) {
+    state = state.map((g) {
+      if (g.id == gameId) {
+        final updated = [...g.activities, activity];
+        return g.copyWith(activities: updated);
+      }
+      return g;
+    }).toList();
+    StorageService.setUserGames(state);
+  }
+
+  void updateActivity(String gameId, GameActivity updatedActivity) {
+    state = state.map((g) {
+      if (g.id == gameId) {
+        final updatedList = g.activities.map((a) {
+          if (a.id == updatedActivity.id || a.name == updatedActivity.id) {
+            return updatedActivity;
+          }
+          return a;
+        }).toList();
+        return g.copyWith(activities: updatedList);
+      }
+      return g;
+    }).toList();
+    StorageService.setUserGames(state);
+  }
+
+  void deleteActivity(String gameId, String activityId) {
+    state = state.map((g) {
+      if (g.id == gameId) {
+        final filtered =
+            g.activities.where((a) => a.id != activityId && a.name != activityId).toList();
+        return g.copyWith(activities: filtered);
       }
       return g;
     }).toList();
@@ -70,10 +114,33 @@ class UserGamesNotifier extends StateNotifier<List<GameProfile>> {
   }
 }
 
-// Active/Selected games only
+// Active/Selected games only (that have at least one enabled activity)
 final activeSelectedGamesProvider = Provider<List<GameProfile>>((ref) {
   final all = ref.watch(userGamesProvider);
-  return all.where((g) => g.isSelected && g.enabledModes.isNotEmpty).toList();
+  return all.where((g) => g.isSelected && g.enabledActivities.isNotEmpty).toList();
+});
+
+// Gaming Session History Provider
+final gameSessionHistoryProvider =
+    StateNotifierProvider<GameSessionHistoryNotifier, List<GameSessionRecord>>(
+        (ref) {
+  return GameSessionHistoryNotifier();
+});
+
+class GameSessionHistoryNotifier
+    extends StateNotifier<List<GameSessionRecord>> {
+  GameSessionHistoryNotifier() : super(StorageService.getGameSessionHistory());
+
+  Future<void> logSession(GameSessionRecord record) async {
+    await StorageService.saveGameSession(record);
+    state = StorageService.getGameSessionHistory();
+  }
+}
+
+// Activity Session Statistics Family Provider
+final activityStatsProvider = Provider.family<ActivitySessionStats, ({String gameId, String activityId})>((ref, args) {
+  ref.watch(gameSessionHistoryProvider);
+  return StorageService.getActivitySessionStats(args.gameId, args.activityId);
 });
 
 // Gaming Windows for today

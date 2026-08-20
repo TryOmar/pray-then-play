@@ -27,26 +27,39 @@ class GamingWindow {
 
 class QueueCheckResult {
   final RiskLevel riskLevel;
+  final String verdictTitle;
   final int minutesUntilPrayer;
+  final int availableSafeMinutes;
   final int estimatedMatchDuration;
+  final int? requestedDurationMinutes;
+  final bool canPause;
+  final bool isCompetitive;
   final String nextPrayerName;
   final String message;
   final String recommendation;
   final List<String> suggestedAlternatives;
+  final int? tightMargin;
 
   const QueueCheckResult({
     required this.riskLevel,
+    this.verdictTitle = '',
     required this.minutesUntilPrayer,
+    this.availableSafeMinutes = 0,
     required this.estimatedMatchDuration,
+    this.requestedDurationMinutes,
+    this.canPause = false,
+    this.isCompetitive = false,
     required this.nextPrayerName,
     required this.message,
     required this.recommendation,
     this.suggestedAlternatives = const [],
+    this.tightMargin,
   });
 
-  /// How many minutes the match would overflow into prayer time
+  /// How many minutes the session/match would overflow into prayer time
   int get overflowMinutes {
-    final diff = estimatedMatchDuration - minutesUntilPrayer;
+    final target = requestedDurationMinutes ?? estimatedMatchDuration;
+    final diff = target - minutesUntilPrayer;
     return diff > 0 ? diff : 0;
   }
 

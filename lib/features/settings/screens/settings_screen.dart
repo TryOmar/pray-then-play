@@ -767,7 +767,8 @@ class _SettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final surface = Theme.of(context).colorScheme.surface;
-    final border = Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
+    final border =
+        Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -782,12 +783,13 @@ class _SettingsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: surface,
+        Material(
+          color: surface,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: border),
+            side: BorderSide(color: border),
           ),
+          clipBehavior: Clip.antiAlias,
           child: Column(children: children),
         ),
       ],

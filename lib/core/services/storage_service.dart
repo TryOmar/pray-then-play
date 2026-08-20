@@ -5,6 +5,7 @@ import '../constants/app_constants.dart';
 import '../constants/game_data.dart';
 import '../constants/prayer_constants.dart';
 import '../models/game_profile.dart';
+import '../models/game_session_record.dart';
 import '../models/prayer_record.dart';
 
 class StorageService {
@@ -98,7 +99,7 @@ class StorageService {
   static Future<void> setGamerProfile(GamerProfile profile) =>
       _prefs.setInt(AppConstants.keyGamerProfile, profile.index);
 
-  // Configured Games (User's active games & customized mode settings)
+  // Configured Games (User's active games & customized activity settings)
   static List<GameProfile> getUserGames() {
     final jsonStr = _prefs.getString(AppConstants.keyConfiguredGames);
     if (jsonStr == null || jsonStr.isEmpty) {
@@ -113,9 +114,35 @@ class StorageService {
       final list = jsonDecode(jsonStr) as List;
       return list.map((e) {
         final profile = GameProfile.fromJson(e as Map<String, dynamic>);
-        final catalogMatch = GameData.defaultCatalog.where((g) => g.id == profile.id).firstOrNull;
+        final catalogMatch =
+            GameData.defaultCatalog.where((g) => g.id == profile.id).firstOrNull;
         if (catalogMatch != null) {
-          return profile.copyWith(iconName: catalogMatch.iconName, color: catalogMatch.color);
+          // Merge activities: retain user custom activities and customized overrides,
+          // while ensuring newly available official activities appear
+          final mergedActivities = <GameActivity>[];
+          final userActivitiesMap = {for (var a in profile.activities) a.id: a};
+
+          for (final officialAct in catalogMatch.activities) {
+            if (userActivitiesMap.containsKey(officialAct.id)) {
+              mergedActivities.add(userActivitiesMap[officialAct.id]!);
+            } else {
+              mergedActivities.add(officialAct);
+            }
+          }
+
+          // Add any custom activities created by user
+          for (final userAct in profile.activities) {
+            if (userAct.isCustom &&
+                !mergedActivities.any((a) => a.id == userAct.id)) {
+              mergedActivities.add(userAct);
+            }
+          }
+
+          return profile.copyWith(
+            iconName: catalogMatch.iconName,
+            color: catalogMatch.color,
+            activities: mergedActivities,
+          );
         }
         return profile;
       }).toList();
@@ -123,6 +150,7 @@ class StorageService {
       return [
         GameData.defaultCatalog.firstWhere((g) => g.id == 'valorant'),
         GameData.defaultCatalog.firstWhere((g) => g.id == 'league_of_legends'),
+        GameData.defaultCatalog.firstWhere((g) => g.id == 'minecraft'),
       ];
     }
   }
@@ -130,6 +158,55 @@ class StorageService {
   static Future<void> setUserGames(List<GameProfile> games) async {
     final jsonStr = jsonEncode(games.map((g) => g.toJson()).toList());
     await _prefs.setString(AppConstants.keyConfiguredGames, jsonStr);
+  }
+
+  // Gaming Session History & Personal Statistics
+  static List<GameSessionRecord> getGameSessionHistory() {
+    final jsonStr = _prefs.getString(AppConstants.keyGameSessions);
+    if (jsonStr == null || jsonStr.isEmpty) return [];
+    try {
+      final list = jsonDecode(jsonStr) as List;
+      return list
+          .map((e) => GameSessionRecord.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static Future<void> saveGameSession(GameSessionRecord record) async {
+    final history = getGameSessionHistory();
+    history.insert(0, record);
+    // Keep last 100 sessions
+    if (history.length > 100) {
+      history.removeRange(100, history.length);
+    }
+    final jsonStr = jsonEncode(history.map((s) => s.toJson()).toList());
+    await _prefs.setString(AppConstants.keyGameSessions, jsonStr);
+  }
+
+  static ActivitySessionStats getActivitySessionStats(
+      String gameId, String activityId) {
+    final history = getGameSessionHistory().where((s) =>
+        s.gameId == gameId &&
+        (s.activityId == activityId || s.activityName == activityId));
+
+    if (history.isEmpty) {
+      return ActivitySessionStats.empty;
+    }
+
+    final durations = history.map((s) => s.durationMinutes).toList();
+    final count = durations.length;
+    final avg = (durations.reduce((a, b) => a + b) / count).round();
+    final longest = durations.reduce((a, b) => a > b ? a : b);
+    final shortest = durations.reduce((a, b) => a < b ? a : b);
+
+    return ActivitySessionStats(
+      sessionCount: count,
+      averageDurationMinutes: avg,
+      longestDurationMinutes: longest,
+      shortestDurationMinutes: shortest,
+    );
   }
 
   // Prayer tracking (Boolean quick check)

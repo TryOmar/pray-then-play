@@ -3,8 +3,9 @@ import '../models/game_profile.dart';
 import '../models/gaming_window.dart';
 
 class RiskCalculator {
-  /// Calculate the gaming status based on minutes remaining until prayer and user's safety buffer
-  static GamingStatus calculateGamingStatus(int minutesUntilPrayer, {int bufferMinutes = 10}) {
+  /// Calculate the general gaming status based on minutes remaining until prayer and safety buffer
+  static GamingStatus calculateGamingStatus(int minutesUntilPrayer,
+      {int bufferMinutes = 10}) {
     if (minutesUntilPrayer <= 0) {
       return GamingStatus.prayerTime;
     }
@@ -17,14 +18,15 @@ class RiskCalculator {
     return GamingStatus.safe;
   }
 
-  /// Calculate the risk of queuing for a specific mode given minutes until prayer and safety buffer
+  /// Calculate the risk of queuing for a specific activity given minutes until prayer, buffer, and optional desired session duration
   static RiskLevel calculateRisk(
-    GameMode mode,
+    GameActivity activity,
     int minutesUntilPrayer, {
     int bufferMinutes = 10,
+    int? desiredSessionMinutes,
   }) {
-    // Flexible games (singleplayer/pauseable) are always safe to play
-    if (mode.commitmentType == GameCommitmentType.flexible || mode.canLeaveSafely) {
+    // Singleplayer / pauseable activities can be paused or exited cleanly anytime
+    if (activity.canPause && !activity.requiresCompletion) {
       return RiskLevel.low;
     }
 
@@ -32,93 +34,196 @@ class RiskCalculator {
       return RiskLevel.high;
     }
 
-    final safeAvailableTime = minutesUntilPrayer - bufferMinutes;
+    final effectiveBuffer = activity.safetyBuffer ?? bufferMinutes;
+    final safeAvailableTime = minutesUntilPrayer - effectiveBuffer;
 
-    // Match fits comfortably within the safe window
-    if (mode.maxMinutes <= safeAvailableTime) {
+    // If user specified a target session duration
+    if (desiredSessionMinutes != null && desiredSessionMinutes > 0) {
+      if (desiredSessionMinutes <= safeAvailableTime) {
+        return RiskLevel.low;
+      }
+      if (desiredSessionMinutes <= minutesUntilPrayer) {
+        return RiskLevel.medium;
+      }
+      return RiskLevel.high;
+    }
+
+    // Default mode evaluation based on activity typical and max bounds
+    if (activity.maxMinutes <= safeAvailableTime) {
       return RiskLevel.low;
     }
 
-    // Match estimated time fits within absolute prayer time, but exceeds safe buffer
-    if (mode.estimatedMinutes <= minutesUntilPrayer && mode.minMinutes <= safeAvailableTime) {
+    if (activity.typicalDuration <= minutesUntilPrayer &&
+        activity.minMinutes <= safeAvailableTime) {
       return RiskLevel.medium;
     }
 
-    // Match will definitely or likely overflow into prayer time
     return RiskLevel.high;
   }
 
-  /// Check queue suitability and generate recommendations
+  /// Check queue suitability and generate comprehensive recommendations
   static QueueCheckResult checkQueue({
     required GameProfile game,
-    required GameMode mode,
+    required GameActivity activity,
     required int minutesUntilPrayer,
     required String nextPrayerName,
     required List<GameProfile> userGames,
     int bufferMinutes = 10,
+    int? desiredSessionMinutes,
   }) {
-    final risk = calculateRisk(mode, minutesUntilPrayer, bufferMinutes: bufferMinutes);
+    final effectiveBuffer = activity.safetyBuffer ?? bufferMinutes;
+    final safeAvailableMinutes =
+        (minutesUntilPrayer - effectiveBuffer).clamp(0, 999);
+    final risk = calculateRisk(
+      activity,
+      minutesUntilPrayer,
+      bufferMinutes: bufferMinutes,
+      desiredSessionMinutes: desiredSessionMinutes,
+    );
 
+    String verdictTitle;
     String message;
     String recommendation;
     List<String> alternatives = [];
+    int? tightMargin;
 
-    if (mode.commitmentType == GameCommitmentType.flexible || mode.canLeaveSafely) {
-      message = 'You can pause, save, or leave ${game.name} ${mode.name} at any time.';
-      recommendation = '$nextPrayerName is in $minutesUntilPrayer minutes. Enjoy your session.';
+    if (activity.canPause && !activity.requiresCompletion) {
+      verdictTitle = '✓ PAUSEABLE SESSION';
+      message =
+          'You can pause, save, or leave ${game.name} · ${activity.name} anytime without penalties.';
+      recommendation =
+          '$nextPrayerName is in $minutesUntilPrayer min ($safeAvailableMinutes min safe window). Enjoy your session and pause when prayer arrives.';
     } else {
-      switch (risk) {
-        case RiskLevel.low:
-          message = 'Typical match: ${mode.minMinutes}–${mode.maxMinutes} min. $nextPrayerName begins in $minutesUntilPrayer min.';
-          recommendation = 'You have a comfortable gaming window with a ${bufferMinutes}m safety buffer.';
-          break;
+      if (desiredSessionMinutes != null && desiredSessionMinutes > 0) {
+        tightMargin = (minutesUntilPrayer - desiredSessionMinutes).clamp(0, 999);
 
-        case RiskLevel.medium:
-          final tightMargin = minutesUntilPrayer - mode.estimatedMinutes;
-          message = 'A normal match (~${mode.estimatedMinutes} min) fits, but overtime (${mode.maxMinutes} min) could overlap with $nextPrayerName in $minutesUntilPrayer min.';
-          recommendation = 'You have roughly $tightMargin min margin. Consider a shorter mode if you want zero risk.';
-          alternatives = _findAlternatives(minutesUntilPrayer, userGames, excludeGameId: game.id, excludeModeName: mode.name, bufferMinutes: bufferMinutes);
-          break;
+        switch (risk) {
+          case RiskLevel.low:
+            verdictTitle = '✓ SAFE TO START';
+            message =
+                'Your desired session ($desiredSessionMinutes min) fits comfortably inside the safe window ($safeAvailableMinutes min before ${effectiveBuffer}m buffer).';
+            recommendation =
+                '$nextPrayerName is in $minutesUntilPrayer min. You have sufficient time to finish with zero rush.';
+            break;
 
-        case RiskLevel.high:
-          message = '$nextPrayerName is in $minutesUntilPrayer minutes. A typical ${game.name} ${mode.name} match (${mode.estimatedMinutes} min) is too long.';
-          recommendation = 'Pray $nextPrayerName first, then queue with total peace of mind.';
-          alternatives = _findAlternatives(minutesUntilPrayer, userGames, excludeGameId: game.id, excludeModeName: mode.name, bufferMinutes: bufferMinutes);
-          break;
+          case RiskLevel.medium:
+            verdictTitle = '⚠ TIGHT WINDOW — USE CAUTION';
+            message =
+                'A $desiredSessionMinutes min session will finish before $nextPrayerName ($minutesUntilPrayer min), but cuts into your ${effectiveBuffer}m safety buffer.';
+            recommendation =
+                'You have roughly $tightMargin min margin. If a match runs long, you may need to rush to prayer.';
+            alternatives = _findAlternatives(
+              minutesUntilPrayer,
+              userGames,
+              excludeGameId: game.id,
+              excludeActivityId: activity.id,
+              bufferMinutes: bufferMinutes,
+            );
+            break;
+
+          case RiskLevel.high:
+            verdictTitle = '✕ NOT RECOMMENDED (PRAY FIRST)';
+            message =
+                '$nextPrayerName is in $minutesUntilPrayer min. Your requested session ($desiredSessionMinutes min) is too long for the safe window ($safeAvailableMinutes min).';
+            recommendation =
+                'Pray $nextPrayerName first, then queue with total focus and peace of mind.';
+            alternatives = _findAlternatives(
+              minutesUntilPrayer,
+              userGames,
+              excludeGameId: game.id,
+              excludeActivityId: activity.id,
+              bufferMinutes: bufferMinutes,
+            );
+            break;
+        }
+      } else {
+        tightMargin = (minutesUntilPrayer - activity.typicalDuration).clamp(0, 999);
+
+        switch (risk) {
+          case RiskLevel.low:
+            verdictTitle = activity.typicalDuration <= 15
+                ? '✓ SAFE FOR A SHORT SESSION'
+                : '✓ SAFE TO START';
+            message =
+                'Typical match: ${activity.minMinutes}–${activity.maxMinutes} min. $nextPrayerName begins in $minutesUntilPrayer min.';
+            recommendation =
+                'You have a comfortable window with a ${effectiveBuffer}m safety buffer preserved.';
+            break;
+
+          case RiskLevel.medium:
+            verdictTitle = '⚠ TIGHT WINDOW — USE CAUTION';
+            message =
+                'A normal match (~${activity.typicalDuration} min) fits, but overtime or delay (${activity.maxMinutes} min) could overlap with $nextPrayerName in $minutesUntilPrayer min.';
+            recommendation =
+                'You have roughly $tightMargin min margin. Consider a shorter mode or pauseable activity if you want zero risk.';
+            alternatives = _findAlternatives(
+              minutesUntilPrayer,
+              userGames,
+              excludeGameId: game.id,
+              excludeActivityId: activity.id,
+              bufferMinutes: bufferMinutes,
+            );
+            break;
+
+          case RiskLevel.high:
+            verdictTitle = '✕ NOT RECOMMENDED (PRAY FIRST)';
+            message =
+                '$nextPrayerName is in $minutesUntilPrayer min. A typical ${game.name} · ${activity.name} session (${activity.typicalDuration} min) is too long.';
+            recommendation =
+                'Pray $nextPrayerName first, then queue with complete peace of mind.';
+            alternatives = _findAlternatives(
+              minutesUntilPrayer,
+              userGames,
+              excludeGameId: game.id,
+              excludeActivityId: activity.id,
+              bufferMinutes: bufferMinutes,
+            );
+            break;
+        }
       }
     }
 
     return QueueCheckResult(
       riskLevel: risk,
+      verdictTitle: verdictTitle,
       minutesUntilPrayer: minutesUntilPrayer,
-      estimatedMatchDuration: mode.estimatedMinutes,
+      availableSafeMinutes: safeAvailableMinutes,
+      estimatedMatchDuration: desiredSessionMinutes ?? activity.typicalDuration,
+      requestedDurationMinutes: desiredSessionMinutes,
+      canPause: activity.canPause,
+      isCompetitive: activity.isCompetitive,
       nextPrayerName: nextPrayerName,
       message: message,
       recommendation: recommendation,
       suggestedAlternatives: alternatives,
+      tightMargin: tightMargin,
     );
   }
 
-  /// Find alternative modes from the user's configured games that safely fit
+  /// Find alternative activities from the user's configured library that safely fit
   static List<String> _findAlternatives(
     int minutesAvailable,
     List<GameProfile> userGames, {
     String? excludeGameId,
-    String? excludeModeName,
+    String? excludeActivityId,
     int bufferMinutes = 10,
   }) {
     final alternatives = <String>[];
 
     for (final game in userGames) {
-      for (final mode in game.enabledModes) {
-        if (game.id == excludeGameId && mode.name == excludeModeName) continue;
+      for (final activity in game.enabledActivities) {
+        if (game.id == excludeGameId && activity.id == excludeActivityId) {
+          continue;
+        }
 
-        final risk = calculateRisk(mode, minutesAvailable, bufferMinutes: bufferMinutes);
+        final risk = calculateRisk(activity, minutesAvailable,
+            bufferMinutes: bufferMinutes);
         if (risk != RiskLevel.high) {
-          if (mode.commitmentType == GameCommitmentType.flexible) {
-            alternatives.add('${game.name} · ${mode.name} (Flexible)');
+          if (activity.canPause && !activity.requiresCompletion) {
+            alternatives.add('${game.name} · ${activity.name} (Pauseable)');
           } else {
-            alternatives.add('${game.name} · ${mode.name} (~${mode.estimatedMinutes} min)');
+            alternatives.add(
+                '${game.name} · ${activity.name} (~${activity.typicalDuration} min)');
           }
         }
       }
