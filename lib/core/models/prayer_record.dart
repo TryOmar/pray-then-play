@@ -6,7 +6,8 @@ enum PrayerStatus {
   late,
   missed,
   notRecorded,
-  upcoming;
+  upcoming,
+  skipped;
 
   String get label {
     switch (this) {
@@ -20,6 +21,8 @@ enum PrayerStatus {
         return 'Not recorded';
       case PrayerStatus.upcoming:
         return 'Upcoming';
+      case PrayerStatus.skipped:
+        return 'Skipped';
     }
   }
 
@@ -35,6 +38,8 @@ enum PrayerStatus {
         return const Color(0xFF64748B);
       case PrayerStatus.upcoming:
         return const Color(0xFF334155);
+      case PrayerStatus.skipped:
+        return const Color(0xFF475569);
     }
   }
 
@@ -50,19 +55,173 @@ enum PrayerStatus {
         return Icons.radio_button_unchecked_rounded;
       case PrayerStatus.upcoming:
         return Icons.schedule_rounded;
+      case PrayerStatus.skipped:
+        return Icons.remove_circle_outline_rounded;
     }
   }
 
   bool get isCompleted => this == PrayerStatus.onTime || this == PrayerStatus.late;
 }
 
+enum PrayerClassification {
+  onTime,
+  late,
+  unknown;
+
+  String get label {
+    switch (this) {
+      case PrayerClassification.onTime:
+        return 'On Time';
+      case PrayerClassification.late:
+        return 'Late';
+      case PrayerClassification.unknown:
+        return 'Not Classified';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case PrayerClassification.onTime:
+        return AppColors.successGreen;
+      case PrayerClassification.late:
+        return AppColors.warningAmber;
+      case PrayerClassification.unknown:
+        return AppColors.textMuted;
+    }
+  }
+}
+
+enum PrayerSource {
+  automatic,
+  manual,
+  notification;
+
+  String get label {
+    switch (this) {
+      case PrayerSource.automatic:
+        return 'Automatic Quick Tap';
+      case PrayerSource.manual:
+        return 'Manual Log';
+      case PrayerSource.notification:
+        return 'Notification Action';
+    }
+  }
+}
+
+/// An individual auditable prayer completion record.
+class PrayerRecordItem {
+  final String id;
+  final String prayerName;
+  final DateTime adhanTime;
+  final PrayerStatus status;
+  final DateTime? completedAt;
+  final PrayerClassification classification;
+  final PrayerSource source;
+  final String? notes;
+  final DateTime updatedAt;
+
+  const PrayerRecordItem({
+    required this.id,
+    required this.prayerName,
+    required this.adhanTime,
+    required this.status,
+    this.completedAt,
+    this.classification = PrayerClassification.unknown,
+    this.source = PrayerSource.manual,
+    this.notes,
+    required this.updatedAt,
+  });
+
+  /// Derive classification rule-based from timestamps rather than arbitrary button clicks.
+  static PrayerClassification deriveClassification({
+    required DateTime adhanTime,
+    required DateTime? completedAt,
+    int onTimeWindowMinutes = 60,
+  }) {
+    if (completedAt == null) return PrayerClassification.unknown;
+    final diff = completedAt.difference(adhanTime).inMinutes;
+    // If prayed between Adhan and threshold (or within 5 min before if early prayer), it's On Time.
+    if (diff >= -5 && diff <= onTimeWindowMinutes) {
+      return PrayerClassification.onTime;
+    }
+    return PrayerClassification.late;
+  }
+
+  PrayerRecordItem copyWith({
+    String? id,
+    String? prayerName,
+    DateTime? adhanTime,
+    PrayerStatus? status,
+    DateTime? completedAt,
+    PrayerClassification? classification,
+    PrayerSource? source,
+    String? notes,
+    DateTime? updatedAt,
+  }) {
+    return PrayerRecordItem(
+      id: id ?? this.id,
+      prayerName: prayerName ?? this.prayerName,
+      adhanTime: adhanTime ?? this.adhanTime,
+      status: status ?? this.status,
+      completedAt: completedAt ?? this.completedAt,
+      classification: classification ?? this.classification,
+      source: source ?? this.source,
+      notes: notes ?? this.notes,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'prayerName': prayerName,
+      'adhanTime': adhanTime.toIso8601String(),
+      'status': status.name,
+      'completedAt': completedAt?.toIso8601String(),
+      'classification': classification.name,
+      'source': source.name,
+      'notes': notes,
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  factory PrayerRecordItem.fromJson(Map<String, dynamic> json) {
+    return PrayerRecordItem(
+      id: json['id'] as String? ?? UniqueKey().toString(),
+      prayerName: json['prayerName'] as String,
+      adhanTime: DateTime.parse(json['adhanTime'] as String),
+      status: PrayerStatus.values.firstWhere(
+        (s) => s.name == json['status'],
+        orElse: () => PrayerStatus.notRecorded,
+      ),
+      completedAt: json['completedAt'] != null
+          ? DateTime.parse(json['completedAt'] as String)
+          : null,
+      classification: PrayerClassification.values.firstWhere(
+        (c) => c.name == json['classification'],
+        orElse: () => PrayerClassification.unknown,
+      ),
+      source: PrayerSource.values.firstWhere(
+        (s) => s.name == json['source'],
+        orElse: () => PrayerSource.manual,
+      ),
+      notes: json['notes'] as String?,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
+    );
+  }
+}
+
 class DailyPrayerRecord {
   final DateTime date;
   final Map<String, PrayerStatus> prayers;
+  final Map<String, PrayerRecordItem>? detailedRecords;
 
   const DailyPrayerRecord({
     required this.date,
     required this.prayers,
+    this.detailedRecords,
   });
 
   factory DailyPrayerRecord.empty(DateTime date) {
@@ -90,10 +249,12 @@ class DailyPrayerRecord {
   DailyPrayerRecord copyWith({
     DateTime? date,
     Map<String, PrayerStatus>? prayers,
+    Map<String, PrayerRecordItem>? detailedRecords,
   }) {
     return DailyPrayerRecord(
       date: date ?? this.date,
       prayers: prayers ?? Map.from(this.prayers),
+      detailedRecords: detailedRecords ?? this.detailedRecords,
     );
   }
 
@@ -107,6 +268,8 @@ class DailyPrayerRecord {
     return {
       'date': date.toIso8601String(),
       'prayers': prayers.map((k, v) => MapEntry(k, v.name)),
+      if (detailedRecords != null)
+        'detailedRecords': detailedRecords!.map((k, v) => MapEntry(k, v.toJson())),
     };
   }
 
@@ -128,7 +291,17 @@ class DailyPrayerRecord {
       }
     }
 
-    return DailyPrayerRecord(date: date, prayers: prayers);
+    Map<String, PrayerRecordItem>? detailed;
+    if (json['detailedRecords'] != null) {
+      final map = json['detailedRecords'] as Map<String, dynamic>;
+      detailed = map.map((k, v) => MapEntry(k, PrayerRecordItem.fromJson(v as Map<String, dynamic>)));
+    }
+
+    return DailyPrayerRecord(
+      date: date,
+      prayers: prayers,
+      detailedRecords: detailed,
+    );
   }
 }
 
@@ -144,7 +317,7 @@ class WeeklyPrayerSummary {
   int get lateCount => days.fold(0, (acc, d) => acc + d.lateCount);
   double get onTimeRate => totalRecorded == 0 ? 0.0 : (onTimeCount / totalRecorded) * 100.0;
   double get consistencyRate => totalPossible == 0 ? 0.0 : (totalRecorded / totalPossible) * 100.0;
-  double get weekOverWeekImprovement => 12.0; // Positive habit delta percentage
+  double get weekOverWeekImprovement => 12.0;
 }
 
 class MonthlyPrayerSummary {
@@ -163,7 +336,7 @@ class MonthlyPrayerSummary {
 }
 
 class ContributionWeek {
-  final List<DailyPrayerRecord?> days; // 7 elements (Mon=0 to Sun=6)
+  final List<DailyPrayerRecord?> days;
   final String? monthLabel;
 
   ContributionWeek({required this.days, this.monthLabel});
@@ -179,7 +352,7 @@ enum GamingDecisionType {
       case GamingDecisionType.avoidedRiskyQueue:
         return 'Avoided risky match queue';
       case GamingDecisionType.stoppedToPray:
-        return 'Stopped gaming session to pray';
+        return 'Paused session to pray';
       case GamingDecisionType.choseShortGame:
         return 'Chose safe short game mode';
     }

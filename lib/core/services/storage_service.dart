@@ -144,24 +144,99 @@ class StorageService {
     };
   }
 
-  static Future<void> markPrayerCompleted(String prayerName, {PrayerStatus status = PrayerStatus.onTime}) async {
+  static Future<void> markPrayerCompleted(
+    String prayerName, {
+    PrayerStatus status = PrayerStatus.onTime,
+    DateTime? completedAt,
+    DateTime? adhanTime,
+    PrayerSource source = PrayerSource.manual,
+    String? notes,
+  }) async {
     final today = DateTime.now();
     final record = getDailyPrayerRecord(today);
-    final updated = record.withPrayer(prayerName, status);
-    await saveDailyPrayerRecord(updated);
+    final completionTime = completedAt ?? DateTime.now();
+    final adhan = adhanTime ?? completionTime;
+
+    final classification = PrayerRecordItem.deriveClassification(
+      adhanTime: adhan,
+      completedAt: completionTime,
+    );
+
+    final item = PrayerRecordItem(
+      id: '${prayerName}_${today.year}_${today.month}_${today.day}',
+      prayerName: prayerName,
+      adhanTime: adhan,
+      status: status,
+      completedAt: completionTime,
+      classification: classification,
+      source: source,
+      notes: notes,
+      updatedAt: DateTime.now(),
+    );
+
+    final updatedDetails = Map<String, PrayerRecordItem>.from(record.detailedRecords ?? {});
+    updatedDetails[prayerName] = item;
+
+    final updatedRecord = record.copyWith(
+      prayers: Map.from(record.prayers)..[prayerName] = status,
+      detailedRecords: updatedDetails,
+    );
+
+    await saveDailyPrayerRecord(updatedRecord);
   }
 
-  static Future<void> togglePrayer(String prayerName) async {
+  static Future<void> togglePrayer(String prayerName, {DateTime? adhanTime}) async {
     final today = DateTime.now();
     final record = getDailyPrayerRecord(today);
     final current = record.prayers[prayerName] ?? PrayerStatus.notRecorded;
-    final nextStatus = current.isCompleted ? PrayerStatus.notRecorded : PrayerStatus.onTime;
-    await saveDailyPrayerRecord(record.withPrayer(prayerName, nextStatus));
+
+    if (current.isCompleted) {
+      // Toggle to not recorded
+      final updatedDetails = Map<String, PrayerRecordItem>.from(record.detailedRecords ?? {});
+      updatedDetails.remove(prayerName);
+      final updatedRecord = record.copyWith(
+        prayers: Map.from(record.prayers)..[prayerName] = PrayerStatus.notRecorded,
+        detailedRecords: updatedDetails,
+      );
+      await saveDailyPrayerRecord(updatedRecord);
+    } else {
+      // Quick mark as completed at current time
+      final now = DateTime.now();
+      final adhan = adhanTime ?? now;
+      final classification = PrayerRecordItem.deriveClassification(
+        adhanTime: adhan,
+        completedAt: now,
+      );
+      final derivedStatus = classification == PrayerClassification.onTime
+          ? PrayerStatus.onTime
+          : PrayerStatus.late;
+
+      await markPrayerCompleted(
+        prayerName,
+        status: derivedStatus,
+        completedAt: now,
+        adhanTime: adhan,
+        source: PrayerSource.automatic,
+      );
+    }
+  }
+
+  static Future<void> savePrayerRecordItem(PrayerRecordItem item, DateTime date) async {
+    final record = getDailyPrayerRecord(date);
+    final updatedDetails = Map<String, PrayerRecordItem>.from(record.detailedRecords ?? {});
+    updatedDetails[item.prayerName] = item;
+
+    final updatedRecord = record.copyWith(
+      prayers: Map.from(record.prayers)..[item.prayerName] = item.status,
+      detailedRecords: updatedDetails,
+    );
+    await saveDailyPrayerRecord(updatedRecord);
   }
 
   // Multi-state Daily Prayer Records (Heatmap & Consistency History)
   static String _dateKey(DateTime date) =>
       'daily_prayer_record_${date.year}_${date.month.toString().padLeft(2, '0')}_${date.day.toString().padLeft(2, '0')}';
+
 
   static DailyPrayerRecord getDailyPrayerRecord(DateTime date) {
     final key = _dateKey(date);

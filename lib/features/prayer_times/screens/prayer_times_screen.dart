@@ -160,7 +160,7 @@ class _PrayerTimesScreenState extends ConsumerState<PrayerTimesScreen> {
                                     onTap: name != 'Sunrise'
                                         ? () {
                                             ref
-                                                .read(prayerTrackingProvider
+                                                .read(todayPrayerRecordProvider
                                                     .notifier)
                                                 .togglePrayer(name);
                                           }

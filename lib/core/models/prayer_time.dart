@@ -93,6 +93,26 @@ class DailyPrayerTimes {
     return current;
   }
 
+  /// Get the time of a specific prayer by name
+  DateTime? getTimeFor(String name) {
+    switch (name.toLowerCase()) {
+      case 'fajr':
+        return fajr;
+      case 'sunrise':
+        return sunrise;
+      case 'dhuhr':
+        return dhuhr;
+      case 'asr':
+        return asr;
+      case 'maghrib':
+        return maghrib;
+      case 'isha':
+        return isha;
+      default:
+        return null;
+    }
+  }
+
   /// Get the end time of a prayer window (= start of next prayer)
   DateTime? getEndTimeForPrayer(String prayerName) {
     final timings = allTimings;
