@@ -1,0 +1,4 @@
+storePassword=ptppassword2026
+keyPassword=ptppassword2026
+keyAlias=upload
+storeFile=upload-keystore.jks

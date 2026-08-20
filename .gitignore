@@ -70,9 +70,11 @@ migrate_working_dir/
 
 # Secrets / Keys
 *.jks
+*.jks.old
 *.keystore
 *.key
 *.p12
+**/android/key.properties
 google-services.json
 GoogleService-Info.plist
 
