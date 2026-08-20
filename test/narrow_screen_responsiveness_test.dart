@@ -151,6 +151,30 @@ void main() {
 
       expect(find.byType(PrayerConsistencyScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
+
+      // Scroll down to layout behavioral insights and habit & discipline badges
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Scroll back up and switch tabs
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 1200));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Tab 1: 5-Prayer Matrix
+      await tester.tap(find.text('5-Prayer Matrix'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Tab 2: Gaming Decisions
+      await tester.tap(find.text('Gaming Decisions'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('PrayerTimesScreen renders without overflow on 320px width',

@@ -614,12 +614,16 @@ class _PrayerConsistencyScreenState
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  _getRecordTooltip(selectedInfo),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    _getRecordTooltip(selectedInfo),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ],
@@ -990,9 +994,13 @@ class _PrayerConsistencyScreenState
               Icon(Icons.sports_esports_rounded,
                   color: theme.primaryColor, size: 20),
               const SizedBox(width: 8),
-              const Text(
-                'Gaming & Salah Decisions',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+              const Expanded(
+                child: Text(
+                  'Gaming & Salah Decisions',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                ),
               ),
             ],
           ),
@@ -1107,11 +1115,16 @@ class _PrayerConsistencyScreenState
         children: [
           Row(
             children: [
-              Icon(Icons.psychology_rounded, color: theme.primaryColor, size: 20),
+              Icon(Icons.psychology_rounded,
+                  color: theme.primaryColor, size: 20),
               const SizedBox(width: 8),
-              const Text(
-                'Weekly Habit Reflection',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+              const Expanded(
+                child: Text(
+                  'Weekly Habit Reflection',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                ),
               ),
             ],
           ),
@@ -1273,7 +1286,7 @@ class _PrayerConsistencyScreenState
     final primaryColor = theme.primaryColor;
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: isUnlocked
             ? (theme.inputDecorationTheme.fillColor ?? AppColors.surfaceElevated)
@@ -1296,11 +1309,12 @@ class _PrayerConsistencyScreenState
             : null,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Medallion Emblem Avatar
           Container(
-            width: 46,
-            height: 46,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               gradient: isUnlocked
                   ? LinearGradient(
@@ -1312,10 +1326,15 @@ class _PrayerConsistencyScreenState
                       ],
                     )
                   : null,
-              color: isUnlocked ? null : theme.inputDecorationTheme.fillColor ?? AppColors.surfaceElevated,
-              borderRadius: BorderRadius.circular(12),
+              color: isUnlocked
+                  ? null
+                  : theme.inputDecorationTheme.fillColor ??
+                      AppColors.surfaceElevated,
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: isUnlocked ? primaryColor.withValues(alpha: 0.6) : Colors.transparent,
+                color: isUnlocked
+                    ? primaryColor.withValues(alpha: 0.6)
+                    : Colors.transparent,
                 width: 1.5,
               ),
               boxShadow: isUnlocked
@@ -1330,33 +1349,39 @@ class _PrayerConsistencyScreenState
             child: Center(
               child: Icon(
                 badge.icon,
-                size: 22,
+                size: 20,
                 color: isUnlocked ? primaryColor : AppColors.textMuted,
               ),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 10),
 
           // Content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 6,
+                  runSpacing: 2,
                   children: [
                     Text(
                       badge.title,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.w700,
-                        color: isUnlocked ? theme.colorScheme.onSurface : AppColors.textMuted,
+                        color: isUnlocked
+                            ? theme.colorScheme.onSurface
+                            : AppColors.textMuted,
                       ),
                     ),
-                    const SizedBox(width: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 5, vertical: 1.5),
                       decoration: BoxDecoration(
-                        color: (isUnlocked ? primaryColor : AppColors.textMuted).withValues(alpha: 0.12),
+                        color: (isUnlocked ? primaryColor : AppColors.textMuted)
+                            .withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -1364,7 +1389,8 @@ class _PrayerConsistencyScreenState
                         style: TextStyle(
                           fontSize: 8,
                           fontWeight: FontWeight.w800,
-                          color: isUnlocked ? primaryColor : AppColors.textMuted,
+                          color:
+                              isUnlocked ? primaryColor : AppColors.textMuted,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -1377,7 +1403,8 @@ class _PrayerConsistencyScreenState
                   style: TextStyle(
                     fontSize: 11,
                     color: isUnlocked
-                        ? (theme.textTheme.bodySmall?.color ?? AppColors.textMuted)
+                        ? (theme.textTheme.bodySmall?.color ??
+                            AppColors.textMuted)
                         : AppColors.textMuted,
                     height: 1.3,
                   ),
@@ -1389,11 +1416,12 @@ class _PrayerConsistencyScreenState
 
           // Unlocked Pill or Lock
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
             decoration: BoxDecoration(
               color: isUnlocked
                   ? AppColors.successGreen.withValues(alpha: 0.14)
-                  : theme.inputDecorationTheme.fillColor ?? AppColors.surfaceElevated,
+                  : theme.inputDecorationTheme.fillColor ??
+                      AppColors.surfaceElevated,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isUnlocked
@@ -1405,17 +1433,22 @@ class _PrayerConsistencyScreenState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  isUnlocked ? Icons.verified_rounded : Icons.lock_outline_rounded,
-                  size: 13,
-                  color: isUnlocked ? AppColors.successGreen : AppColors.textMuted,
+                  isUnlocked
+                      ? Icons.verified_rounded
+                      : Icons.lock_outline_rounded,
+                  size: 12,
+                  color:
+                      isUnlocked ? AppColors.successGreen : AppColors.textMuted,
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 3),
                 Text(
                   isUnlocked ? 'Unlocked' : 'Locked',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 9.5,
                     fontWeight: FontWeight.w700,
-                    color: isUnlocked ? AppColors.successGreen : AppColors.textMuted,
+                    color: isUnlocked
+                        ? AppColors.successGreen
+                        : AppColors.textMuted,
                   ),
                 ),
               ],

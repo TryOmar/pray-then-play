@@ -355,27 +355,25 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Row(
+                                          Wrap(
+                                            crossAxisAlignment:
+                                                WrapCrossAlignment.center,
+                                            spacing: 6,
+                                            runSpacing: 2,
                                             children: [
-                                              Flexible(
-                                                child: Text(
-                                                  activity.name,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.w700,
-                                                    fontSize: 14,
-                                                  ),
+                                              Text(
+                                                activity.name,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 14,
                                                 ),
                                               ),
-                                              if (activity.isCustom) ...[
-                                                const SizedBox(width: 6),
+                                              if (activity.isCustom)
                                                 Container(
                                                   padding: const EdgeInsets
                                                       .symmetric(
-                                                      horizontal: 6,
-                                                      vertical: 2),
+                                                      horizontal: 5,
+                                                      vertical: 1.5),
                                                   decoration: BoxDecoration(
                                                     color: AppColors.primaryCyan
                                                         .withValues(alpha: 0.2),
@@ -386,7 +384,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                                   child: const Text(
                                                     'Custom',
                                                     style: TextStyle(
-                                                      fontSize: 9,
+                                                      fontSize: 8.5,
                                                       fontWeight:
                                                           FontWeight.w700,
                                                       color:
@@ -394,7 +392,6 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                                     ),
                                                   ),
                                                 ),
-                                              ],
                                             ],
                                           ),
                                           const SizedBox(height: 4),
@@ -435,20 +432,28 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                         ],
                                       ),
                                     ),
+                                    const SizedBox(width: 6),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
+                                          horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
                                         color:
                                             risk.color.withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: Text(
-                                        RiskCalculator.getRiskLabel(risk),
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w800,
-                                          color: risk.color,
+                                      child: ConstrainedBox(
+                                        constraints: const BoxConstraints(
+                                            maxWidth: 80),
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            RiskCalculator.getRiskLabel(risk),
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w800,
+                                              color: risk.color,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
