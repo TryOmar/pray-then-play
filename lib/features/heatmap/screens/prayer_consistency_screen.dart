@@ -26,7 +26,6 @@ class _PrayerConsistencyScreenState
     final contributionWeeks = notifier.getContributionWeeks(18);
     final monthlySummary =
         notifier.getMonthlySummary(state.selectedYear, state.selectedMonth);
-    final weeklySummary = notifier.getWeeklySummary();
     final reflection = notifier.getHabitReflection();
     final achievements = notifier.getAllAchievements();
     final streak = notifier.getConsistencyStreak();
@@ -1531,80 +1530,108 @@ class _PrayerConsistencyScreenState
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: theme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.dividerTheme.color ?? AppColors.surfaceHighlight,
-                  borderRadius: BorderRadius.circular(2),
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            16,
+            20,
+            MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.dividerTheme.color ?? AppColors.surfaceHighlight,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Did you pray $prayerName?',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: theme.colorScheme.onSurface,
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.primaryColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.mosque_rounded, size: 20, color: theme.primaryColor),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Did you pray $prayerName?',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Choose timing to update your consistency history.',
+                          style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Choose your timing to update your consistency heatmap.',
-              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
-            _buildQuickActionButton(
-              ctx,
-              label: 'Yes, on time',
-              color: AppColors.successGreen,
-              icon: Icons.check_circle_rounded,
-              onTap: () {
-                ref
-                    .read(prayerConsistencyProvider.notifier)
-                    .updatePrayerStatus(date, prayerName, PrayerStatus.onTime);
-                Navigator.pop(ctx);
-              },
-            ),
-            const SizedBox(height: 8),
-            _buildQuickActionButton(
-              ctx,
-              label: 'Yes, late',
-              color: AppColors.warningAmber,
-              icon: Icons.access_time_rounded,
-              onTap: () {
-                ref
-                    .read(prayerConsistencyProvider.notifier)
-                    .updatePrayerStatus(date, prayerName, PrayerStatus.late);
-                Navigator.pop(ctx);
-              },
-            ),
-            const SizedBox(height: 8),
-            _buildQuickActionButton(
-              ctx,
-              label: 'Not recorded yet / Clear',
-              color: const Color(0xFF64748B),
-              icon: Icons.radio_button_unchecked_rounded,
-              onTap: () {
-                ref.read(prayerConsistencyProvider.notifier).updatePrayerStatus(
-                    date, prayerName, PrayerStatus.notRecorded);
-                Navigator.pop(ctx);
-              },
-            ),
-          ],
+              _buildQuickActionButton(
+                ctx,
+                label: 'Yes, on time',
+                color: AppColors.successGreen,
+                icon: Icons.check_circle_rounded,
+                onTap: () {
+                  ref
+                      .read(prayerConsistencyProvider.notifier)
+                      .updatePrayerStatus(date, prayerName, PrayerStatus.onTime);
+                  Navigator.pop(ctx);
+                },
+              ),
+              const SizedBox(height: 8),
+              _buildQuickActionButton(
+                ctx,
+                label: 'Yes, late',
+                color: AppColors.warningAmber,
+                icon: Icons.access_time_rounded,
+                onTap: () {
+                  ref
+                      .read(prayerConsistencyProvider.notifier)
+                      .updatePrayerStatus(date, prayerName, PrayerStatus.late);
+                  Navigator.pop(ctx);
+                },
+              ),
+              const SizedBox(height: 8),
+              _buildQuickActionButton(
+                ctx,
+                label: 'Not recorded yet / Clear',
+                color: const Color(0xFF64748B),
+                icon: Icons.radio_button_unchecked_rounded,
+                onTap: () {
+                  ref.read(prayerConsistencyProvider.notifier).updatePrayerStatus(
+                      date, prayerName, PrayerStatus.notRecorded);
+                  Navigator.pop(ctx);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

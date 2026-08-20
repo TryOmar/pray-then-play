@@ -228,7 +228,6 @@ class _LiveCountdownWidget extends ConsumerWidget {
 
     final remaining = prayerTime.difference(now);
     final isArrived = remaining.isNegative;
-    final totalRemainingMinutes = remaining.inMinutes;
 
     final onSurface = Theme.of(context).colorScheme.onSurface;
 

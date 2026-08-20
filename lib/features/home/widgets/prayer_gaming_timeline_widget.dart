@@ -22,7 +22,6 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     if (prayerTimes == null) return const SizedBox();
 
     final primaryColor = Theme.of(context).primaryColor;
-    final surfaceColor = Theme.of(context).colorScheme.surface;
     final surfaceHighlight = Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
 
     return Container(
