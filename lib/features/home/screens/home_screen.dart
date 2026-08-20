@@ -207,7 +207,7 @@ class HomeScreen extends ConsumerWidget {
         const AppLogoWidget(
           size: 30,
           variant: AppLogoVariant.iconOnly,
-          showGlow: true,
+          showGlow: false,
         ),
         const SizedBox(width: 8),
         Expanded(

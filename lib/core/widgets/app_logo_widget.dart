@@ -1,50 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gamer_salah/app/theme.dart';
+import 'package:gamer_salah/core/providers/settings_provider.dart';
 
 enum AppLogoVariant {
   iconOnly,
   compact,
   horizontal,
+  fullLockup,
 }
 
-class AppLogoWidget extends StatelessWidget {
+class AppLogoWidget extends ConsumerWidget {
   final double size;
   final AppLogoVariant variant;
+  final AppGamingTheme? gamingTheme;
   final Color? primaryColor;
   final Color? secondaryColor;
   final Color? playColor;
   final bool showGlow;
   final bool isMonochrome;
+  final bool useAssetImage;
 
   const AppLogoWidget({
     super.key,
     this.size = 40,
     this.variant = AppLogoVariant.iconOnly,
+    this.gamingTheme,
     this.primaryColor,
     this.secondaryColor,
     this.playColor,
     this.showGlow = false,
     this.isMonochrome = false,
+    this.useAssetImage = true,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    AppGamingTheme activeTheme = gamingTheme ?? AppGamingTheme.midnight;
+    try {
+      if (gamingTheme == null) {
+        activeTheme = ref.watch(effectiveThemeProvider);
+      }
+    } catch (_) {
+      // In isolated environments outside ProviderScope
+      for (final t in AppGamingTheme.values) {
+        if (t.primaryAccent.value == theme.primaryColor.value) {
+          activeTheme = t;
+          break;
+        }
+      }
+    }
 
     final primary = primaryColor ??
         (isMonochrome
             ? (isDark ? Colors.white : const Color(0xFF0F172A))
-            : theme.primaryColor);
+            : activeTheme.primaryAccent);
 
     final secondary = secondaryColor ??
         (isMonochrome
             ? primary
-            : (isDark ? const Color(0xFF3B82F6) : const Color(0xFFE11D48)));
+            : activeTheme.secondaryAccent);
 
-    final play = playColor ??
-        (isMonochrome
-            ? primary
-            : (isDark ? const Color(0xFF00F0FF) : const Color(0xFFF97316)));
+    final play = playColor ?? secondary;
+
+    final themeAssetPath =
+        'assets/branding/logo/themes/ptp_logo_${activeTheme.name}.png';
 
     final markWidget = Container(
       width: size,
@@ -54,23 +77,56 @@ class AppLogoWidget extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: primary.withValues(alpha: 0.35),
-                  blurRadius: size * 0.4,
-                  spreadRadius: 1,
+                  color: primary.withValues(alpha: 0.2),
+                  blurRadius: size * 0.25,
+                  spreadRadius: 0,
                 ),
               ],
             )
           : null,
-      child: CustomPaint(
-        size: Size(size, size),
-        painter: _PrayThenPlayLogoPainter(
-          primaryColor: primary,
-          secondaryColor: secondary,
-          playColor: play,
-          isMonochrome: isMonochrome,
-        ),
-      ),
+      child: useAssetImage && !isMonochrome
+          ? Image.asset(
+              themeAssetPath,
+              width: size,
+              height: size,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) => Image.asset(
+                'assets/branding/logo/ptp_logo_icon.png',
+                width: size,
+                height: size,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => CustomPaint(
+                  size: Size(size, size),
+                  painter: _PrayThenPlayLogoPainter(
+                    primaryColor: primary,
+                    secondaryColor: secondary,
+                    playColor: play,
+                    isMonochrome: isMonochrome,
+                  ),
+                ),
+              ),
+            )
+          : CustomPaint(
+              size: Size(size, size),
+              painter: _PrayThenPlayLogoPainter(
+                primaryColor: primary,
+                secondaryColor: secondary,
+                playColor: play,
+                isMonochrome: isMonochrome,
+              ),
+            ),
     );
+
+    if (variant == AppLogoVariant.fullLockup) {
+      return Container(
+        constraints: BoxConstraints(maxWidth: size * 2.5, maxHeight: size * 3),
+        child: Image.asset(
+          'assets/branding/logo/ptp_logo_full.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => markWidget,
+        ),
+      );
+    }
 
     if (variant == AppLogoVariant.iconOnly) {
       return markWidget;

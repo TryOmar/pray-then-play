@@ -62,7 +62,7 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     AppLogoWidget(
                       size: 34,
-                      primaryColor: currentTheme.primaryAccent,
+                      gamingTheme: currentTheme,
                       showGlow: false,
                     ),
                   ],

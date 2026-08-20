@@ -374,9 +374,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 24),
           AppLogoWidget(
             size: 80,
-            primaryColor: _selectedTheme.primaryAccent,
-            secondaryColor: _selectedTheme.secondaryAccent,
-            showGlow: true,
+            gamingTheme: _selectedTheme,
+            showGlow: false,
           ),
           const SizedBox(height: 24),
 
