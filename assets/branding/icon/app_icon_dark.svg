@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Pray Then Play Dark App Icon -->
+  <defs>
+    <linearGradient id="dark-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B1020"/>
+      <stop offset="100%" stop-color="#050811"/>
+    </linearGradient>
+    <linearGradient id="ptp-dark-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="50%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="play-dark-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+    <filter id="dark-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect width="512" height="512" rx="112" fill="url(#dark-bg)"/>
+  <rect width="508" height="508" x="2" y="2" rx="110" stroke="#1E293B" stroke-width="3" fill="none"/>
+
+  <!-- P + Play Mark with subtle ambient glow -->
+  <g filter="url(#dark-glow)">
+    <!-- Geometric P Stem -->
+    <rect x="116" y="100" width="56" height="312" rx="28" fill="url(#ptp-dark-grad)"/>
+
+    <!-- Geometric P Loop (Upper Arch) -->
+    <path d="M144 100 H276 C346 100 404 158 404 228 C404 298 346 356 276 356 H144" 
+          stroke="url(#ptp-dark-grad)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Forward Play Triangle Fused into the P Center Core -->
+    <path d="M236 180 L318 228 L236 276 Z" fill="url(#play-dark-grad)"/>
+  </g>
+</svg>

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  static const String appName = 'GamerSalah';
-  static const String tagline = 'Game responsibly. Pray on time.';
-  static const String version = '1.2.0';
+  static const String appName = 'Pray Then Play';
+  static const String tagline = 'Stay on time. Play with peace of mind.';
+  static const String version = '2.0.0';
 
   // Storage keys
   static const String keyOnboardingComplete = 'onboarding_complete';
   static const String keyCalculationMethod = 'calculation_method';
   static const String keyAsrMethod = 'asr_method';
   static const String keyProtectionLevel = 'protection_level';
-  static const String keyGamingTheme = 'gaming_theme';
+  static const String keyGamingTheme = 'gaming_theme_v2';
+  static const String keyThemeMode = 'theme_mode_v1';
   static const String keyGamerProfile = 'gamer_profile';
   static const String keyLatitude = 'latitude';
   static const String keyLongitude = 'longitude';
@@ -25,9 +26,19 @@ class AppConstants {
   static const String keyMatchStartTime = 'match_start_time';
 
   // Notification channels
-  static const String notificationChannelId = 'gamer_salah_prayers';
+  static const String notificationChannelId = 'pray_then_play_prayers';
   static const String notificationChannelName = 'Prayer Reminders';
   static const String notificationChannelDesc = 'Smart prayer reminders for gamers';
+}
+
+enum ThemeModeOption {
+  manual('Manual Theme', 'Always use chosen theme'),
+  system('System Dynamic', 'Follow device light/dark mode'),
+  sunCycle('Sunrise / Sunset', 'Dawn by day • Midnight by night');
+
+  const ThemeModeOption(this.label, this.description);
+  final String label;
+  final String description;
 }
 
 enum ProtectionLevel {

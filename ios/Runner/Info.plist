@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Gamer Salah</string>
+	<string>Pray Then Play</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -67,8 +67,8 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>GamerSalah needs your location to calculate accurate prayer times for your area.</string>
+	<string>Pray Then Play needs your location to calculate accurate prayer times for your area.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>GamerSalah needs your location to keep prayer times updated when you travel.</string>
+	<string>Pray Then Play needs your location to keep prayer times updated when you travel.</string>
 </dict>
 </plist>

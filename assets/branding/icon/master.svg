@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Pray Then Play Master Icon (Geometric P + Play Triangle) -->
+  <defs>
+    <linearGradient id="ptp-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="50%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="ptp-play" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Geometric P Stem -->
+  <rect x="96" y="80" width="64" height="352" rx="32" fill="url(#ptp-grad)"/>
+  
+  <!-- Geometric P Loop (Upper Arch) -->
+  <path d="M128 80 H288 C368 80 432 144 432 224 C432 304 368 368 288 368 H128" 
+        stroke="url(#ptp-grad)" stroke-width="64" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Forward Play Triangle Fused into the P Center Core -->
+  <path d="M236 172 L324 224 L236 276 Z" fill="url(#ptp-play)" />
+</svg>

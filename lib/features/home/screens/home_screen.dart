@@ -5,6 +5,7 @@ import '../../../app/theme.dart';
 import '../../../core/providers/prayer_provider.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/services/storage_service.dart';
+import '../../../core/widgets/app_logo_widget.dart';
 import '../widgets/next_prayer_hero_widget.dart';
 import '../widgets/prayer_gaming_timeline_widget.dart';
 import '../widgets/prayer_streak_widget.dart';
@@ -203,38 +204,35 @@ class HomeScreen extends ConsumerWidget {
   ) {
     return Row(
       children: [
-        ShaderMask(
-          shaderCallback: (bounds) => LinearGradient(
-            colors: [
-              activeTheme.primaryColor,
-              onSurface,
-            ],
-          ).createShader(bounds),
-          child: const Text(
-            'GamerSalah',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
-            ),
-          ),
+        const AppLogoWidget(
+          size: 32,
+          variant: AppLogoVariant.iconOnly,
+          showGlow: true,
         ),
-        const SizedBox(width: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: activeTheme.primaryColor.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            'PRO',
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-              color: activeTheme.primaryColor,
-              letterSpacing: 0.5,
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Pray Then Play',
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w900,
+                color: onSurface,
+                letterSpacing: -0.3,
+              ),
             ),
-          ),
+            Text(
+              'STAY ON TIME • PLAY WITH PEACE',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                color: activeTheme.primaryColor,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ],
         ),
         const Spacer(),
         GestureDetector(

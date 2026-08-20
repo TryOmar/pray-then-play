@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Pray Then Play Light App Icon -->
+  <defs>
+    <linearGradient id="light-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDF6F0"/>
+      <stop offset="100%" stop-color="#F4F8FC"/>
+    </linearGradient>
+    <linearGradient id="ptp-light-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F97316"/>
+      <stop offset="50%" stop-color="#E11D48"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="play-light-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F97316"/>
+      <stop offset="100%" stop-color="#E11D48"/>
+    </linearGradient>
+    <filter id="light-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect width="512" height="512" rx="112" fill="url(#light-bg)"/>
+  <rect width="508" height="508" x="2" y="2" rx="110" stroke="#E2E8F0" stroke-width="3" fill="none"/>
+
+  <!-- P + Play Mark with subtle soft shadow -->
+  <g filter="url(#light-shadow)">
+    <!-- Geometric P Stem -->
+    <rect x="116" y="100" width="56" height="312" rx="28" fill="url(#ptp-light-grad)"/>
+
+    <!-- Geometric P Loop (Upper Arch) -->
+    <path d="M144 100 H276 C346 100 404 158 404 228 C404 298 346 356 276 356 H144" 
+          stroke="url(#ptp-light-grad)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Forward Play Triangle Fused into the P Center Core -->
+    <path d="M236 180 L318 228 L236 276 Z" fill="url(#play-light-grad)"/>
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" fill="none">
+  <!-- Primary Mark: Icon + "PRAY THEN PLAY" + Tagline -->
+  <defs>
+    <linearGradient id="primary-p-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="50%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Geometric P Mark -->
+  <g transform="translate(30, 25) scale(0.3)">
+    <rect x="96" y="80" width="64" height="352" rx="32" fill="url(#primary-p-grad)"/>
+    <path d="M128 80 H288 C368 80 432 144 432 224 C432 304 368 368 288 368 H128" 
+          stroke="url(#primary-p-grad)" stroke-width="64" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M236 172 L324 224 L236 276 Z" fill="#00F0FF" />
+  </g>
+
+  <!-- Typography -->
+  <text x="210" y="102" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="44" font-weight="900" letter-spacing="2" fill="#FFFFFF">
+    PRAY <tspan fill="#00F0FF">THEN</tspan> PLAY
+  </text>
+  <text x="212" y="142" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="16" font-weight="500" letter-spacing="0.5" fill="#94A3B8">
+    Stay on time. Play with peace of mind.
+  </text>
+</svg>

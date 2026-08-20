@@ -21,7 +21,7 @@ void main() async {
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF0A0E1A),
+      systemNavigationBarColor: Color(0xFF0B1020),
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
@@ -32,24 +32,58 @@ void main() async {
 
   runApp(
     const ProviderScope(
-      child: GamerSalahApp(),
+      child: PrayThenPlayApp(),
     ),
   );
 }
 
-class GamerSalahApp extends ConsumerWidget {
-  const GamerSalahApp({super.key});
+class PrayThenPlayApp extends ConsumerStatefulWidget {
+  const PrayThenPlayApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final gamingTheme = ref.watch(gamingThemeProvider);
+  ConsumerState<PrayThenPlayApp> createState() => _PrayThenPlayAppState();
+}
+
+class _PrayThenPlayAppState extends ConsumerState<PrayThenPlayApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Sync initial system brightness
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final brightness =
+          WidgetsBinding.instance.platformDispatcher.platformBrightness;
+      ref.read(systemBrightnessProvider.notifier).state = brightness;
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    final brightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    ref.read(systemBrightnessProvider.notifier).state = brightness;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final activeTheme = ref.watch(effectiveThemeProvider);
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: 'GamerSalah',
+      title: 'Pray Then Play',
       debugShowCheckedModeBanner: false,
-      theme: GamerSalahTheme.getTheme(gamingTheme),
+      theme: PrayThenPlayTheme.getTheme(activeTheme),
       routerConfig: router,
     );
   }
 }
+
+// Backwards compatibility alias
+typedef GamerSalahApp = PrayThenPlayApp;

@@ -1,196 +1,212 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Balanced 11-Theme Matrix for Pray Then Play
+/// 5 Dark Themes, 5 Light Themes, 1 Mixed/Utility Theme
 enum AppGamingTheme {
-  // --- DARK GAMING THEMES ---
-  cyber(
-    displayName: 'Cyberpunk',
-    tagline: 'High-Tech Neon Cyber',
-    description: 'Electric cyan with deep night abyss',
-    primaryAccent: Color(0xFF00F0FF),
-    secondaryAccent: Color(0xFF7000FF),
-    background: Color(0xFF050811),
-    surface: Color(0xFF0B1021),
-    surfaceElevated: Color(0xFF131A36),
-    surfaceHighlight: Color(0xFF1D2852),
-    borderColor: Color(0xFF162245),
-    textPrimary: Color(0xFFF8FAFC),
-    textSecondary: Color(0xFF94A3B8),
-    textMuted: Color(0xFF64748B),
-    buttonTextColor: Color(0xFF050811),
-    isLight: false,
-  ),
-  tactical(
-    displayName: 'Tactical Spec-Ops',
-    tagline: 'Stealth Matte Gunmetal',
-    description: 'Hazard amber with military dark charcoal',
-    primaryAccent: Color(0xFFFF9900),
-    secondaryAccent: Color(0xFFE55A00),
-    background: Color(0xFF111215),
-    surface: Color(0xFF181A1F),
-    surfaceElevated: Color(0xFF22252C),
-    surfaceHighlight: Color(0xFF2E323C),
-    borderColor: Color(0xFF282C36),
-    textPrimary: Color(0xFFF8FAFC),
-    textSecondary: Color(0xFF94A3B8),
-    textMuted: Color(0xFF64748B),
-    buttonTextColor: Color(0xFF111215),
-    isLight: false,
-  ),
-  crimson(
-    displayName: 'Bloodmoon Crimson',
-    tagline: 'Dark Ruby Phantom',
-    description: 'Vivid crimson with deep wine obsidian',
-    primaryAccent: Color(0xFFFF2A4D),
-    secondaryAccent: Color(0xFFFF6B8B),
-    background: Color(0xFF0D0608),
-    surface: Color(0xFF180C10),
-    surfaceElevated: Color(0xFF26131A),
-    surfaceHighlight: Color(0xFF381B26),
-    borderColor: Color(0xFF301620),
-    textPrimary: Color(0xFFF8FAFC),
-    textSecondary: Color(0xFF94A3B8),
-    textMuted: Color(0xFF64748B),
-    buttonTextColor: Colors.white,
-    isLight: false,
-  ),
-  emerald(
-    displayName: 'Matrix Emerald',
-    tagline: 'Cyber Jade & Toxic Green',
-    description: 'Hyper emerald with deep forest black',
-    primaryAccent: Color(0xFF00FF66),
-    secondaryAccent: Color(0xFF00E5FF),
-    background: Color(0xFF030D06),
-    surface: Color(0xFF07170C),
-    surfaceElevated: Color(0xFF0E2616),
-    surfaceHighlight: Color(0xFF173D23),
-    borderColor: Color(0xFF12301C),
-    textPrimary: Color(0xFFF8FAFC),
-    textSecondary: Color(0xFF94A3B8),
-    textMuted: Color(0xFF64748B),
-    buttonTextColor: Color(0xFF030D06),
-    isLight: false,
-  ),
+  // --- 5 DARK THEMES ---
   midnight(
-    displayName: 'Nebula Void',
-    tagline: 'Royal Amethyst Abyss',
-    description: 'Electric violet with deep cosmic indigo',
-    primaryAccent: Color(0xFFA855F7),
-    secondaryAccent: Color(0xFF6366F1),
-    background: Color(0xFF070512),
-    surface: Color(0xFF0F0B24),
-    surfaceElevated: Color(0xFF19133B),
-    surfaceHighlight: Color(0xFF281E5E),
-    borderColor: Color(0xFF221A4F),
-    textPrimary: Color(0xFFF8FAFC),
-    textSecondary: Color(0xFF94A3B8),
-    textMuted: Color(0xFF64748B),
-    buttonTextColor: Colors.white,
-    isLight: false,
-  ),
-  sandstorm(
-    displayName: 'Desert Gold',
-    tagline: 'Solar Amber & Bronze Dune',
-    description: 'Warm solar gold with dark bronze obsidian',
-    primaryAccent: Color(0xFFF59E0B),
-    secondaryAccent: Color(0xFFEA580C),
-    background: Color(0xFF0E0B07),
-    surface: Color(0xFF18130C),
-    surfaceElevated: Color(0xFF261E13),
-    surfaceHighlight: Color(0xFF3B2F1E),
-    borderColor: Color(0xFF302618),
-    textPrimary: Color(0xFFF8FAFC),
-    textSecondary: Color(0xFF94A3B8),
-    textMuted: Color(0xFF64748B),
-    buttonTextColor: Color(0xFF0E0B07),
-    isLight: false,
-  ),
-  arctic(
-    displayName: 'Arctic Frost',
-    tagline: 'Glacier Blue & Titanium Slate',
-    description: 'Crisp ice blue with cold slate navy',
+    displayName: 'Midnight',
+    tagline: 'Deep Calm Evening',
+    description: 'Deep navy obsidian with soothing blue accents',
     primaryAccent: Color(0xFF38BDF8),
     secondaryAccent: Color(0xFF818CF8),
-    background: Color(0xFF0A111F),
-    surface: Color(0xFF111D33),
-    surfaceElevated: Color(0xFF1C2D4D),
-    surfaceHighlight: Color(0xFF2B416B),
-    borderColor: Color(0xFF223557),
+    background: Color(0xFF0B1020),
+    backgroundSecondary: Color(0xFF070B16),
+    surface: Color(0xFF111827),
+    surfaceElevated: Color(0xFF1F2937),
+    surfaceHighlight: Color(0xFF374151),
+    borderColor: Color(0xFF1E293B),
     textPrimary: Color(0xFFF8FAFC),
     textSecondary: Color(0xFF94A3B8),
     textMuted: Color(0xFF64748B),
-    buttonTextColor: Color(0xFF0A111F),
+    buttonTextColor: Color(0xFF0B1020),
     isLight: false,
   ),
   oled(
     displayName: 'OLED Minimal',
-    tagline: 'Pure Absolute Pitch Black',
-    description: 'Monochrome titanium with true black contrast',
+    tagline: 'Pure True Black',
+    description: 'True black battery saver with high contrast razor lines',
     primaryAccent: Color(0xFFFFFFFF),
-    secondaryAccent: Color(0xFF94A3B8),
+    secondaryAccent: Color(0xFFA1A1AA),
     background: Color(0xFF000000),
-    surface: Color(0xFF111113),
-    surfaceElevated: Color(0xFF1A1A1E),
-    surfaceHighlight: Color(0xFF29292F),
-    borderColor: Color(0xFF222228),
-    textPrimary: Color(0xFFF8FAFC),
-    textSecondary: Color(0xFF94A3B8),
-    textMuted: Color(0xFF64748B),
+    backgroundSecondary: Color(0xFF050505),
+    surface: Color(0xFF080808),
+    surfaceElevated: Color(0xFF121212),
+    surfaceHighlight: Color(0xFF222222),
+    borderColor: Color(0xFF1F1F1F),
+    textPrimary: Color(0xFFFFFFFF),
+    textSecondary: Color(0xFFA1A1AA),
+    textMuted: Color(0xFF71717A),
     buttonTextColor: Color(0xFF000000),
     isLight: false,
   ),
+  crimson(
+    displayName: 'Crimson',
+    tagline: 'Signature Gaming Dark',
+    description: 'Deep ruby obsidian with vibrant crimson passion',
+    primaryAccent: Color(0xFFFF2E51),
+    secondaryAccent: Color(0xFFFF6B8B),
+    background: Color(0xFF0D0B0E),
+    backgroundSecondary: Color(0xFF080609),
+    surface: Color(0xFF171219),
+    surfaceElevated: Color(0xFF261824),
+    surfaceHighlight: Color(0xFF3B2238),
+    borderColor: Color(0xFF2D192B),
+    textPrimary: Color(0xFFFFF1F2),
+    textSecondary: Color(0xFFFDA4AF),
+    textMuted: Color(0xFF9F1239),
+    buttonTextColor: Colors.white,
+    isLight: false,
+  ),
+  forest(
+    displayName: 'Forest',
+    tagline: 'Natural Emerald Calm',
+    description: 'Deep moss spruce with luminous emerald accents',
+    primaryAccent: Color(0xFF10B981),
+    secondaryAccent: Color(0xFF34D399),
+    background: Color(0xFF08140E),
+    backgroundSecondary: Color(0xFF040A07),
+    surface: Color(0xFF0F2117),
+    surfaceElevated: Color(0xFF183324),
+    surfaceHighlight: Color(0xFF234934),
+    borderColor: Color(0xFF1B3B2A),
+    textPrimary: Color(0xFFECFDF5),
+    textSecondary: Color(0xFFA7F3D0),
+    textMuted: Color(0xFF6EE7B7),
+    buttonTextColor: Color(0xFF08140E),
+    isLight: false,
+  ),
+  ember(
+    displayName: 'Ember',
+    tagline: 'Warm Charcoal Evening',
+    description: 'Dark roasted charcoal with warm solar amber glow',
+    primaryAccent: Color(0xFFF59E0B),
+    secondaryAccent: Color(0xFFEA580C),
+    background: Color(0xFF14100E),
+    backgroundSecondary: Color(0xFF0C0908),
+    surface: Color(0xFF1E1815),
+    surfaceElevated: Color(0xFF2E221D),
+    surfaceHighlight: Color(0xFF453229),
+    borderColor: Color(0xFF362720),
+    textPrimary: Color(0xFFFFFBEB),
+    textSecondary: Color(0xFFFDE68A),
+    textMuted: Color(0xFFB45309),
+    buttonTextColor: Color(0xFF14100E),
+    isLight: false,
+  ),
 
-  // --- LIGHT GAMING THEMES ---
-  esportsLight(
-    displayName: 'Esports White',
-    tagline: 'Titan Platinum & Cyan',
-    description: 'Crisp porcelain slate with electric cyan accents',
-    primaryAccent: Color(0xFF0284C7),
-    secondaryAccent: Color(0xFF0EA5E9),
-    background: Color(0xFFF1F5F9),
+  // --- 5 LIGHT THEMES ---
+  dawn(
+    displayName: 'Dawn',
+    tagline: 'Signature Sunrise Light',
+    description: 'Warm morning cream with sunrise coral and rose glow',
+    primaryAccent: Color(0xFFF97316),
+    secondaryAccent: Color(0xFFE11D48),
+    background: Color(0xFFFDF6F0),
+    backgroundSecondary: Color(0xFFF7EBE1),
     surface: Color(0xFFFFFFFF),
-    surfaceElevated: Color(0xFFE2E8F0),
-    surfaceHighlight: Color(0xFFCBD5E1),
-    borderColor: Color(0xFFE2E8F0),
+    surfaceElevated: Color(0xFFFCEEE3),
+    surfaceHighlight: Color(0xFFF7DDD0),
+    borderColor: Color(0xFFF3D5C5),
+    textPrimary: Color(0xFF2A1B18),
+    textSecondary: Color(0xFF6C4E47),
+    textMuted: Color(0xFF9C776F),
+    buttonTextColor: Colors.white,
+    isLight: true,
+  ),
+  arctic(
+    displayName: 'Arctic',
+    tagline: 'Cool Clean Modern',
+    description: 'Crisp glacial white with focused royal blue accents',
+    primaryAccent: Color(0xFF2563EB),
+    secondaryAccent: Color(0xFF0284C7),
+    background: Color(0xFFF4F8FC),
+    backgroundSecondary: Color(0xFFEBF1F8),
+    surface: Color(0xFFFFFFFF),
+    surfaceElevated: Color(0xFFE7EFF7),
+    surfaceHighlight: Color(0xFFD5E4F2),
+    borderColor: Color(0xFFD8E6F3),
     textPrimary: Color(0xFF0F172A),
     textSecondary: Color(0xFF475569),
     textMuted: Color(0xFF64748B),
     buttonTextColor: Colors.white,
     isLight: true,
   ),
-  solarDaybreak(
-    displayName: 'Solar Daybreak',
-    tagline: 'Desert Sand & Warm Amber',
-    description: 'Warm parchment sand with radiant amber gold',
-    primaryAccent: Color(0xFFD97706),
-    secondaryAccent: Color(0xFFB45309),
-    background: Color(0xFFFBF8F3),
-    surface: Color(0xFFFFFFFF),
-    surfaceElevated: Color(0xFFF3EDE2),
-    surfaceHighlight: Color(0xFFE6DCCE),
-    borderColor: Color(0xFFE5DACB),
-    textPrimary: Color(0xFF1C1917),
-    textSecondary: Color(0xFF57534E),
-    textMuted: Color(0xFF78716C),
+  sand(
+    displayName: 'Sand',
+    tagline: 'Warm Calm Ivory',
+    description: 'Warm dune ivory with refined desert gold accents',
+    primaryAccent: Color(0xFFB7791F),
+    secondaryAccent: Color(0xFFD97706),
+    background: Color(0xFFF7F1E5),
+    backgroundSecondary: Color(0xFFEDE5D4),
+    surface: Color(0xFFFFFDF8),
+    surfaceElevated: Color(0xFFEFE6D4),
+    surfaceHighlight: Color(0xFFE4D7C0),
+    borderColor: Color(0xFFE5DAC4),
+    textPrimary: Color(0xFF292318),
+    textSecondary: Color(0xFF635745),
+    textMuted: Color(0xFF8C7D69),
     buttonTextColor: Colors.white,
     isLight: true,
   ),
-  glacierLight(
-    displayName: 'Glacier Light',
-    tagline: 'Arctic Frost & Ice Blue',
-    description: 'Cold frost white with vivid sky blue accents',
+  sky(
+    displayName: 'Sky',
+    tagline: 'Fresh Daylight Focus',
+    description: 'Bright daylight sky with vibrant cyan & deep navy typography',
     primaryAccent: Color(0xFF0284C7),
-    secondaryAccent: Color(0xFF38BDF8),
-    background: Color(0xFFF0F9FF),
+    secondaryAccent: Color(0xFF06B6D4),
+    background: Color(0xFFEBF3FA),
+    backgroundSecondary: Color(0xFFDFEDF7),
     surface: Color(0xFFFFFFFF),
-    surfaceElevated: Color(0xFFE0F2FE),
-    surfaceHighlight: Color(0xFFBAE6FD),
-    borderColor: Color(0xFFBAE6FD),
-    textPrimary: Color(0xFF0C4A6E),
-    textSecondary: Color(0xFF0369A1),
+    surfaceElevated: Color(0xFFDCE8F5),
+    surfaceHighlight: Color(0xFFC8DCF0),
+    borderColor: Color(0xFFCEE0F3),
+    textPrimary: Color(0xFF0F172A),
+    textSecondary: Color(0xFF334155),
     textMuted: Color(0xFF64748B),
     buttonTextColor: Colors.white,
     isLight: true,
+  ),
+  lavender(
+    displayName: 'Lavender',
+    tagline: 'Modern Soft Violet',
+    description: 'Soft lavender mist with elegant deep purple accents',
+    primaryAccent: Color(0xFF7C3AED),
+    secondaryAccent: Color(0xFF9333EA),
+    background: Color(0xFFF5F3FF),
+    backgroundSecondary: Color(0xFFECE7FF),
+    surface: Color(0xFFFFFFFF),
+    surfaceElevated: Color(0xFFEDE9FE),
+    surfaceHighlight: Color(0xFFDDD6FE),
+    borderColor: Color(0xFFE0D7FE),
+    textPrimary: Color(0xFF1E1B4B),
+    textSecondary: Color(0xFF4C1D95),
+    textMuted: Color(0xFF7C3AED),
+    buttonTextColor: Colors.white,
+    isLight: true,
+  ),
+
+  // --- 1 MIXED / UTILITY THEME ---
+  tactical(
+    displayName: 'Tactical',
+    tagline: 'Military Spec-Ops Utility',
+    description: 'Matte slate charcoal with high-visibility hazard lime',
+    primaryAccent: Color(0xFF84CC16),
+    secondaryAccent: Color(0xFFEAB308),
+    background: Color(0xFF121517),
+    backgroundSecondary: Color(0xFF0B0D0E),
+    surface: Color(0xFF1A1E22),
+    surfaceElevated: Color(0xFF252B31),
+    surfaceHighlight: Color(0xFF353D45),
+    borderColor: Color(0xFF2A323A),
+    textPrimary: Color(0xFFF8FAFC),
+    textSecondary: Color(0xFF94A3B8),
+    textMuted: Color(0xFF64748B),
+    buttonTextColor: Color(0xFF121517),
+    isLight: false,
   );
 
   const AppGamingTheme({
@@ -200,6 +216,7 @@ enum AppGamingTheme {
     required this.primaryAccent,
     required this.secondaryAccent,
     required this.background,
+    required this.backgroundSecondary,
     required this.surface,
     required this.surfaceElevated,
     required this.surfaceHighlight,
@@ -217,6 +234,7 @@ enum AppGamingTheme {
   final Color primaryAccent;
   final Color secondaryAccent;
   final Color background;
+  final Color backgroundSecondary;
   final Color surface;
   final Color surfaceElevated;
   final Color surfaceHighlight;
@@ -226,227 +244,327 @@ enum AppGamingTheme {
   final Color textMuted;
   final Color buttonTextColor;
   final bool isLight;
+
+  ThemeTokens get tokens => ThemeTokens(this);
 }
 
+/// Rich Design Token Engine isolating semantic meaning from theme accents
+class ThemeTokens {
+  final AppGamingTheme theme;
+
+  const ThemeTokens(this.theme);
+
+  // Backgrounds & Surfaces
+  Color get background => theme.background;
+  Color get backgroundSecondary => theme.backgroundSecondary;
+  Color get surface => theme.surface;
+  Color get surfaceElevated => theme.surfaceElevated;
+  Color get surfaceHighlight => theme.surfaceHighlight;
+  Color get borderColor => theme.borderColor;
+
+  // Accents
+  Color get primaryAccent => theme.primaryAccent;
+  Color get secondaryAccent => theme.secondaryAccent;
+
+  // Typography
+  Color get textPrimary => theme.textPrimary;
+  Color get textSecondary => theme.textSecondary;
+  Color get textMuted => theme.textMuted;
+  Color get buttonTextColor => theme.buttonTextColor;
+  bool get isLight => theme.isLight;
+
+  // SEMANTIC COLORS (Independent of theme accent so meaning remains 100% consistent)
+  Color get semanticSuccess =>
+      theme.isLight ? const Color(0xFF059669) : const Color(0xFF10B981);
+  Color get semanticSuccessDim =>
+      theme.isLight ? const Color(0xFFD1FAE5) : const Color(0xFF064E3B);
+
+  Color get semanticWarning =>
+      theme.isLight ? const Color(0xFFD97706) : const Color(0xFFF59E0B);
+  Color get semanticWarningDim =>
+      theme.isLight ? const Color(0xFFFEF3C7) : const Color(0xFF78350F);
+
+  Color get semanticDanger =>
+      theme.isLight ? const Color(0xFFDC2626) : const Color(0xFFEF4444);
+  Color get semanticDangerDim =>
+      theme.isLight ? const Color(0xFFFEE2E2) : const Color(0xFF7F1D1D);
+
+  Color get semanticPrayer =>
+      theme.isLight ? const Color(0xFF0284C7) : const Color(0xFF06B6D4);
+  Color get semanticPrayerDim =>
+      theme.isLight ? const Color(0xFFE0F2FE) : const Color(0xFF083344);
+}
+
+/// Global backward-compatible status colors
 class AppColors {
   // Static status colors across all themes
-  static const Color successGreen = Color(0xFF00C853);
-  static const Color successGreenDim = Color(0xFF00A858);
-  static const Color warningAmber = Color(0xFFFFB800);
-  static const Color warningAmberDim = Color(0xFFA87800);
-  static const Color dangerRed = Color(0xFFFF3D5A);
-  static const Color dangerRedDim = Color(0xFFA82838);
+  static const Color successGreen = Color(0xFF10B981);
+  static const Color successGreenDim = Color(0xFF059669);
+  static const Color warningAmber = Color(0xFFF59E0B);
+  static const Color warningAmberDim = Color(0xFFD97706);
+  static const Color dangerRed = Color(0xFFEF4444);
+  static const Color dangerRedDim = Color(0xFFDC2626);
 
   // Default fallbacks
   static const Color textPrimary = Color(0xFFF8FAFC);
   static const Color textSecondary = Color(0xFF94A3B8);
   static const Color textMuted = Color(0xFF64748B);
-  static const Color primaryCyan = Color(0xFF00F0FF);
-  static const Color background = Color(0xFF050811);
-  static const Color surface = Color(0xFF0B1021);
-  static const Color surfaceElevated = Color(0xFF131A36);
-  static const Color surfaceHighlight = Color(0xFF1D2852);
+  static const Color primaryCyan = Color(0xFF38BDF8);
+  static const Color background = Color(0xFF0B1020);
+  static const Color surface = Color(0xFF111827);
+  static const Color surfaceElevated = Color(0xFF1F2937);
+  static const Color surfaceHighlight = Color(0xFF374151);
 }
 
-class GamerSalahTheme {
+class PrayThenPlayTheme {
   static ThemeData getTheme(AppGamingTheme gamingTheme) {
-    final primary = gamingTheme.primaryAccent;
-    final bg = gamingTheme.background;
-    final surf = gamingTheme.surface;
-    final surfElevated = gamingTheme.surfaceElevated;
-    final highlight = gamingTheme.surfaceHighlight;
-    final border = gamingTheme.borderColor;
-    final textPrim = gamingTheme.textPrimary;
-    final textSec = gamingTheme.textSecondary;
-    final textMut = gamingTheme.textMuted;
     final isLight = gamingTheme.isLight;
+    final isOled = gamingTheme == AppGamingTheme.oled;
 
     return ThemeData(
       useMaterial3: true,
       brightness: isLight ? Brightness.light : Brightness.dark,
-      scaffoldBackgroundColor: bg,
-      primaryColor: primary,
+      primaryColor: gamingTheme.primaryAccent,
+      scaffoldBackgroundColor: gamingTheme.background,
       colorScheme: ColorScheme(
         brightness: isLight ? Brightness.light : Brightness.dark,
-        primary: primary,
-        secondary: gamingTheme.secondaryAccent,
-        surface: surf,
-        error: AppColors.dangerRed,
+        primary: gamingTheme.primaryAccent,
         onPrimary: gamingTheme.buttonTextColor,
-        onSecondary: gamingTheme.buttonTextColor,
-        onSurface: textPrim,
+        secondary: gamingTheme.secondaryAccent,
+        onSecondary: Colors.white,
+        surface: gamingTheme.surface,
+        onSurface: gamingTheme.textPrimary,
+        error: AppColors.dangerRed,
         onError: Colors.white,
       ),
       textTheme: GoogleFonts.outfitTextTheme(
-        TextTheme(
-          displayLarge: TextStyle(fontSize: 44, fontWeight: FontWeight.w800, color: textPrim, letterSpacing: -1.5),
-          displayMedium: TextStyle(fontSize: 34, fontWeight: FontWeight.w700, color: textPrim, letterSpacing: -1.0),
-          displaySmall: TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: textPrim, letterSpacing: -0.5),
-          headlineLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: textPrim),
-          headlineMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: textPrim),
-          headlineSmall: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textPrim),
-          titleLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textPrim),
-          titleMedium: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: textPrim),
-          titleSmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: textSec),
-          bodyLarge: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: textPrim),
-          bodyMedium: TextStyle(fontSize: 13, fontWeight: FontWeight.w400, color: textSec),
-          bodySmall: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: textMut),
-          labelLarge: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textPrim, letterSpacing: 0.5),
-          labelMedium: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: textSec),
-          labelSmall: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: textMut, letterSpacing: 0.5),
-        ),
+        isLight ? ThemeData.light().textTheme : ThemeData.dark().textTheme,
+      ).apply(
+        bodyColor: gamingTheme.textPrimary,
+        displayColor: gamingTheme.textPrimary,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: bg,
+        backgroundColor: gamingTheme.background,
+        foregroundColor: gamingTheme.textPrimary,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: true,
-        titleTextStyle: GoogleFonts.outfit(
-          fontSize: 17,
-          fontWeight: FontWeight.w700,
-          color: textPrim,
-        ),
-        iconTheme: IconThemeData(color: textPrim),
+        centerTitle: false,
       ),
       cardTheme: CardThemeData(
-        color: surf,
-        elevation: 0,
+        color: gamingTheme.surface,
+        elevation: isLight ? 1 : 0,
+        shadowColor:
+            isLight ? Colors.black.withValues(alpha: 0.05) : Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: border, width: 1),
+          side: BorderSide(
+            color: isOled ? const Color(0xFF222222) : gamingTheme.borderColor,
+            width: 1,
+          ),
         ),
+      ),
+      dividerTheme: DividerThemeData(
+        color: gamingTheme.borderColor,
+        thickness: 1,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primary,
+          backgroundColor: gamingTheme.primaryAccent,
           foregroundColor: gamingTheme.buttonTextColor,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           textStyle: GoogleFonts.outfit(
-            fontSize: 15,
             fontWeight: FontWeight.w700,
+            fontSize: 15,
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: primary,
-          side: BorderSide(color: primary, width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+          foregroundColor: gamingTheme.primaryAccent,
+          side: BorderSide(
+            color: gamingTheme.primaryAccent.withValues(alpha: 0.6),
+            width: 1.2,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           textStyle: GoogleFonts.outfit(
-            fontSize: 15,
             fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
         ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: primary,
-          textStyle: GoogleFonts.outfit(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: surf,
-        selectedItemColor: primary,
-        unselectedItemColor: textMut,
-        type: BottomNavigationBarType.fixed,
-        elevation: 0,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfElevated,
+        fillColor: gamingTheme.surfaceElevated,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: border, width: 1),
+          borderSide: BorderSide(color: gamingTheme.borderColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: border, width: 1),
+          borderSide: BorderSide(color: gamingTheme.borderColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: primary, width: 1.5),
+          borderSide: BorderSide(color: gamingTheme.primaryAccent, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        hintStyle: TextStyle(color: textMut),
+        hintStyle: TextStyle(color: gamingTheme.textMuted, fontSize: 14),
+        labelStyle: TextStyle(color: gamingTheme.textSecondary, fontSize: 14),
       ),
-      dividerTheme: DividerThemeData(
-        color: highlight,
-        thickness: 1,
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return gamingTheme.primaryAccent;
+          }
+          return Colors.transparent;
+        }),
+        checkColor: WidgetStateProperty.all(gamingTheme.buttonTextColor),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        side: BorderSide(color: gamingTheme.borderColor, width: 1.5),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return primary;
+            return gamingTheme.buttonTextColor;
           }
-          return textMut;
+          return gamingTheme.textMuted;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return primary.withValues(alpha: 0.3);
+            return gamingTheme.primaryAccent;
           }
-          return highlight;
+          return gamingTheme.surfaceHighlight;
         }),
-      ),
-      sliderTheme: SliderThemeData(
-        activeTrackColor: primary,
-        inactiveTrackColor: highlight,
-        thumbColor: primary,
-        overlayColor: primary.withValues(alpha: 0.2),
       ),
     );
   }
 }
 
+// Backwards compatibility class alias
+typedef GamerSalahTheme = PrayThenPlayTheme;
+
+/// Atmosphere-aware Glassmorphic & Surface Decorations
 class GlassmorphicDecoration {
   static BoxDecoration card({
     BuildContext? context,
-    Color? backgroundColor,
-    Color? borderColor,
-    double borderWidth = 1.0,
-    double borderRadius = 16.0,
-    List<BoxShadow>? glowShadows,
+    double radius = 16,
+    Color? customBorder,
+    Color? customColor,
+    bool glow = false,
   }) {
-    final theme = context != null ? Theme.of(context) : null;
-    final bg = backgroundColor ?? (theme != null ? theme.colorScheme.surface : AppColors.surface);
-    final border = borderColor ?? (theme != null ? theme.dividerTheme.color ?? AppColors.surfaceHighlight : AppColors.surfaceHighlight);
+    if (context != null) {
+      final theme = Theme.of(context);
+      final isDark = theme.brightness == Brightness.dark;
 
+      if (isDark) {
+        return BoxDecoration(
+          color: customColor ??
+              theme.colorScheme.surface.withValues(alpha: 0.85),
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: customBorder ??
+                (theme.dividerTheme.color ?? const Color(0xFF1E293B)),
+            width: 1,
+          ),
+          boxShadow: glow
+              ? [
+                  BoxShadow(
+                    color: theme.primaryColor.withValues(alpha: 0.18),
+                    blurRadius: 18,
+                    spreadRadius: 1,
+                  ),
+                ]
+              : null,
+        );
+      }
+
+      // Light theme surface: soft subtle shadow, clean white card
+      return BoxDecoration(
+        color: customColor ?? theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: customBorder ??
+              (theme.dividerTheme.color ?? const Color(0xFFE2E8F0)),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          if (glow)
+            BoxShadow(
+              color: theme.primaryColor.withValues(alpha: 0.12),
+              blurRadius: 16,
+              spreadRadius: 1,
+            ),
+        ],
+      );
+    }
+
+    // Default fallback if context is omitted
     return BoxDecoration(
-      color: bg,
+      color: customColor ?? const Color(0xFF111827),
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        color: customBorder ?? const Color(0xFF1E293B),
+        width: 1,
+      ),
+      boxShadow: glow
+          ? [
+              const BoxShadow(
+                color: Color(0x3338BDF8),
+                blurRadius: 18,
+                spreadRadius: 1,
+              ),
+            ]
+          : null,
+    );
+  }
+
+  static BoxDecoration statusCard({
+    required Color statusColor,
+    double borderRadius = 16,
+    BuildContext? context,
+  }) {
+    return BoxDecoration(
+      color: statusColor.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
-        color: border.withValues(alpha: 0.6),
-        width: borderWidth,
+        color: statusColor.withValues(alpha: 0.35),
+        width: 1,
       ),
-      boxShadow: glowShadows,
+      boxShadow: [
+        BoxShadow(
+          color: statusColor.withValues(alpha: 0.12),
+          blurRadius: 16,
+          spreadRadius: 1,
+        ),
+      ],
     );
   }
 
   static BoxDecoration neonCard({
     BuildContext? context,
     required Color glowColor,
+    double borderRadius = 16,
     Color? backgroundColor,
-    double borderRadius = 16.0,
-    double glowIntensity = 0.25,
+    Color? borderColor,
+    double glowIntensity = 0.18,
+    double borderWidth = 1.0,
   }) {
-    final theme = context != null ? Theme.of(context) : null;
-    final bg = backgroundColor ?? (theme != null ? theme.colorScheme.surface : AppColors.surface);
-
     return BoxDecoration(
-      color: bg,
+      color: backgroundColor ?? const Color(0xFF111827),
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
-        color: glowColor.withValues(alpha: 0.45),
-        width: 1.5,
+        color: borderColor ?? glowColor.withValues(alpha: 0.35),
+        width: borderWidth,
       ),
       boxShadow: [
         BoxShadow(
@@ -454,37 +572,29 @@ class GlassmorphicDecoration {
           blurRadius: 18,
           spreadRadius: 1,
         ),
-        BoxShadow(
-          color: glowColor.withValues(alpha: glowIntensity * 0.4),
-          blurRadius: 36,
-          spreadRadius: 2,
-        ),
       ],
     );
   }
 
-  static BoxDecoration statusCard({
-    BuildContext? context,
-    required Color statusColor,
-    Color? surfaceColor,
-    double borderRadius = 16.0,
+  static Widget frosted({
+    required Widget child,
+    double blur = 10,
+    double radius = 16,
+    Color? color,
+    Border? border,
   }) {
-    final theme = context != null ? Theme.of(context) : null;
-    final bg = surfaceColor ?? (theme != null ? theme.colorScheme.surface : AppColors.surface);
-
-    return BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          statusColor.withValues(alpha: 0.12),
-          bg,
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(borderRadius),
-      border: Border.all(
-        color: statusColor.withValues(alpha: 0.35),
-        width: 1,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+        child: Container(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(radius),
+            border: border,
+          ),
+          child: child,
+        ),
       ),
     );
   }

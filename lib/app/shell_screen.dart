@@ -23,7 +23,7 @@ class ShellScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentIndex = _getCurrentIndex(context);
-    final activeTheme = ref.watch(gamingThemeProvider);
+    final activeTheme = ref.watch(effectiveThemeProvider);
 
     return Scaffold(
       backgroundColor: activeTheme.background,

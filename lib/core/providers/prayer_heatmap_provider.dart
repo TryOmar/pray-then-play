@@ -243,7 +243,7 @@ class PrayerConsistencyNotifier extends StateNotifier<PrayerConsistencyState> {
       HabitAchievement(
         id: 'first_step',
         title: 'First Step',
-        description: 'Complete and record your first prayer in GamerSalah.',
+        description: 'Complete and record your first prayer in Pray Then Play.',
         icon: Icons.flag_rounded,
         isUnlocked: unlocked.contains('first_step'),
         category: 'Getting Started',

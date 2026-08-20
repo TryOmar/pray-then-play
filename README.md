@@ -1,14 +1,14 @@
-# 🎮 GamerSalah — Game Responsibly. Pray on Time.
+# 🎮 Pray Then Play — Stay on time. Play with peace of mind.
 
 <div align="center">
 
 ![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)
-![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android%20%7C%20Web-blue.svg?style=for-the-badge)
+![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android%20%7C%20Windows%20%7C%20Web-blue.svg?style=for-the-badge)
 
 **A smart gaming companion and prayer tracker tailored specifically for Muslim gamers.**  
-*Never lose ranked points. Never miss a prayer.*
+*Salah first. Gaming second. Stay on time. Play with peace of mind.*
 
 </div>
 
@@ -16,7 +16,7 @@
 
 ## 🌟 Overview
 
-**GamerSalah** bridges the gap between competitive gaming sessions and spiritual discipline. By calculating precise prayer times and comparing them with your game mode durations, GamerSalah provides intelligent queue check recommendations so you always know whether you can safely queue up or should pause to pray.
+**Pray Then Play** (*PTP*) bridges the gap between gaming sessions and spiritual discipline. By calculating precise prayer times and comparing them with your game activities and session durations, Pray Then Play provides intelligent queue safety recommendations so you always know when to queue, when to pause, and when to pray.
 
 ---
 

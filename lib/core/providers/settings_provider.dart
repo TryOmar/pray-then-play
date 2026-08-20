@@ -1,10 +1,29 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../constants/app_constants.dart';
 import '../constants/prayer_constants.dart';
 import '../services/storage_service.dart';
 
-// Gaming Theme State
+// System brightness listener state
+final systemBrightnessProvider = StateProvider<Brightness>((ref) => Brightness.dark);
+
+// Theme Mode Option (Manual, System, Sunrise/Sunset)
+final themeModeProvider =
+    StateNotifierProvider<ThemeModeNotifier, ThemeModeOption>((ref) {
+  return ThemeModeNotifier();
+});
+
+class ThemeModeNotifier extends StateNotifier<ThemeModeOption> {
+  ThemeModeNotifier() : super(StorageService.themeMode);
+
+  void setMode(ThemeModeOption mode) {
+    state = mode;
+    StorageService.setThemeMode(mode);
+  }
+}
+
+// Gaming Theme State (Manual Choice)
 final gamingThemeProvider =
     StateNotifierProvider<GamingThemeNotifier, AppGamingTheme>((ref) {
   return GamingThemeNotifier();
@@ -18,6 +37,33 @@ class GamingThemeNotifier extends StateNotifier<AppGamingTheme> {
     StorageService.setGamingTheme(theme);
   }
 }
+
+// Effective active theme resolving Manual, System Dynamic, or Sunrise/Sunset cycle
+final effectiveThemeProvider = Provider<AppGamingTheme>((ref) {
+  final mode = ref.watch(themeModeProvider);
+  final manualTheme = ref.watch(gamingThemeProvider);
+  final systemBrightness = ref.watch(systemBrightnessProvider);
+
+  switch (mode) {
+    case ThemeModeOption.manual:
+      return manualTheme;
+
+    case ThemeModeOption.system:
+      if (systemBrightness == Brightness.light) {
+        // If user already picked a light theme, use that; otherwise signature Dawn
+        return manualTheme.isLight ? manualTheme : AppGamingTheme.dawn;
+      } else {
+        // If user picked a dark theme, use that; otherwise signature Midnight
+        return !manualTheme.isLight ? manualTheme : AppGamingTheme.midnight;
+      }
+
+    case ThemeModeOption.sunCycle:
+      final hour = DateTime.now().hour;
+      // Daytime (06:00 to 18:30) -> Signature Dawn; Night -> Signature Midnight
+      final isDaytime = hour >= 6 && hour < 19;
+      return isDaytime ? AppGamingTheme.dawn : AppGamingTheme.midnight;
+  }
+});
 
 // Calculation Method
 final calculationMethodProvider =

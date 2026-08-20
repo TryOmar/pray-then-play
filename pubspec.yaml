@@ -1,7 +1,7 @@
 name: gamer_salah
-description: "GamerSalah - Game responsibly. Pray on time. A gaming companion for Muslim gamers."
+description: "Pray Then Play - Stay on time. Play with peace of mind. A gaming companion for Muslim gamers."
 publish_to: 'none'
-version: 1.0.0+1
+version: 2.0.0+1
 
 environment:
   sdk: ^3.5.0
@@ -54,3 +54,6 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/branding/
+    - assets/branding/icon/
+    - assets/branding/logo/

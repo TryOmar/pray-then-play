@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" fill="none">
+  <!-- Compact Mark: Icon + "PTP" -->
+  <defs>
+    <linearGradient id="compact-p-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(10, 10) scale(0.2)">
+    <rect x="96" y="80" width="64" height="352" rx="32" fill="url(#compact-p-grad)"/>
+    <path d="M128 80 H288 C368 80 432 144 432 224 C432 304 368 368 288 368 H128" 
+          stroke="url(#compact-p-grad)" stroke-width="64" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M236 172 L324 224 L236 276 Z" fill="#00F0FF" />
+  </g>
+
+  <text x="130" y="74" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="48" font-weight="900" letter-spacing="4" fill="#FFFFFF">
+    P<tspan fill="#00F0FF">T</tspan>P
+  </text>
+</svg>

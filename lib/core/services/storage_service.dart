@@ -81,11 +81,23 @@ class StorageService {
     if (index >= 0 && index < AppGamingTheme.values.length) {
       return AppGamingTheme.values[index];
     }
-    return AppGamingTheme.cyber;
+    return AppGamingTheme.midnight;
   }
 
   static Future<void> setGamingTheme(AppGamingTheme theme) =>
       _prefs.setInt(AppConstants.keyGamingTheme, theme.index);
+
+  // Theme Mode (Manual, System, Sunrise/Sunset)
+  static ThemeModeOption get themeMode {
+    final index = _prefs.getInt(AppConstants.keyThemeMode) ?? 0;
+    if (index >= 0 && index < ThemeModeOption.values.length) {
+      return ThemeModeOption.values[index];
+    }
+    return ThemeModeOption.manual;
+  }
+
+  static Future<void> setThemeMode(ThemeModeOption mode) =>
+      _prefs.setInt(AppConstants.keyThemeMode, mode.index);
 
   // Gamer profile
   static GamerProfile get gamerProfile {

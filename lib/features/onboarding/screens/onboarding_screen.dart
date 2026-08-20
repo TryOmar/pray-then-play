@@ -11,6 +11,7 @@ import '../../../core/providers/gaming_provider.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/storage_service.dart';
+import '../../../core/widgets/app_logo_widget.dart';
 import '../../../core/widgets/game_icon_widget.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -42,7 +43,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ProtectionLevel _protectionLevel = ProtectionLevel.balanced;
 
   // Step 6: Gaming Theme
-  AppGamingTheme _selectedTheme = AppGamingTheme.cyber;
+  AppGamingTheme _selectedTheme = AppGamingTheme.midnight;
 
   @override
   void initState() {
@@ -370,39 +371,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 20),
-          Container(
-            width: 84,
-            height: 84,
-            decoration: GlassmorphicDecoration.neonCard(
-              glowColor: _selectedTheme.primaryAccent,
-              borderRadius: 22,
-            ),
-            child: Icon(
-              Icons.mosque_rounded,
-              size: 42,
-              color: _selectedTheme.primaryAccent,
-            ),
+          const SizedBox(height: 24),
+          AppLogoWidget(
+            size: 80,
+            primaryColor: _selectedTheme.primaryAccent,
+            secondaryColor: _selectedTheme.secondaryAccent,
+            showGlow: true,
           ),
           const SizedBox(height: 24),
 
           ShaderMask(
-            shaderCallback: (bounds) =>
-                LinearGradient(colors: [_selectedTheme.primaryAccent, _selectedTheme.textPrimary]).createShader(bounds),
+            shaderCallback: (bounds) => LinearGradient(
+              colors: [_selectedTheme.primaryAccent, _selectedTheme.textPrimary],
+            ).createShader(bounds),
             child: Text(
-              'GamerSalah',
+              'PRAY THEN PLAY',
               style: TextStyle(
-                fontSize: 38,
-                fontWeight: FontWeight.w800,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
                 color: _selectedTheme.textPrimary,
-                letterSpacing: -1,
+                letterSpacing: 1.2,
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
           Text(
-            'Protect your Salah. Enjoy your games.',
+            'Plan your gaming around Salah.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,
@@ -413,7 +408,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 8),
 
           Text(
-            'Let\'s configure your gaming schedule so we can give you useful, prayer-aware recommendations.',
+            'Stay on time. Play with peace of mind.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -424,23 +419,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 36),
 
           _PhilosophyTile(
-            icon: Icons.access_time_filled_rounded,
-            title: 'Know your safe gaming windows',
+            icon: Icons.play_circle_outline_rounded,
+            title: 'Know when to play',
             subtitle: 'Calculates exact uninterrupted gaming time before next prayer',
             color: _selectedTheme.primaryAccent,
           ),
           const SizedBox(height: 12),
           _PhilosophyTile(
-            icon: Icons.shield_rounded,
-            title: 'Smart "Can I Queue?" warnings',
-            subtitle: 'Prevents getting locked into ranked matches that overlap with Salah',
+            icon: Icons.pause_circle_outline_rounded,
+            title: 'Know when to pause',
+            subtitle: 'Smart queue protection so you never get trapped in overtime matches',
             color: _selectedTheme.primaryAccent,
           ),
           const SizedBox(height: 12),
           _PhilosophyTile(
-            icon: Icons.sports_esports_rounded,
-            title: 'Personalized to what you play',
-            subtitle: 'Only suggests game modes from your selected game library',
+            icon: Icons.schedule_rounded,
+            title: 'Stay on time',
+            subtitle: 'Seamlessly balance competitive gaming with your spiritual discipline',
             color: _selectedTheme.primaryAccent,
           ),
 
@@ -452,7 +447,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               onPressed: _nextPage,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _selectedTheme.primaryAccent,
-                foregroundColor: _selectedTheme.background,
+                foregroundColor: _selectedTheme.buttonTextColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               child: const Text('Get Started'),
@@ -1057,7 +1052,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 foregroundColor: _selectedTheme.buttonTextColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text('Start Using GamerSalah'),
+              child: const Text('Start Using Pray Then Play'),
             ),
           ),
         ],
