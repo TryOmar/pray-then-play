@@ -644,16 +644,15 @@ class _GameCardState extends ConsumerState<_GameCard> {
       ),
       child: Column(
         children: [
-          // Header Row
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
             child: Row(
               children: [
                 GameIconWidget(
                     iconName: game.iconName,
-                    size: 40,
+                    size: 36,
                     fallbackColor: game.color),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: GestureDetector(
                     onTap: () => setState(() => _expanded = !_expanded),
@@ -662,16 +661,20 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       children: [
                         Row(
                           children: [
-                            Text(
-                              game.name,
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w700),
+                            Flexible(
+                              child: Text(
+                                game.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w700),
+                              ),
                             ),
                             if (game.isCustom) ...[
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 5),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
+                                    horizontal: 5, vertical: 1),
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryCyan
                                       .withValues(alpha: 0.18),
@@ -691,7 +694,9 @@ class _GameCardState extends ConsumerState<_GameCard> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${game.enabledActivities.length}/${game.activities.length} activities active • ${game.category.label}',
+                          '${game.enabledActivities.length}/${game.activities.length} activities • ${game.category.label}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                               fontSize: 11, color: AppColors.textMuted),
                         ),
@@ -699,22 +704,10 @@ class _GameCardState extends ConsumerState<_GameCard> {
                     ),
                   ),
                 ),
-                IconButton(
-                  tooltip: 'Add activity to ${game.name}',
-                  onPressed: () => _showAddActivityDialog(context, game),
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryCyan.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.add_circle_outline_rounded,
-                        color: AppColors.primaryCyan, size: 18),
-                  ),
-                ),
                 Checkbox(
                   value: game.isSelected,
                   activeColor: gameColor,
+                  visualDensity: VisualDensity.compact,
                   onChanged: (_) {
                     ref
                         .read(userGamesProvider.notifier)
@@ -725,6 +718,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                   IconButton(
                     icon: const Icon(Icons.delete_outline_rounded,
                         size: 18, color: AppColors.dangerRed),
+                    visualDensity: VisualDensity.compact,
                     onPressed: () {
                       ref
                           .read(userGamesProvider.notifier)
@@ -732,6 +726,9 @@ class _GameCardState extends ConsumerState<_GameCard> {
                     },
                   ),
                 IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                   icon: AnimatedRotation(
                     turns: _expanded ? 0.5 : 0,
                     duration: const Duration(milliseconds: 200),
@@ -743,8 +740,6 @@ class _GameCardState extends ConsumerState<_GameCard> {
               ],
             ),
           ),
-
-          // Activities expansion
           AnimatedCrossFade(
             firstChild: const SizedBox(width: double.infinity),
             secondChild: Padding(
@@ -756,41 +751,28 @@ class _GameCardState extends ConsumerState<_GameCard> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      const Text(
-                        'ACTIVITIES & MODES',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textMuted,
-                          letterSpacing: 1.2,
+                      const Expanded(
+                        child: Text(
+                          'ACTIVITIES & MODES',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textMuted,
+                            letterSpacing: 1.0,
+                          ),
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 8),
                       InkWell(
                         onTap: () => _showAddActivityDialog(context, game),
-                        borderRadius: BorderRadius.circular(6),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryCyan.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.add_rounded,
-                                  size: 14, color: AppColors.primaryCyan),
-                              SizedBox(width: 4),
-                              Text(
-                                'Add Activity',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.primaryCyan,
-                                ),
-                              ),
-                            ],
+                        child: Text(
+                          '+ Add Mode',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).primaryColor,
                           ),
                         ),
                       ),
@@ -798,13 +780,16 @@ class _GameCardState extends ConsumerState<_GameCard> {
                   ),
                   const SizedBox(height: 10),
                   ...game.activities.map((activity) => Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(10),
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Theme.of(context)
-                                  .inputDecorationTheme
-                                  .fillColor ??
-                              AppColors.surfaceElevated,
+                          color: activity.isEnabled
+                              ? (Theme.of(context).cardTheme.color ??
+                                  AppColors.surface)
+                              : (Theme.of(context).dividerTheme.color ??
+                                      AppColors.surfaceHighlight)
+                                  .withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: activity.isEnabled
@@ -817,6 +802,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                           children: [
                             Checkbox(
                               value: activity.isEnabled,
+                              visualDensity: VisualDensity.compact,
                               activeColor: gameColor,
                               onChanged: (_) {
                                 ref
@@ -831,18 +817,22 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                 children: [
                                   Row(
                                     children: [
-                                      Text(
-                                        activity.name,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: activity.isEnabled
-                                              ? FontWeight.w700
-                                              : FontWeight.w400,
-                                          color: activity.isEnabled
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface
-                                              : AppColors.textMuted,
+                                      Flexible(
+                                        child: Text(
+                                          activity.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: activity.isEnabled
+                                                ? FontWeight.w700
+                                                : FontWeight.w400,
+                                            color: activity.isEnabled
+                                                ? Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                : AppColors.textMuted,
+                                          ),
                                         ),
                                       ),
                                       if (activity.isCustom) ...[
@@ -859,30 +849,30 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                           child: const Text(
                                             'Custom',
                                             style: TextStyle(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w700,
-                                                color: AppColors.primaryCyan),
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppColors.primaryCyan),
                                           ),
                                         ),
                                       ],
                                     ],
                                   ),
                                   const SizedBox(height: 2),
-                                  Row(
+                                  Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    spacing: 4,
+                                    runSpacing: 2,
                                     children: [
                                       if (activity.canPause &&
                                           !activity.requiresCompletion) ...[
                                         const Text(
-                                          'Pauseable',
+                                          'Pauseable •',
                                           style: TextStyle(
                                               fontSize: 10,
                                               fontWeight: FontWeight.w600,
                                               color: AppColors.successGreen),
                                         ),
-                                        const Text(' • ',
-                                            style: TextStyle(
-                                                fontSize: 10,
-                                                color: AppColors.textMuted)),
                                       ],
                                       Text(
                                         '~${activity.typicalDuration}m (${activity.minMinutes}–${activity.maxMinutes}m)',
@@ -906,20 +896,27 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                 ],
                               ),
                             ),
-                            // Prominent Edit Button
-                            OutlinedButton.icon(
+                            // Sleek Compact Icon-Only Edit Button
+                            IconButton(
                               onPressed: () => _showEditActivityDialog(
                                   context, game, activity),
-                              icon: const Icon(Icons.edit_outlined, size: 14),
-                              label: const Text('Edit'),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 6),
-                                minimumSize: Size.zero,
-                                tapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                textStyle: const TextStyle(
-                                    fontSize: 11, fontWeight: FontWeight.w600),
+                              icon: const Icon(Icons.edit_rounded, size: 16),
+                              tooltip: 'Edit activity',
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.all(6),
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
+                              ),
+                              style: IconButton.styleFrom(
+                                backgroundColor: Theme.of(context)
+                                    .primaryColor
+                                    .withValues(alpha: 0.12),
+                                foregroundColor:
+                                    Theme.of(context).primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                             ),
                             if (activity.isCustom) ...[
@@ -927,6 +924,20 @@ class _GameCardState extends ConsumerState<_GameCard> {
                               IconButton(
                                 icon: const Icon(Icons.delete_outline_rounded,
                                     size: 16, color: AppColors.dangerRed),
+                                tooltip: 'Delete custom activity',
+                                visualDensity: VisualDensity.compact,
+                                padding: const EdgeInsets.all(6),
+                                constraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
+                                style: IconButton.styleFrom(
+                                  backgroundColor: AppColors.dangerRed
+                                      .withValues(alpha: 0.1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
                                 onPressed: () {
                                   ref
                                       .read(userGamesProvider.notifier)
@@ -938,20 +949,21 @@ class _GameCardState extends ConsumerState<_GameCard> {
                         ),
                       )),
                   const SizedBox(height: 6),
-                  // Large Add Activity Button at bottom of card
+                  // Clean Add Activity Button
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: () => _showAddActivityDialog(context, game),
-                      icon: const Icon(Icons.add_circle_outline_rounded,
-                          size: 16, color: AppColors.primaryCyan),
-                      label: Text('+ Add Activity to ${game.name}'),
+                      icon: Icon(Icons.add_rounded,
+                          size: 16, color: Theme.of(context).primaryColor),
+                      label: const Text('+ Add Mode / Activity'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryCyan,
+                        foregroundColor: Theme.of(context).primaryColor,
                         side: BorderSide(
-                            color: AppColors.primaryCyan
+                            color: Theme.of(context)
+                                .primaryColor
                                 .withValues(alpha: 0.35)),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 9),
                       ),
                     ),
                   ),

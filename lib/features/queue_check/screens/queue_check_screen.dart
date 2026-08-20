@@ -153,10 +153,14 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                         const Icon(Icons.access_time_rounded,
                             size: 14, color: AppColors.textMuted),
                         const SizedBox(width: 5),
-                        Text(
-                          '$_nextPrayerName in $_minutesUntilPrayer min  •  ${bufferMinutes}m safety buffer',
-                          style: const TextStyle(
-                              color: AppColors.textSecondary, fontSize: 13),
+                        Expanded(
+                          child: Text(
+                            '$_nextPrayerName in $_minutesUntilPrayer min  •  ${bufferMinutes}m safety buffer',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                color: AppColors.textSecondary, fontSize: 12.5),
+                          ),
                         ),
                       ],
                     ),
@@ -271,16 +275,20 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                     children: [
                       Row(
                         children: [
-                          const Text(
-                            'WHAT ARE YOU PLANNING TO PLAY?',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.textMuted,
-                              letterSpacing: 1.2,
+                          const Expanded(
+                            child: Text(
+                              'WHAT ARE YOU PLANNING TO PLAY?',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textMuted,
+                                letterSpacing: 1.0,
+                              ),
                             ),
                           ),
-                          const Spacer(),
+                          const SizedBox(width: 8),
                           GestureDetector(
                             onTap: () => _showAddActivityQuickDialog(
                                 context, _selectedGame!),
@@ -349,20 +357,25 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                         children: [
                                           Row(
                                             children: [
-                                              Text(
-                                                activity.name,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 14,
+                                              Flexible(
+                                                child: Text(
+                                                  activity.name,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w700,
+                                                    fontSize: 14,
+                                                  ),
                                                 ),
                                               ),
                                               if (activity.isCustom) ...[
                                                 const SizedBox(width: 6),
                                                 Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                          horizontal: 6,
-                                                          vertical: 2),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2),
                                                   decoration: BoxDecoration(
                                                     color: AppColors.primaryCyan
                                                         .withValues(alpha: 0.2),
@@ -385,7 +398,11 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                             ],
                                           ),
                                           const SizedBox(height: 4),
-                                          Row(
+                                          Wrap(
+                                            crossAxisAlignment:
+                                                WrapCrossAlignment.center,
+                                            spacing: 4,
+                                            runSpacing: 2,
                                             children: [
                                               if (activity.canPause &&
                                                   !activity
@@ -393,29 +410,24 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                                 const Icon(
                                                     Icons.pause_circle_outline,
                                                     size: 13,
-                                                    color: AppColors
-                                                        .successGreen),
-                                                const SizedBox(width: 4),
+                                                    color:
+                                                        AppColors.successGreen),
+                                                const SizedBox(width: 2),
                                                 const Text(
-                                                  'Pauseable anytime',
+                                                  'Pauseable •',
                                                   style: TextStyle(
                                                       color: AppColors
                                                           .successGreen,
-                                                      fontSize: 11,
+                                                      fontSize: 10.5,
                                                       fontWeight:
                                                           FontWeight.w600),
                                                 ),
-                                                const Text('  •  ',
-                                                    style: TextStyle(
-                                                        color: AppColors
-                                                            .textMuted,
-                                                        fontSize: 11)),
                                               ],
                                               Text(
-                                                'Typical: ~${activity.typicalDuration}m (${activity.minMinutes}–${activity.maxMinutes}m)',
+                                                '~${activity.typicalDuration}m (${activity.minMinutes}–${activity.maxMinutes}m)',
                                                 style: const TextStyle(
                                                   color: AppColors.textMuted,
-                                                  fontSize: 11,
+                                                  fontSize: 10.5,
                                                 ),
                                               ),
                                             ],
@@ -880,7 +892,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
     return Row(
       children: [
         Icon(icon, size: 16, color: AppColors.textMuted),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         Text(
           title,
           style: const TextStyle(
@@ -889,13 +901,20 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
             fontWeight: FontWeight.w500,
           ),
         ),
-        const Spacer(),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: valueColor,
+        const SizedBox(width: 8),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: valueColor,
+              ),
+            ),
           ),
         ),
       ],

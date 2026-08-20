@@ -10,13 +10,15 @@ class ShellScreen extends ConsumerWidget {
   const ShellScreen({super.key, required this.child});
 
   int _getCurrentIndex(BuildContext context) {
-    final location = GoRouterState.of(context).uri.toString();
-    if (location == '/') return 0;
-    if (location == '/queue-check') return 1;
-    if (location == '/consistency') return 2;
-    if (location == '/prayer-times') return 3;
-    if (location == '/games') return 4;
-    if (location == '/settings') return 5;
+    try {
+      final location = GoRouterState.of(context).uri.toString();
+      if (location == '/') return 0;
+      if (location == '/queue-check') return 1;
+      if (location == '/consistency') return 2;
+      if (location == '/prayer-times') return 3;
+      if (location == '/games') return 4;
+      if (location == '/settings') return 5;
+    } catch (_) {}
     return 0;
   }
 
@@ -47,9 +49,8 @@ class ShellScreen extends ConsumerWidget {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _NavItem(
                   icon: Icons.home_rounded,
@@ -67,14 +68,14 @@ class ShellScreen extends ConsumerWidget {
                 ),
                 _NavItem(
                   icon: Icons.auto_graph_rounded,
-                  label: 'Consistency',
+                  label: 'Stats',
                   isSelected: currentIndex == 2,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/consistency'),
                 ),
                 _NavItem(
                   icon: Icons.schedule_rounded,
-                  label: 'Prayer',
+                  label: 'Prayers',
                   isSelected: currentIndex == 3,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/prayer-times'),
@@ -119,38 +120,46 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unselectedColor = Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
+    final unselectedColor =
+        Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: isSelected
-            ? BoxDecoration(
-                color: activeColor.withValues(alpha: 0.14),
-                borderRadius: BorderRadius.circular(12),
-              )
-            : null,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: isSelected ? activeColor : unselectedColor,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+          decoration: isSelected
+              ? BoxDecoration(
+                  color: activeColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                )
+              : null,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 21,
                 color: isSelected ? activeColor : unselectedColor,
               ),
-            ),
-          ],
+              const SizedBox(height: 3),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected ? activeColor : unselectedColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

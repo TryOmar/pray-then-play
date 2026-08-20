@@ -39,32 +39,40 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                   color: primaryColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.timeline_rounded, size: 16, color: primaryColor),
+                child:
+                    Icon(Icons.timeline_rounded, size: 16, color: primaryColor),
               ),
               const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '24H PRAYER & GAMING TIMELINE',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textMuted,
-                      letterSpacing: 1.2,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '24H PRAYER & GAMING TIMELINE',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textMuted,
+                        letterSpacing: 1.0,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Mathematical safety windows calculated by Adhan',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
+                    const SizedBox(height: 2),
+                    Text(
+                      'Calculated by Adhan & buffer',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context).textTheme.bodySmall?.color ??
+                            AppColors.textMuted,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               _LiveBadge(primaryColor: primaryColor),
             ],
           ),
@@ -176,13 +184,15 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // Legend
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          const Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12,
+            runSpacing: 6,
             children: [
-              _LegendItem(color: AppColors.successGreen, label: 'Safe Gaming Slot'),
-              SizedBox(width: 14),
-              _LegendItem(color: AppColors.warningAmber, label: 'Pre-Prayer Buffer'),
-              SizedBox(width: 14),
+              _LegendItem(
+                  color: AppColors.successGreen, label: 'Safe Gaming'),
+              _LegendItem(
+                  color: AppColors.warningAmber, label: 'Safety Buffer'),
               _LegendItem(color: AppColors.dangerRed, label: 'Prayer Time'),
             ],
           ),

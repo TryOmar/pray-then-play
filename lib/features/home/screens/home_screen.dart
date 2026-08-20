@@ -205,59 +205,76 @@ class HomeScreen extends ConsumerWidget {
     return Row(
       children: [
         const AppLogoWidget(
-          size: 32,
+          size: 30,
           variant: AppLogoVariant.iconOnly,
           showGlow: true,
         ),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Pray Then Play',
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w900,
-                color: onSurface,
-                letterSpacing: -0.3,
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Pray Then Play',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                  color: onSurface,
+                  letterSpacing: -0.3,
+                ),
               ),
-            ),
-            Text(
-              'STAY ON TIME • PLAY WITH PEACE',
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                color: activeTheme.primaryColor,
-                letterSpacing: 0.8,
+              Text(
+                'STAY ON TIME • PLAY WITH PEACE',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w700,
+                  color: activeTheme.primaryColor,
+                  letterSpacing: 0.6,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        const Spacer(),
+        const SizedBox(width: 6),
         GestureDetector(
-          onTap: () => context.go('/settings'),
+          onTap: () {
+            try {
+              context.go('/settings');
+            } catch (_) {}
+          },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: activeTheme.colorScheme.surface,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: activeTheme.dividerTheme.color ?? AppColors.surfaceHighlight,
+                color: activeTheme.dividerTheme.color ??
+                    AppColors.surfaceHighlight,
                 width: 0.8,
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.location_on_rounded, size: 14, color: activeTheme.primaryColor),
-                const SizedBox(width: 4),
-                Text(
-                  city,
-                  style: TextStyle(
-                    color: textSecondary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                Icon(Icons.location_on_rounded,
+                    size: 13, color: activeTheme.primaryColor),
+                const SizedBox(width: 3),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 60),
+                  child: Text(
+                    city,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: textSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],

@@ -84,11 +84,15 @@ class _PrayerTimesScreenState extends ConsumerState<PrayerTimesScreen> {
                               const Icon(Icons.location_on_rounded,
                                   size: 14, color: AppColors.textMuted),
                               const SizedBox(width: 4),
-                              Text(
-                                '$city  \u2022  ${TimeUtils.formatDate(DateTime.now())}',
-                                style: const TextStyle(
-                                  color: AppColors.textMuted,
-                                  fontSize: 13,
+                              Expanded(
+                                child: Text(
+                                  '$city  \u2022  ${TimeUtils.formatDate(DateTime.now())}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppColors.textMuted,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],

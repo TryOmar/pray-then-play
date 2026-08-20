@@ -1,0 +1,198 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gamer_salah/app/shell_screen.dart';
+import 'package:gamer_salah/app/theme.dart';
+import 'package:gamer_salah/core/providers/prayer_provider.dart';
+import 'package:gamer_salah/core/services/storage_service.dart';
+import 'package:gamer_salah/features/game_profiles/screens/game_profiles_screen.dart';
+import 'package:gamer_salah/features/heatmap/screens/prayer_consistency_screen.dart';
+import 'package:gamer_salah/features/home/screens/home_screen.dart';
+import 'package:gamer_salah/features/prayer_times/screens/prayer_times_screen.dart';
+import 'package:gamer_salah/features/queue_check/screens/queue_check_screen.dart';
+import 'package:gamer_salah/features/settings/screens/settings_screen.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
+
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({
+      'onboarding_complete': true,
+      'latitude': 21.4225,
+      'longitude': 39.8262,
+      'city_name': 'Makkah',
+      'country_name': 'Saudi Arabia',
+    });
+    await StorageService.initialize();
+  });
+
+  group('Narrow Mobile Screen Responsiveness Tests (320px Viewport)', () {
+    testWidgets('ShellScreen bottom navigation renders cleanly on 300px narrow width',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(300 * 3, 600 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            liveSecondTickerProvider.overrideWith(
+              (ref) => Stream.value(DateTime.now()),
+            ),
+          ],
+          child: MaterialApp(
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight),
+            home: const ShellScreen(
+              child: Scaffold(body: Center(child: Text('Content'))),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ShellScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('HomeScreen renders without overflow on 320px narrow mobile',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320 * 3, 568 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            liveSecondTickerProvider.overrideWith(
+              (ref) => Stream.value(DateTime.now()),
+            ),
+          ],
+          child: MaterialApp(
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight),
+            home: const HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(HomeScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('GameProfilesScreen with icon-only edit button renders cleanly on 320px width',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320 * 3, 568 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight),
+            home: const GameProfilesScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(GameProfilesScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('QueueCheckScreen renders without overflow on 320px width',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320 * 3, 568 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            liveSecondTickerProvider.overrideWith(
+              (ref) => Stream.value(DateTime.now()),
+            ),
+          ],
+          child: MaterialApp(
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight),
+            home: const QueueCheckScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byType(QueueCheckScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('PrayerConsistencyScreen renders without overflow on 320px width',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320 * 3, 568 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight),
+            home: const PrayerConsistencyScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PrayerConsistencyScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('PrayerTimesScreen renders without overflow on 320px width',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320 * 3, 568 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight),
+            home: const PrayerTimesScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PrayerTimesScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('SettingsScreen renders without overflow on 320px width',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320 * 3, 568 * 3);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight),
+            home: const SettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SettingsScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+}
