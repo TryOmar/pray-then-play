@@ -144,3 +144,23 @@ class FajrModeNotifier extends StateNotifier<bool> {
     StorageService.setFajrMode(state);
   }
 }
+
+// Time Format Preference (12-Hour AM/PM vs 24-Hour)
+final timeFormatIs24HourProvider =
+    StateNotifierProvider<TimeFormatNotifier, bool>((ref) {
+  return TimeFormatNotifier();
+});
+
+class TimeFormatNotifier extends StateNotifier<bool> {
+  TimeFormatNotifier() : super(StorageService.is24HourFormat);
+
+  void set24Hour(bool is24Hour) {
+    state = is24Hour;
+    StorageService.setIs24HourFormat(is24Hour);
+  }
+
+  void toggle() {
+    set24Hour(!state);
+  }
+}
+

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../core/providers/prayer_provider.dart';
 import '../../../core/providers/settings_provider.dart';
+import '../../../core/services/home_widget_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/widgets/app_logo_widget.dart';
 import '../widgets/next_prayer_hero_widget.dart';
@@ -21,6 +22,16 @@ class HomeScreen extends ConsumerWidget {
     final nextPrayer = ref.watch(nextPrayerProvider);
     final activeTheme = Theme.of(context);
 
+    // Sync data with Android Home Screen widgets on update
+    ref.listen<MapEntry<String, DateTime>?>(nextPrayerProvider, (previous, next) {
+      if (next != null) {
+        HomeWidgetService.updateWidgets(
+          nextPrayerName: next.key,
+          nextPrayerTime: next.value,
+        );
+      }
+    });
+
     final onSurface = activeTheme.colorScheme.onSurface;
     final textSecondary = activeTheme.textTheme.bodyMedium?.color ?? AppColors.textSecondary;
 
@@ -29,6 +40,15 @@ class HomeScreen extends ConsumerWidget {
     final minutesUntilPrayer = nextPrayerTime != null
         ? nextPrayerTime.difference(DateTime.now()).inMinutes
         : 999;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (nextPrayer != null) {
+        HomeWidgetService.updateWidgets(
+          nextPrayerName: nextPrayer.key,
+          nextPrayerTime: nextPrayer.value,
+        );
+      }
+    });
 
     return Scaffold(
       backgroundColor: activeTheme.scaffoldBackgroundColor,

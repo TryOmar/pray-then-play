@@ -22,37 +22,48 @@ class GameProfilesScreen extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'My Games & Activities',
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'My Games & Activities',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.5,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                             ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Customize activity durations, pauseability, and add custom modes',
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Customize durations, pauseability & custom modes',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: AppColors.textMuted,
-                              fontSize: 13,
+                              fontSize: 12.5,
                             ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(width: 10),
                     ElevatedButton.icon(
                       onPressed: () => _showAddGameDialog(context, ref),
-                      icon: const Icon(Icons.add_rounded, size: 18),
+                      icon: const Icon(Icons.add_rounded, size: 16),
                       label: const Text('Add Game'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
+                            horizontal: 12, vertical: 8),
+                        textStyle: const TextStyle(
+                            fontSize: 12.5, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -172,12 +183,22 @@ class GameProfilesScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Text('Add to Library',
+                    Expanded(
+                      child: Text(
+                        'Add to Library',
                         style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w700)),
-                    const Spacer(),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.close_rounded, size: 20),
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints:
+                          const BoxConstraints(minWidth: 32, minHeight: 32),
                       onPressed: () => Navigator.pop(ctx),
                     ),
                   ],
@@ -191,7 +212,8 @@ class GameProfilesScreen extends ConsumerWidget {
                       child: GestureDetector(
                         onTap: () => setModalState(() => activeTab = 0),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 8),
                           decoration: BoxDecoration(
                             color: activeTab == 0
                                 ? Theme.of(context)
@@ -210,20 +232,23 @@ class GameProfilesScreen extends ConsumerWidget {
                             ),
                           ),
                           child: Center(
-                            child: Text(
-                              'Predefined Catalog (${GameData.defaultCatalog.length})',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: activeTab == 0
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                color: activeTab == 0
-                                    ? Theme.of(context).primaryColor
-                                    : Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.color ??
-                                        AppColors.textMuted,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Catalog (${GameData.defaultCatalog.length})',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: activeTab == 0
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: activeTab == 0
+                                      ? Theme.of(context).primaryColor
+                                      : Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.color ??
+                                          AppColors.textMuted,
+                                ),
                               ),
                             ),
                           ),
@@ -235,7 +260,8 @@ class GameProfilesScreen extends ConsumerWidget {
                       child: GestureDetector(
                         onTap: () => setModalState(() => activeTab = 1),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 8),
                           decoration: BoxDecoration(
                             color: activeTab == 1
                                 ? Theme.of(context)
@@ -254,20 +280,23 @@ class GameProfilesScreen extends ConsumerWidget {
                             ),
                           ),
                           child: Center(
-                            child: Text(
-                              '+ Custom Game',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: activeTab == 1
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                color: activeTab == 1
-                                    ? Theme.of(context).primaryColor
-                                    : Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.color ??
-                                        AppColors.textMuted,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '+ Custom Game',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: activeTab == 1
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: activeTab == 1
+                                      ? Theme.of(context).primaryColor
+                                      : Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.color ??
+                                          AppColors.textMuted,
+                                ),
                               ),
                             ),
                           ),
@@ -332,13 +361,15 @@ class GameProfilesScreen extends ConsumerWidget {
                                   iconName: game.iconName,
                                   size: 36,
                                   fallbackColor: game.color),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       game.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
@@ -350,6 +381,8 @@ class GameProfilesScreen extends ConsumerWidget {
                                     const SizedBox(height: 2),
                                     Text(
                                       '${game.activities.length} activities • ${game.category.label}',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 11,
                                         color: Theme.of(context)
@@ -362,21 +395,20 @@ class GameProfilesScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              ElevatedButton.icon(
+                              const SizedBox(width: 6),
+                              ElevatedButton(
                                 onPressed: () {
-                                  ref
-                                      .read(userGamesProvider.notifier)
-                                      .addCatalogGame(game);
+                                  if (isAlreadyAdded) {
+                                    ref
+                                        .read(userGamesProvider.notifier)
+                                        .removeGame(game.id);
+                                  } else {
+                                    ref
+                                        .read(userGamesProvider.notifier)
+                                        .addCatalogGame(game);
+                                  }
                                   setModalState(() {});
                                 },
-                                icon: Icon(
-                                  isAlreadyAdded
-                                      ? Icons.check_rounded
-                                      : Icons.add_rounded,
-                                  size: 16,
-                                ),
-                                label: Text(isAlreadyAdded ? 'Added' : 'Add'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: isAlreadyAdded
                                       ? AppColors.successGreen
@@ -384,11 +416,29 @@ class GameProfilesScreen extends ConsumerWidget {
                                   foregroundColor:
                                       Theme.of(context).scaffoldBackgroundColor,
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  minimumSize: Size.zero,
+                                      horizontal: 8, vertical: 5),
+                                  minimumSize: const Size(44, 28),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                   elevation: 0,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isAlreadyAdded
+                                          ? Icons.check_rounded
+                                          : Icons.add_rounded,
+                                      size: 14,
+                                    ),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      isAlreadyAdded ? 'Added' : 'Add',
+                                      style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -414,13 +464,15 @@ class GameProfilesScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          Row(
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
                             children: [
                               const Text('Category:',
                                   style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600)),
-                              const SizedBox(width: 10),
                               ChoiceChip(
                                 label: const Text('Casual / Flexible'),
                                 selected:
@@ -428,7 +480,6 @@ class GameProfilesScreen extends ConsumerWidget {
                                 onSelected: (val) => setModalState(
                                     () => selectedCategory = GameCategory.casual),
                               ),
-                              const SizedBox(width: 8),
                               ChoiceChip(
                                 label: const Text('Competitive'),
                                 selected: selectedCategory ==
@@ -472,8 +523,8 @@ class GameProfilesScreen extends ConsumerWidget {
                                         child: TextField(
                                           controller: ac.name,
                                           decoration: const InputDecoration(
-                                            hintText:
-                                                'Activity name (e.g. Skyblock)',
+                                            hintText: 'Activity name',
+                                            labelText: 'Name',
                                             isDense: true,
                                           ),
                                         ),
@@ -485,7 +536,9 @@ class GameProfilesScreen extends ConsumerWidget {
                                           controller: ac.duration,
                                           keyboardType: TextInputType.number,
                                           decoration: const InputDecoration(
-                                            hintText: 'Typical min',
+                                            hintText: '30',
+                                            labelText: 'Mins',
+                                            suffixText: 'm',
                                             isDense: true,
                                           ),
                                         ),
@@ -496,21 +549,31 @@ class GameProfilesScreen extends ConsumerWidget {
                                               Icons.remove_circle_outline,
                                               size: 18,
                                               color: AppColors.dangerRed),
+                                          visualDensity: VisualDensity.compact,
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(
+                                              minWidth: 28, minHeight: 28),
                                           onPressed: () => setModalState(
                                               () => activityControllers
                                                   .removeAt(i)),
                                         ),
                                     ],
                                   ),
+                                  const SizedBox(height: 4),
                                   Row(
                                     children: [
                                       Checkbox(
                                         value: ac.canPause,
+                                        visualDensity: VisualDensity.compact,
                                         onChanged: (val) => setModalState(
                                             () => ac.canPause = val ?? false),
                                       ),
-                                      const Text('Can pause / exit anytime',
-                                          style: TextStyle(fontSize: 12)),
+                                      const Expanded(
+                                        child: Text(
+                                          'Can pause / exit anytime',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -714,17 +777,6 @@ class _GameCardState extends ConsumerState<_GameCard> {
                         .toggleGameSelected(game.id);
                   },
                 ),
-                if (game.isCustom)
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded,
-                        size: 18, color: AppColors.dangerRed),
-                    visualDensity: VisualDensity.compact,
-                    onPressed: () {
-                      ref
-                          .read(userGamesProvider.notifier)
-                          .removeGame(game.id);
-                    },
-                  ),
                 IconButton(
                   visualDensity: VisualDensity.compact,
                   padding: EdgeInsets.zero,
@@ -948,24 +1000,68 @@ class _GameCardState extends ConsumerState<_GameCard> {
                           ],
                         ),
                       )),
-                  const SizedBox(height: 6),
-                  // Clean Add Activity Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _showAddActivityDialog(context, game),
-                      icon: Icon(Icons.add_rounded,
-                          size: 16, color: Theme.of(context).primaryColor),
-                      label: const Text('+ Add Mode / Activity'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(context).primaryColor,
-                        side: BorderSide(
-                            color: Theme.of(context)
-                                .primaryColor
-                                .withValues(alpha: 0.35)),
-                        padding: const EdgeInsets.symmetric(vertical: 9),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () =>
+                              _showAddActivityDialog(context, game),
+                          icon: Icon(Icons.add_rounded,
+                              size: 15, color: Theme.of(context).primaryColor),
+                          label: const Text('+ Add Mode'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Theme.of(context).primaryColor,
+                            side: BorderSide(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withValues(alpha: 0.35)),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            textStyle: const TextStyle(
+                                fontSize: 11.5, fontWeight: FontWeight.w700),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      TextButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(userGamesProvider.notifier)
+                              .removeGame(game.id);
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text('${game.name} removed from library'),
+                              duration: const Duration(seconds: 3),
+                              action: SnackBarAction(
+                                label: 'Undo',
+                                textColor: Theme.of(context).primaryColor,
+                                onPressed: () {
+                                  ref
+                                      .read(userGamesProvider.notifier)
+                                      .addCatalogGame(game);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.delete_outline_rounded,
+                            size: 15, color: AppColors.dangerRed),
+                        label: const Text(
+                          'Remove Game',
+                          style: TextStyle(
+                            color: AppColors.dangerRed,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 8),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -1003,17 +1099,23 @@ class _GameCardState extends ConsumerState<_GameCard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Add Activity to ${game.name}',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Add Activity to ${game.name}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700),
+                ),
               ),
               const SizedBox(height: 14),
               TextField(
                 controller: nameCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Activity Name (e.g. Skyblock, Heist, Career)',
+                  labelText: 'Activity Name',
+                  hintText: 'e.g. Skyblock, Heist, Career',
                   border: OutlineInputBorder(),
+                  isDense: true,
                 ),
               ),
               const SizedBox(height: 12),
@@ -1024,8 +1126,10 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       controller: durCtrl,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Typical (min)',
+                        labelText: 'Typical',
+                        suffixText: 'm',
                         border: OutlineInputBorder(),
+                        isDense: true,
                       ),
                     ),
                   ),
@@ -1035,8 +1139,10 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       controller: minCtrl,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Min (min)',
+                        labelText: 'Min',
+                        suffixText: 'm',
                         border: OutlineInputBorder(),
+                        isDense: true,
                       ),
                     ),
                   ),
@@ -1046,8 +1152,10 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       controller: maxCtrl,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Max (min)',
+                        labelText: 'Max',
+                        suffixText: 'm',
                         border: OutlineInputBorder(),
+                        isDense: true,
                       ),
                     ),
                   ),
@@ -1074,6 +1182,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                   labelText: 'Custom Notes (Optional)',
                   hintText: 'e.g. Weekend server with squad',
                   border: OutlineInputBorder(),
+                  isDense: true,
                 ),
               ),
               const SizedBox(height: 16),
@@ -1147,10 +1256,14 @@ class _GameCardState extends ConsumerState<_GameCard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Edit ${activity.name}',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Edit ${activity.name}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700),
+                ),
               ),
               const SizedBox(height: 14),
               TextField(
@@ -1158,6 +1271,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                 decoration: const InputDecoration(
                   labelText: 'Activity Name',
                   border: OutlineInputBorder(),
+                  isDense: true,
                 ),
               ),
               const SizedBox(height: 12),
@@ -1168,8 +1282,10 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       controller: durCtrl,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Typical (min)',
+                        labelText: 'Typical',
+                        suffixText: 'm',
                         border: OutlineInputBorder(),
+                        isDense: true,
                       ),
                     ),
                   ),
@@ -1179,8 +1295,10 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       controller: minCtrl,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Min (min)',
+                        labelText: 'Min',
+                        suffixText: 'm',
                         border: OutlineInputBorder(),
+                        isDense: true,
                       ),
                     ),
                   ),
@@ -1190,8 +1308,10 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       controller: maxCtrl,
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
-                        labelText: 'Max (min)',
+                        labelText: 'Max',
+                        suffixText: 'm',
                         border: OutlineInputBorder(),
+                        isDense: true,
                       ),
                     ),
                   ),
@@ -1217,6 +1337,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                 decoration: const InputDecoration(
                   labelText: 'Custom Notes',
                   border: OutlineInputBorder(),
+                  isDense: true,
                 ),
               ),
               const SizedBox(height: 16),

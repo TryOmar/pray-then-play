@@ -99,6 +99,13 @@ class StorageService {
   static Future<void> setThemeMode(ThemeModeOption mode) =>
       _prefs.setInt(AppConstants.keyThemeMode, mode.index);
 
+  // Time Format (12-Hour vs 24-Hour)
+  static bool get is24HourFormat =>
+      _prefs.getBool(AppConstants.keyIs24HourFormat) ?? false;
+
+  static Future<void> setIs24HourFormat(bool is24Hour) =>
+      _prefs.setBool(AppConstants.keyIs24HourFormat, is24Hour);
+
   // Gamer profile
   static GamerProfile get gamerProfile {
     final index = _prefs.getInt(AppConstants.keyGamerProfile) ?? 0;
@@ -326,19 +333,27 @@ class StorageService {
   static String _dateKey(DateTime date) =>
       'daily_prayer_record_${date.year}_${date.month.toString().padLeft(2, '0')}_${date.day.toString().padLeft(2, '0')}';
 
+  static bool hasStoredDailyRecord(DateTime date) {
+    final key = _dateKey(date);
+    return _prefs.containsKey(key);
+  }
+
+  static bool get hasAnyRecordedHistory {
+    final keys = _prefs.getKeys();
+    return keys.any((k) => k.startsWith('daily_prayer_record_'));
+  }
 
   static DailyPrayerRecord getDailyPrayerRecord(DateTime date) {
     final key = _dateKey(date);
     final jsonStr = _prefs.getString(key);
     if (jsonStr != null && jsonStr.isNotEmpty) {
       try {
-        return DailyPrayerRecord.fromJson(jsonDecode(jsonStr) as Map<String, dynamic>);
+        return DailyPrayerRecord.fromJson(
+            jsonDecode(jsonStr) as Map<String, dynamic>);
       } catch (_) {}
     }
 
-    // Generate realistic seeded history for previous days so the heatmap is visually meaningful
     final today = DateTime.now();
-    final isToday = date.year == today.year && date.month == today.month && date.day == today.day;
     final isFuture = date.isAfter(DateTime(today.year, today.month, today.day));
 
     if (isFuture) {
@@ -354,35 +369,15 @@ class StorageService {
       );
     }
 
-    if (isToday) {
-      return DailyPrayerRecord(
-        date: date,
-        prayers: {
-          'Fajr': PrayerStatus.onTime,
-          'Dhuhr': PrayerStatus.onTime,
-          'Asr': PrayerStatus.onTime,
-          'Maghrib': PrayerStatus.onTime,
-          'Isha': PrayerStatus.notRecorded,
-        },
-      );
-    }
-
-    // Seed historical day with realistic consistency (e.g. 88% on-time rate)
-    final dayIndex = date.day + date.month * 31;
-    final fStatus = (dayIndex % 7 == 0) ? PrayerStatus.late : PrayerStatus.onTime;
-    final dStatus = (dayIndex % 11 == 0) ? PrayerStatus.late : PrayerStatus.onTime;
-    final aStatus = (dayIndex % 13 == 0) ? PrayerStatus.late : PrayerStatus.onTime;
-    final mStatus = (dayIndex % 5 == 0) ? PrayerStatus.late : ((dayIndex % 23 == 0) ? PrayerStatus.notRecorded : PrayerStatus.onTime);
-    final iStatus = (dayIndex % 9 == 0) ? PrayerStatus.late : PrayerStatus.onTime;
-
+    // Authentic clean slate: unrecorded days start empty
     return DailyPrayerRecord(
       date: date,
       prayers: {
-        'Fajr': fStatus,
-        'Dhuhr': dStatus,
-        'Asr': aStatus,
-        'Maghrib': mStatus,
-        'Isha': iStatus,
+        'Fajr': PrayerStatus.notRecorded,
+        'Dhuhr': PrayerStatus.notRecorded,
+        'Asr': PrayerStatus.notRecorded,
+        'Maghrib': PrayerStatus.notRecorded,
+        'Isha': PrayerStatus.notRecorded,
       },
     );
   }
@@ -392,9 +387,63 @@ class StorageService {
     await _prefs.setString(key, jsonEncode(record.toJson()));
   }
 
+  /// Clears all stored daily prayer records and resets metrics to Day 1
+  static Future<void> clearAllDailyPrayerRecords() async {
+    final keys = _prefs.getKeys().toList();
+    for (final k in keys) {
+      if (k.startsWith('daily_prayer_record_') ||
+          k.startsWith('decision_') ||
+          k == 'protected_prayers_count' ||
+          k == 'unlocked_achievements') {
+        await _prefs.remove(k);
+      }
+    }
+  }
+
+  /// Seeds realistic 30-day history for demo / screenshots
+  static Future<void> loadSampleDemoHistory() async {
+    final now = DateTime.now();
+    for (int i = 0; i < 30; i++) {
+      final date = now.subtract(Duration(days: i));
+      final dayIndex = date.day + date.month * 31;
+      final fStatus =
+          (dayIndex % 7 == 0) ? PrayerStatus.late : PrayerStatus.onTime;
+      final dStatus =
+          (dayIndex % 11 == 0) ? PrayerStatus.late : PrayerStatus.onTime;
+      final aStatus =
+          (dayIndex % 13 == 0) ? PrayerStatus.late : PrayerStatus.onTime;
+      final mStatus = (dayIndex % 5 == 0)
+          ? PrayerStatus.late
+          : ((dayIndex % 23 == 0)
+              ? PrayerStatus.notRecorded
+              : PrayerStatus.onTime);
+      final iStatus =
+          (dayIndex % 9 == 0) ? PrayerStatus.late : PrayerStatus.onTime;
+
+      final record = DailyPrayerRecord(
+        date: date,
+        prayers: {
+          'Fajr': fStatus,
+          'Dhuhr': dStatus,
+          'Asr': aStatus,
+          'Maghrib': mStatus,
+          'Isha': iStatus,
+        },
+      );
+      await saveDailyPrayerRecord(record);
+    }
+
+    await _prefs.setInt('protected_prayers_count', 18);
+    await _prefs.setInt('decision_avoidedRiskyQueue', 23);
+    await _prefs.setInt('decision_stoppedToPray', 14);
+    await _prefs.setInt('decision_choseShortGame', 8);
+    await _prefs.setStringList('unlocked_achievements',
+        ['first_step', 'queue_discipline', 'consistent_week', 'prayer_protector']);
+  }
+
   // Gaming Discipline & Protection Metrics
   static int get protectedPrayersCount =>
-      _prefs.getInt('protected_prayers_count') ?? 18;
+      _prefs.getInt('protected_prayers_count') ?? 0;
 
   static Future<void> incrementProtectedPrayers() async {
     final count = protectedPrayersCount + 1;
@@ -402,7 +451,7 @@ class StorageService {
   }
 
   static int getGamingDecisionCount(GamingDecisionType type) {
-    return _prefs.getInt('decision_${type.name}') ?? (type == GamingDecisionType.avoidedRiskyQueue ? 23 : (type == GamingDecisionType.stoppedToPray ? 14 : 8));
+    return _prefs.getInt('decision_${type.name}') ?? 0;
   }
 
   static Future<void> incrementGamingDecision(GamingDecisionType type) async {
@@ -413,7 +462,7 @@ class StorageService {
   // Unlocked Achievements
   static Set<String> getUnlockedAchievements() {
     final list = _prefs.getStringList('unlocked_achievements');
-    return list?.toSet() ?? {'first_step', 'queue_discipline', 'consistent_week', 'prayer_protector'};
+    return list?.toSet() ?? <String>{};
   }
 
   static Future<void> unlockAchievement(String id) async {

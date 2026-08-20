@@ -1,6 +1,9 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:home_widget/home_widget.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
 import 'core/providers/settings_provider.dart';
@@ -55,7 +58,32 @@ class _PrayThenPlayAppState extends ConsumerState<PrayThenPlayApp>
       final brightness =
           WidgetsBinding.instance.platformDispatcher.platformBrightness;
       ref.read(systemBrightnessProvider.notifier).state = brightness;
+
+      // Handle HomeWidget deep linking on Android
+      if (!kIsWeb) {
+        try {
+          if (Platform.isAndroid) {
+            HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
+              if (uri != null) _handleWidgetUri(uri);
+            });
+            HomeWidget.widgetClicked.listen((uri) {
+              if (uri != null) _handleWidgetUri(uri);
+            });
+          }
+        } catch (_) {}
+      }
     });
+  }
+
+  void _handleWidgetUri(Uri uri) {
+    final router = ref.read(routerProvider);
+    if (uri.host == 'queue-check') {
+      router.go('/queue-check');
+    } else if (uri.host == 'prayer-times') {
+      router.go('/prayer-times');
+    } else {
+      router.go('/');
+    }
   }
 
   @override

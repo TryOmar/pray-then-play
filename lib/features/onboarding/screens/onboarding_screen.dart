@@ -383,13 +383,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             shaderCallback: (bounds) => LinearGradient(
               colors: [_selectedTheme.primaryAccent, _selectedTheme.textPrimary],
             ).createShader(bounds),
-            child: Text(
-              'PRAY THEN PLAY',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w900,
-                color: _selectedTheme.textPrimary,
-                letterSpacing: 1.2,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                'PRAY THEN PLAY',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  color: _selectedTheme.textPrimary,
+                  letterSpacing: 1.2,
+                ),
               ),
             ),
           ),
@@ -726,9 +729,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     children: [
                       Row(
                         children: [
-                          GameIconWidget(iconName: game.iconName, size: 28, fallbackColor: game.color),
+                          GameIconWidget(
+                              iconName: game.iconName,
+                              size: 28,
+                              fallbackColor: game.color),
                           const SizedBox(width: 10),
-                          Text(game.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                          Expanded(
+                            child: Text(
+                              game.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.w700),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -768,16 +782,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).inputDecorationTheme.fillColor ?? AppColors.surfaceElevated,
+                                  color: Theme.of(context)
+                                          .inputDecorationTheme
+                                          .fillColor ??
+                                      AppColors.surfaceElevated,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  mode.commitmentType == GameCommitmentType.flexible ? 'Flexible' : '~${mode.estimatedMinutes}m (${mode.minMinutes}–${mode.maxMinutes}m)',
+                                  mode.commitmentType ==
+                                          GameCommitmentType.flexible
+                                      ? 'Flexible'
+                                      : '~${mode.estimatedMinutes}m',
                                   style: TextStyle(
-                                    fontSize: 11,
-                                    color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.color ??
+                                        AppColors.textMuted,
                                   ),
                                 ),
                               ),
@@ -853,25 +879,40 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 6,
+                              runSpacing: 4,
                               children: [
-                                Text(level.label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                                const Spacer(),
+                                Text(
+                                  level.label,
+                                  style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700),
+                                ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: _selectedTheme.primaryAccent.withValues(alpha: 0.15),
+                                    color: _selectedTheme.primaryAccent
+                                        .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     level.badge,
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: _selectedTheme.primaryAccent),
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: _selectedTheme.primaryAccent),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text(level.description, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                            Text(level.description,
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary)),
                           ],
                         ),
                       ),
@@ -898,185 +939,523 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   int _themeFilterIndex = 0;
 
-  // STEP 6: Gaming Theme
+  // STEP 6: Gaming Theme Selection
   Widget _buildThemePage() {
     final filteredThemes = AppGamingTheme.values.where((t) {
-      if (_themeFilterIndex == 1) return !t.isLight;
+      if (_themeFilterIndex == 1) {
+        return !t.isLight &&
+            t != AppGamingTheme.oled &&
+            t != AppGamingTheme.tactical;
+      }
       if (_themeFilterIndex == 2) return t.isLight;
+      if (_themeFilterIndex == 3) {
+        return t == AppGamingTheme.oled || t == AppGamingTheme.tactical;
+      }
       return true;
     }).toList();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.palette_rounded, size: 40, color: AppColors.primaryCyan),
-          const SizedBox(height: 10),
-          const Text('Choose Your Theme', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 4),
-          const Text(
-            'Select a professional gaming-inspired visual theme for your dashboard.',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-          ),
-          const SizedBox(height: 14),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final isNarrow = availableWidth < 360;
+        final isTablet = availableWidth >= 600;
+        final isDesktop = availableWidth >= 800;
 
-          // Filter chips
-          Row(
-            children: [
-              _buildOnboardingFilterChip('All (11)', _themeFilterIndex == 0, () => setState(() => _themeFilterIndex = 0)),
-              const SizedBox(width: 8),
-              _buildOnboardingFilterChip('Dark (8)', _themeFilterIndex == 1, () => setState(() => _themeFilterIndex = 1)),
-              const SizedBox(width: 8),
-              _buildOnboardingFilterChip('Light (3)', _themeFilterIndex == 2, () => setState(() => _themeFilterIndex = 2)),
-            ],
-          ),
-          const SizedBox(height: 16),
+        final crossAxisCount = isDesktop ? 4 : (isTablet ? 3 : 2);
+        final cardAspectRatio = isNarrow
+            ? 1.18
+            : (availableWidth < 420
+                ? 1.25
+                : (isTablet ? 1.34 : 1.38));
 
-          GridView.count(
-            crossAxisCount: 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 1.35,
-            children: filteredThemes.map((theme) {
-              final isSelected = _selectedTheme == theme;
-              return GestureDetector(
-                onTap: () => setState(() => _selectedTheme = theme),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.background,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: isSelected ? theme.primaryAccent : theme.borderColor,
-                      width: isSelected ? 2 : 1,
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 860),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet ? 32 : (isNarrow ? 14 : 20),
+                vertical: 16,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Section Step Badge
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color:
+                          _selectedTheme.primaryAccent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: _selectedTheme.primaryAccent
+                            .withValues(alpha: 0.35),
+                      ),
                     ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: theme.primaryAccent.withValues(alpha: 0.25),
-                              blurRadius: 10,
-                              spreadRadius: 1,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.palette_rounded,
+                          size: 13,
+                          color: _selectedTheme.primaryAccent,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            isNarrow
+                                ? 'STEP 6/6 • THEME'
+                                : 'STEP 6 OF 6 • VISUAL IDENTITY',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                              color: _selectedTheme.primaryAccent,
                             ),
-                          ]
-                        : null,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 28,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              color: theme.surface,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: theme.borderColor),
+                  const SizedBox(height: 10),
+
+                  // Heading
+                  Text(
+                    'Choose Your Theme',
+                    style: TextStyle(
+                      fontSize: isNarrow ? 22 : 26,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                      color: _selectedTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Select a visual aesthetic tailored for your gaming routine and prayer focus.',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: _selectedTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // LIVE THEME EXPERIENCE HERO PREVIEW
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    padding: EdgeInsets.all(isNarrow ? 14 : 18),
+                    decoration: BoxDecoration(
+                      color: _selectedTheme.surfaceElevated,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: _selectedTheme.primaryAccent
+                            .withValues(alpha: 0.45),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _selectedTheme.primaryAccent
+                              .withValues(alpha: 0.15),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            AppLogoWidget(
+                              size: isNarrow ? 36 : 42,
+                              gamingTheme: _selectedTheme,
+                              showGlow: false,
                             ),
-                            child: Center(
-                              child: Container(
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          _selectedTheme.displayName,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w900,
+                                            color: _selectedTheme.textPrimary,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _buildThemeModeBadge(
+                                          _selectedTheme, isNarrow),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _selectedTheme.tagline,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: _selectedTheme.primaryAccent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Mini Interactive Live Preview Bar
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _selectedTheme.surface,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: _selectedTheme.borderColor,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
                                 width: 8,
                                 height: 8,
                                 decoration: BoxDecoration(
-                                  color: theme.primaryAccent,
+                                  color: _selectedTheme.primaryAccent,
                                   shape: BoxShape.circle,
                                 ),
                               ),
-                            ),
-                          ),
-                          const Spacer(),
-                          if (isSelected)
-                            Icon(Icons.check_circle_rounded, color: theme.primaryAccent, size: 16),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                theme.displayName,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: isSelected ? theme.primaryAccent : theme.textPrimary,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: theme.isLight ? Colors.blue.withValues(alpha: 0.15) : Colors.purple.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
+                              const SizedBox(width: 8),
+                              Expanded(
                                 child: Text(
-                                  theme.isLight ? 'L' : 'D',
+                                  _selectedTheme.description,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 8,
-                                    fontWeight: FontWeight.w800,
-                                    color: theme.isLight ? Colors.blue : Colors.purpleAccent,
+                                    fontSize: 11,
+                                    color: _selectedTheme.textSecondary,
                                   ),
                                 ),
                               ),
+                              const SizedBox(width: 8),
+                              // Live color swatches
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildColorDot(_selectedTheme.primaryAccent),
+                                  const SizedBox(width: 4),
+                                  _buildColorDot(
+                                      _selectedTheme.secondaryAccent),
+                                  const SizedBox(width: 4),
+                                  _buildColorDot(_selectedTheme.surface),
+                                ],
+                              ),
                             ],
                           ),
-                          Text(
-                            theme.tagline,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 10, color: theme.secondaryAccent, fontWeight: FontWeight.w500),
-                          ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+
+                  // FILTER CHIPS BAR
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _buildOnboardingFilterChip(
+                        'All (11)',
+                        _themeFilterIndex == 0,
+                        () => setState(() => _themeFilterIndex = 0),
+                      ),
+                      _buildOnboardingFilterChip(
+                        'Dark (5)',
+                        _themeFilterIndex == 1,
+                        () => setState(() => _themeFilterIndex = 1),
+                      ),
+                      _buildOnboardingFilterChip(
+                        'Light (5)',
+                        _themeFilterIndex == 2,
+                        () => setState(() => _themeFilterIndex = 2),
+                      ),
+                      _buildOnboardingFilterChip(
+                        'Specialized (2)',
+                        _themeFilterIndex == 3,
+                        () => setState(() => _themeFilterIndex = 3),
                       ),
                     ],
                   ),
-                ),
-              );
-            }).toList(),
-          ),
+                  const SizedBox(height: 16),
 
-          const SizedBox(height: 28),
+                  // RESPONSIVE THEME GRID
+                  GridView.builder(
+                    itemCount: filteredThemes.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: isNarrow ? 8 : 12,
+                      mainAxisSpacing: isNarrow ? 8 : 12,
+                      childAspectRatio: cardAspectRatio,
+                    ),
+                    itemBuilder: (context, index) {
+                      final theme = filteredThemes[index];
+                      final isSelected = _selectedTheme == theme;
 
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _completeOnboarding,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _selectedTheme.primaryAccent,
-                foregroundColor: _selectedTheme.buttonTextColor,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedTheme = theme),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: EdgeInsets.all(isNarrow ? 10 : 12),
+                          decoration: BoxDecoration(
+                            color: theme.surface,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: isSelected
+                                  ? theme.primaryAccent
+                                  : theme.borderColor,
+                              width: isSelected ? 2 : 1,
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: theme.primaryAccent
+                                          .withValues(alpha: 0.3),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Top Bar: Mini Logo + Mode Tag + Radio / Check
+                              Row(
+                                children: [
+                                  AppLogoWidget(
+                                    size: 20,
+                                    gamingTheme: theme,
+                                    showGlow: false,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _buildMiniModeTag(theme),
+                                  const Spacer(),
+                                  if (isSelected)
+                                    Icon(
+                                      Icons.check_circle_rounded,
+                                      color: theme.primaryAccent,
+                                      size: 16,
+                                    )
+                                  else
+                                    Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: theme.borderColor,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+
+                              // Color Gradient Ribbon
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(3),
+                                child: Container(
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        theme.primaryAccent,
+                                        theme.secondaryAccent,
+                                        theme.surfaceElevated,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // Title & Tagline
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    theme.displayName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      color: isSelected
+                                          ? theme.primaryAccent
+                                          : theme.textPrimary,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    theme.tagline,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: theme.secondaryAccent,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 28),
+
+                  // BOTTOM COMPLETE BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _completeOnboarding,
+                      icon: const Icon(Icons.rocket_launch_rounded, size: 18),
+                      label: const Text(
+                        'Start Using Pray Then Play',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _selectedTheme.primaryAccent,
+                        foregroundColor: _selectedTheme.buttonTextColor,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 4,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ),
-              child: const Text('Start Using Pray Then Play'),
             ),
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _buildColorDot(Color color) {
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white24, width: 1),
       ),
     );
   }
 
-  Widget _buildOnboardingFilterChip(String label, bool isSelected, VoidCallback onTap) {
+  Widget _buildThemeModeBadge(AppGamingTheme theme, bool isNarrow) {
+    String label = theme.isLight ? 'LIGHT' : 'DARK';
+    if (theme == AppGamingTheme.oled) label = 'OLED';
+    if (theme == AppGamingTheme.tactical) label = 'SPEC-OPS';
+
+    Color bg = theme.isLight
+        ? const Color(0xFF3B82F6).withValues(alpha: 0.15)
+        : const Color(0xFF8B5CF6).withValues(alpha: 0.15);
+    Color textCol = theme.isLight
+        ? const Color(0xFF2563EB)
+        : const Color(0xFFA78BFA);
+
+    if (theme == AppGamingTheme.oled) {
+      bg = Colors.white.withValues(alpha: 0.15);
+      textCol = Colors.white;
+    } else if (theme == AppGamingTheme.tactical) {
+      bg = const Color(0xFF84CC16).withValues(alpha: 0.15);
+      textCol = const Color(0xFF84CC16);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w800,
+          color: textCol,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMiniModeTag(AppGamingTheme theme) {
+    String label = theme.isLight ? 'L' : 'D';
+    if (theme == AppGamingTheme.oled) label = 'OLED';
+    if (theme == AppGamingTheme.tactical) label = 'OPS';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      decoration: BoxDecoration(
+        color: theme.primaryAccent.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 7.5,
+          fontWeight: FontWeight.w800,
+          color: theme.primaryAccent,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOnboardingFilterChip(
+      String label, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? _selectedTheme.primaryAccent.withValues(alpha: 0.15) : AppColors.surface,
+          color: isSelected
+              ? _selectedTheme.primaryAccent.withValues(alpha: 0.18)
+              : _selectedTheme.surface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? _selectedTheme.primaryAccent : AppColors.surfaceHighlight,
+            color: isSelected
+                ? _selectedTheme.primaryAccent
+                : _selectedTheme.borderColor,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? _selectedTheme.primaryAccent : AppColors.textSecondary,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+            color: isSelected
+                ? _selectedTheme.primaryAccent
+                : _selectedTheme.textSecondary,
           ),
         ),
       ),

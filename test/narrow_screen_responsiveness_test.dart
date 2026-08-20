@@ -103,6 +103,40 @@ void main() {
 
       expect(find.byType(GameProfilesScreen), findsOneWidget);
       expect(tester.takeException(), isNull);
+
+      // Open Add Game Dialog
+      await tester.tap(find.text('Add Game').first);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Switch to '+ Custom Game' Tab
+      await tester.tap(find.text('+ Custom Game'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Game / Server Name'), findsOneWidget);
+      expect(find.text('Casual / Flexible'), findsOneWidget);
+      expect(find.text('Competitive'), findsOneWidget);
+
+      // Close modal
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Scroll card into view and tap expand
+      await tester.ensureVisible(find.byIcon(Icons.expand_more_rounded).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.expand_more_rounded).first);
+      await tester.pumpAndSettle();
+
+      // Tap Edit Activity icon
+      await tester.ensureVisible(find.byIcon(Icons.edit_rounded).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.edit_rounded).first);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Typical'), findsOneWidget);
+      expect(find.text('Min'), findsOneWidget);
+      expect(find.text('Max'), findsOneWidget);
     });
 
     testWidgets('QueueCheckScreen renders without overflow on 320px width',
@@ -161,18 +195,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
-      // Scroll back up and switch tabs
+      // Scroll back up and position on tabs
       await tester.drag(find.byType(CustomScrollView), const Offset(0, 1200));
       await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -350));
+      await tester.pumpAndSettle();
 
       // Tab 1: 5-Prayer Matrix
-      await tester.tap(find.text('5-Prayer Matrix'));
+      await tester.tap(find.text('5-Prayer Matrix').first);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
       // Tab 2: Gaming Decisions
-      await tester.tap(find.text('Gaming Decisions'));
+      await tester.tap(find.text('Gaming Decisions').first);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });

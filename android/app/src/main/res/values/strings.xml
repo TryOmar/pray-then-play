@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pray Then Play</string>
+    <string name="widget_medium_title">Gamer Command Center (4x2)</string>
+    <string name="widget_medium_desc">Next prayer countdown, live gaming safety status, and 1-tap Queue Check.</string>
+    
+    <string name="widget_small_title">Salah Quick Status (2x2)</string>
+    <string name="widget_small_desc">Compact time remaining until Salah and instant safety indicator.</string>
+    
+    <string name="widget_timeline_title">Today\'s Salah Timeline (4x1)</string>
+    <string name="widget_timeline_desc">Live horizontal track of all 5 daily prayers with active prayer highlighted.</string>
+    
+    <string name="widget_recommended_title">Safe Gaming Modes (4x2)</string>
+    <string name="widget_recommended_desc">Recommended games and activities that fit safely before next prayer.</string>
+</resources>

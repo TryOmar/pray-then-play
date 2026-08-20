@@ -128,14 +128,76 @@ class PrayerConsistencyNotifier extends StateNotifier<PrayerConsistencyState> {
     _checkAchievements();
   }
 
+  Future<void> resetHistory() async {
+    await StorageService.clearAllDailyPrayerRecords();
+    final cache = <String, DailyPrayerRecord>{};
+    final now = DateTime.now();
+    for (int i = 0; i < 140; i++) {
+      final date = now.subtract(Duration(days: i));
+      final key = _formatKey(date);
+      cache[key] = StorageService.getDailyPrayerRecord(date);
+    }
+    state = state.copyWith(
+      recordsCache: cache,
+      protectedPrayers: 0,
+      avoidedRiskyQueue: 0,
+      stoppedToPray: 0,
+      choseShortGame: 0,
+      unlockedAchievements: <String>{},
+    );
+  }
+
+  Future<void> loadDemoHistory() async {
+    await StorageService.loadSampleDemoHistory();
+    final cache = <String, DailyPrayerRecord>{};
+    final now = DateTime.now();
+    for (int i = 0; i < 140; i++) {
+      final date = now.subtract(Duration(days: i));
+      final key = _formatKey(date);
+      cache[key] = StorageService.getDailyPrayerRecord(date);
+    }
+    state = state.copyWith(
+      recordsCache: cache,
+      protectedPrayers: StorageService.protectedPrayersCount,
+      avoidedRiskyQueue: StorageService.getGamingDecisionCount(GamingDecisionType.avoidedRiskyQueue),
+      stoppedToPray: StorageService.getGamingDecisionCount(GamingDecisionType.stoppedToPray),
+      choseShortGame: StorageService.getGamingDecisionCount(GamingDecisionType.choseShortGame),
+      unlockedAchievements: StorageService.getUnlockedAchievements(),
+    );
+  }
+
   void _checkAchievements() {
+    bool hasAnyOnTime = false;
+    bool hasFiveInDay = false;
+
+    for (final record in state.recordsCache.values) {
+      if (record.onTimeCount > 0) hasAnyOnTime = true;
+      if (record.onTimeCount >= 5) hasFiveInDay = true;
+    }
+
+    if (hasAnyOnTime) {
+      StorageService.unlockAchievement('first_step');
+    }
+    if (hasFiveInDay) {
+      StorageService.unlockAchievement('five_in_day');
+    }
     if (state.protectedPrayers >= 10) {
       StorageService.unlockAchievement('prayer_protector');
     }
     if (state.avoidedRiskyQueue >= 5) {
       StorageService.unlockAchievement('queue_discipline');
     }
-    state = state.copyWith(unlockedAchievements: StorageService.getUnlockedAchievements());
+
+    final currentStreak = getConsistencyStreak();
+    if (currentStreak >= 7) {
+      StorageService.unlockAchievement('consistent_week');
+    }
+    if (currentStreak >= 30) {
+      StorageService.unlockAchievement('balanced_gamer');
+    }
+
+    state = state.copyWith(
+        unlockedAchievements: StorageService.getUnlockedAchievements());
   }
 
   List<ContributionWeek> getContributionWeeks([int numberOfWeeks = 16]) {
@@ -211,9 +273,18 @@ class PrayerConsistencyNotifier extends StateNotifier<PrayerConsistencyState> {
     final now = DateTime.now();
     DateTime checkDate = DateTime(now.year, now.month, now.day);
 
+    // If today has no recordings yet, also check yesterday as active baseline
+    final todayRecord = getRecord(checkDate);
+    if (todayRecord.completedCount == 0) {
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+
     while (true) {
+      if (!StorageService.hasStoredDailyRecord(checkDate)) {
+        break;
+      }
       final record = getRecord(checkDate);
-      if (record.onTimeCount >= 4) {
+      if (record.onTimeCount >= 3) {
         streak++;
         checkDate = checkDate.subtract(const Duration(days: 1));
       } else {
@@ -221,7 +292,20 @@ class PrayerConsistencyNotifier extends StateNotifier<PrayerConsistencyState> {
       }
       if (streak >= 365) break;
     }
-    return streak == 0 ? 6 : streak; // default realistic baseline
+    return streak;
+  }
+
+  bool get hasAnyRecordedPrayers {
+    for (final r in state.recordsCache.values) {
+      if (r.prayers.values.any((s) =>
+          s == PrayerStatus.onTime ||
+          s == PrayerStatus.late ||
+          s == PrayerStatus.missed ||
+          s == PrayerStatus.skipped)) {
+        return true;
+      }
+    }
+    return StorageService.hasAnyRecordedHistory;
   }
 
   GamingHabitReflection getHabitReflection() {
@@ -230,10 +314,11 @@ class PrayerConsistencyNotifier extends StateNotifier<PrayerConsistencyState> {
       avoidedRiskyQueueCount: state.avoidedRiskyQueue,
       stoppedToPrayCount: state.stoppedToPray,
       choseShortGameCount: state.choseShortGame,
-      mostConsistentPrayer: 'Fajr & Dhuhr',
-      opportunityPrayer: 'Maghrib (Evening Gaming)',
-      behavioralInsight:
-          '3 of your 4 late prayers occurred during evening ranked sessions. Choosing short game modes before Maghrib protects your consistency.',
+      mostConsistentPrayer: hasAnyRecordedPrayers ? 'Fajr & Dhuhr' : 'None yet',
+      opportunityPrayer: hasAnyRecordedPrayers ? 'Maghrib (Evening Gaming)' : 'Build your baseline',
+      behavioralInsight: hasAnyRecordedPrayers
+          ? 'Choosing short game modes before Maghrib protects your consistency and keeps your streak unbroken.'
+          : 'Complete and record your daily prayers on time to generate personal habit reflection and gaming safety insights.',
     );
   }
 
@@ -269,7 +354,7 @@ class PrayerConsistencyNotifier extends StateNotifier<PrayerConsistencyState> {
         title: 'Five in a Day',
         description: 'Record all five daily prayers on time.',
         icon: Icons.stars_rounded,
-        isUnlocked: unlocked.contains('five_in_day') || true,
+        isUnlocked: unlocked.contains('five_in_day'),
         category: 'Salah Focus',
       ),
       HabitAchievement(
@@ -285,7 +370,7 @@ class PrayerConsistencyNotifier extends StateNotifier<PrayerConsistencyState> {
         title: 'Balanced Gamer',
         description: 'Maintain a balanced gaming and prayer routine for 30 days.',
         icon: Icons.military_tech_rounded,
-        isUnlocked: unlocked.contains('balanced_gamer') || true,
+        isUnlocked: unlocked.contains('balanced_gamer'),
         category: 'Mastery',
       ),
     ];

@@ -21,7 +21,7 @@ class PrayerStreakWidget extends ConsumerWidget {
     final prayersList = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       decoration: GlassmorphicDecoration.card(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,79 +35,93 @@ class PrayerStreakWidget extends ConsumerWidget {
                   color: AppColors.successGreen.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.check_circle_outline_rounded, size: 16, color: AppColors.successGreen),
+                child: const Icon(Icons.check_circle_outline_rounded,
+                    size: 15, color: AppColors.successGreen),
               ),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "TODAY'S SALAH",
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textMuted,
-                      letterSpacing: 1.2,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "TODAY'S SALAH",
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textMuted,
+                        letterSpacing: 1.1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '$completedCount / 5 Completed · ${(dailyRecord.consistencyRate).round()}% Today',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: completedCount == 5 ? AppColors.successGreen : AppColors.textSecondary,
+                    const SizedBox(height: 2),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '$completedCount / 5 Completed · ${(dailyRecord.consistencyRate).round()}% Today',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: completedCount == 5
+                              ? AppColors.successGreen
+                              : AppColors.textSecondary,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 6),
               GestureDetector(
                 onTap: () => context.go('/consistency'),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).inputDecorationTheme.fillColor ?? AppColors.surfaceElevated,
+                    color: Theme.of(context).inputDecorationTheme.fillColor ??
+                        AppColors.surfaceElevated,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight,
+                      color: Theme.of(context).dividerTheme.color ??
+                          AppColors.surfaceHighlight,
                       width: 0.8,
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.local_fire_department_rounded, size: 14, color: AppColors.warningAmber),
-                      const SizedBox(width: 4),
+                      const Icon(Icons.local_fire_department_rounded,
+                          size: 13, color: AppColors.warningAmber),
+                      const SizedBox(width: 3),
                       Text(
                         '$streak d streak',
                         style: const TextStyle(
-                          fontSize: 11,
+                          fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: AppColors.warningAmber,
                         ),
                       ),
-                      const SizedBox(width: 2),
-                      const Icon(Icons.chevron_right_rounded, size: 14, color: AppColors.textMuted),
+                      const Icon(Icons.chevron_right_rounded,
+                          size: 13, color: AppColors.textMuted),
                     ],
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
 
           // 5 Interactive Prayer Cards
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: prayersList.map((name) {
-              final status = dailyRecord.prayers[name] ?? PrayerStatus.notRecorded;
+              final status =
+                  dailyRecord.prayers[name] ?? PrayerStatus.notRecorded;
               final detailed = dailyRecord.detailedRecords?[name];
               final adhan = prayerTimes?.getTimeFor(name);
 
               return Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: _PrayerCard(
                     prayerName: name,
                     status: status,
@@ -135,42 +149,58 @@ class PrayerStreakWidget extends ConsumerWidget {
             }).toList(),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
 
           // Gateway to Heatmap & Reflection
           GestureDetector(
             onTap: () => context.go('/consistency'),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
               decoration: BoxDecoration(
-                color: Theme.of(context).inputDecorationTheme.fillColor ?? AppColors.surfaceElevated,
+                color: Theme.of(context).inputDecorationTheme.fillColor ??
+                    AppColors.surfaceElevated,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight,
+                  color: Theme.of(context).dividerTheme.color ??
+                      AppColors.surfaceHighlight,
                   width: 0.8,
                 ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_month_rounded, size: 16, color: AppColors.successGreen),
+                  const Icon(Icons.calendar_month_rounded,
+                      size: 16, color: AppColors.successGreen),
                   const SizedBox(width: 10),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'View 5-Prayer Heatmap & Reflection',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'View 5-Prayer Heatmap & Reflection',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 1),
-                        Text(
-                          'Track consistency, on-time rates & gaming habit balance',
-                          style: TextStyle(fontSize: 10, color: AppColors.textMuted),
+                        const SizedBox(height: 1),
+                        const Text(
+                          'Track consistency, on-time rates & habit balance',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 10, color: AppColors.textMuted),
                         ),
                       ],
                     ),
                   ),
-                  Icon(Icons.arrow_forward_rounded, size: 14, color: primaryColor),
+                  const SizedBox(width: 6),
+                  Icon(Icons.arrow_forward_rounded,
+                      size: 14, color: primaryColor),
                 ],
               ),
             ),
@@ -370,7 +400,7 @@ class _PrayerCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
         decoration: BoxDecoration(
           color: cardBgColor,
           borderRadius: BorderRadius.circular(12),
@@ -381,7 +411,9 @@ class _PrayerCard extends StatelessWidget {
           boxShadow: isCompleted
               ? [
                   BoxShadow(
-                    color: (status == PrayerStatus.onTime ? AppColors.successGreen : AppColors.warningAmber)
+                    color: (status == PrayerStatus.onTime
+                            ? AppColors.successGreen
+                            : AppColors.warningAmber)
                         .withValues(alpha: 0.15),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
@@ -392,38 +424,53 @@ class _PrayerCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              prayerName,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isCompleted ? FontWeight.w800 : FontWeight.w600,
-                color: isCompleted
-                    ? Theme.of(context).colorScheme.onSurface
-                    : (Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.textSecondary),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                prayerName,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isCompleted ? FontWeight.w800 : FontWeight.w600,
+                  color: isCompleted
+                      ? Theme.of(context).colorScheme.onSurface
+                      : (Theme.of(context).textTheme.bodyMedium?.color ??
+                          AppColors.textSecondary),
+                ),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              adhanTime != null ? TimeUtils.formatTime24(adhanTime!) : '--:--',
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-                color: isCompleted ? AppColors.textSecondary : AppColors.textMuted,
+            const SizedBox(height: 3),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                adhanTime != null ? TimeUtils.formatTime(adhanTime!) : '--:--',
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: isCompleted
+                      ? AppColors.textSecondary
+                      : AppColors.textMuted,
+                ),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 5),
             Icon(
               status.icon,
-              size: 18,
+              size: 16,
               color: status.color,
             ),
-            const SizedBox(height: 4),
-            Text(
-              status == PrayerStatus.notRecorded ? 'Tap' : status.label,
-              style: TextStyle(
-                fontSize: 8.5,
-                fontWeight: FontWeight.w700,
-                color: status.color,
+            const SizedBox(height: 3),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                status == PrayerStatus.notRecorded ? 'Tap' : status.label,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w700,
+                  color: status.color,
+                ),
               ),
             ),
           ],

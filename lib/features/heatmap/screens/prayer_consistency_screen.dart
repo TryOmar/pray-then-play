@@ -76,6 +76,15 @@ class _PrayerConsistencyScreenState
             ),
           ),
 
+          // Starter Guide Banner for Fresh Installs
+          if (!notifier.hasAnyRecordedPrayers)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: _buildStarterGuideBanner(context, theme),
+              ),
+            ),
+
           // View Selector Tabs
           SliverToBoxAdapter(
             child: Padding(
@@ -373,6 +382,62 @@ class _PrayerConsistencyScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStarterGuideBanner(BuildContext context, ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.primaryColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.primaryColor.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.auto_awesome_rounded,
+              color: theme.primaryColor,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Start Your Salah Consistency Journey',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Each prayer you complete and log on time will illuminate your heatmap grid with green squares and unlock discipline badges. Log today\'s prayers above to begin!',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8) ?? AppColors.textSecondary,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

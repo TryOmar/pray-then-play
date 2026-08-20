@@ -998,17 +998,23 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Add Activity to ${game.name}',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Add Activity to ${game.name}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700),
+                ),
               ),
               const SizedBox(height: 14),
               TextField(
                 controller: nameCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Activity Name (e.g. Skyblock, Ranked)',
+                  labelText: 'Activity Name',
+                  hintText: 'e.g. Skyblock, Ranked',
                   border: OutlineInputBorder(),
+                  isDense: true,
                 ),
               ),
               const SizedBox(height: 12),
@@ -1016,8 +1022,10 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                 controller: durCtrl,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Typical Duration (Minutes)',
+                  labelText: 'Typical Duration',
+                  suffixText: 'mins',
                   border: OutlineInputBorder(),
+                  isDense: true,
                 ),
               ),
               const SizedBox(height: 10),

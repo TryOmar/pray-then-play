@@ -6,6 +6,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/city_data.dart';
 import '../../../core/constants/prayer_constants.dart';
 import '../../../core/providers/gaming_provider.dart';
+import '../../../core/providers/prayer_heatmap_provider.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/storage_service.dart';
@@ -24,6 +25,7 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final jumuahMode = ref.watch(jumuahModeProvider);
     final fajrMode = ref.watch(fajrModeProvider);
+    final is24Hour = ref.watch(timeFormatIs24HourProvider);
     final userGames = ref.watch(userGamesProvider);
     final city = StorageService.cityName;
     final country = StorageService.countryName;
@@ -109,6 +111,35 @@ class SettingsScreen extends ConsumerWidget {
                         title: 'Asr Calculation',
                         subtitle: asrMethod.displayName,
                         onTap: () => _showAsrPicker(context, ref),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // TIME DISPLAY & FORMAT
+                  _SettingsSection(
+                    title: 'TIME DISPLAY & FORMAT',
+                    children: [
+                      _SettingsTile(
+                        icon: Icons.schedule_rounded,
+                        title: 'Time Format',
+                        subtitle: is24Hour
+                            ? '24-Hour (e.g. 15:47)'
+                            : '12-Hour (e.g. 03:47 PM)',
+                        trailing: Switch.adaptive(
+                          value: is24Hour,
+                          activeColor: Theme.of(context).primaryColor,
+                          onChanged: (val) {
+                            ref
+                                .read(timeFormatIs24HourProvider.notifier)
+                                .set24Hour(val);
+                          },
+                        ),
+                        onTap: () {
+                          ref
+                              .read(timeFormatIs24HourProvider.notifier)
+                              .toggle();
+                        },
                       ),
                     ],
                   ),
@@ -238,6 +269,34 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  // DATA MANAGEMENT
+                  _SettingsSection(
+                    title: 'DATA MANAGEMENT',
+                    children: [
+                      _SettingsTile(
+                        icon: Icons.cleaning_services_rounded,
+                        title: 'Clear History & Reset to Day 1',
+                        subtitle: 'Erase all logged prayer records, streaks, and reset to clean slate',
+                        titleColor: const Color(0xFFEF4444),
+                        iconColor: const Color(0xFFEF4444),
+                        onTap: () => _confirmResetData(context, ref),
+                      ),
+                      const Divider(height: 1, indent: 50),
+                      _SettingsTile(
+                        icon: Icons.science_outlined,
+                        title: 'Load Sample Demo History',
+                        subtitle: 'Populate 30-day realistic sample data for testing and previews',
+                        onTap: () async {
+                          await ref.read(prayerConsistencyProvider.notifier).loadDemoHistory();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Sample 30-day prayer history loaded successfully!')),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 20),
 
                   // ABOUT PRAY THEN PLAY
@@ -256,6 +315,40 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmResetData(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reset All Prayer Data?'),
+        content: const Text(
+          'This will erase all recorded prayer logs, streaks, and reset your consistency heatmap to a clean Day 1 slate.\n\nYour location and game preferences will be kept.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ref.read(prayerConsistencyProvider.notifier).resetHistory();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Prayer history has been reset to Day 1.')),
+                );
+              }
+            },
+            child: const Text('Reset to Day 1'),
+          ),
+        ],
       ),
     );
   }
@@ -977,6 +1070,8 @@ class _SettingsTile extends StatelessWidget {
   final String subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final Color? titleColor;
+  final Color? iconColor;
 
   const _SettingsTile({
     required this.icon,
@@ -984,11 +1079,14 @@ class _SettingsTile extends StatelessWidget {
     required this.subtitle,
     this.trailing,
     this.onTap,
+    this.titleColor,
+    this.iconColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    final textPrim = Theme.of(context).colorScheme.onSurface;
+    final effectiveIconColor = iconColor ?? Theme.of(context).primaryColor;
+    final textPrim = titleColor ?? Theme.of(context).colorScheme.onSurface;
     final textSec = Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
 
     return ListTile(
@@ -997,10 +1095,10 @@ class _SettingsTile extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.12),
+          color: effectiveIconColor.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(icon, color: Theme.of(context).primaryColor, size: 18),
+        child: Icon(icon, color: effectiveIconColor, size: 18),
       ),
       title: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textPrim)),
       subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: textSec)),

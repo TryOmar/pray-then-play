@@ -1,8 +1,10 @@
 import 'package:intl/intl.dart';
+import '../services/storage_service.dart';
 
 class TimeUtils {
-  static String formatTime(DateTime time) {
-    return DateFormat('h:mm a').format(time);
+  static String formatTime(DateTime time, {bool? is24Hour}) {
+    final use24 = is24Hour ?? StorageService.is24HourFormat;
+    return use24 ? DateFormat('HH:mm').format(time) : DateFormat('h:mm a').format(time);
   }
 
   static String formatTime24(DateTime time) {
