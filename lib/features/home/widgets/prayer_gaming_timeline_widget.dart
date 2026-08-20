@@ -145,12 +145,15 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                                 color: primaryColor.withValues(alpha: 0.85),
                               ),
                               const SizedBox(height: 3),
-                              Text(
-                                TimeUtils.formatTime24(prayer.value),
-                                style: TextStyle(
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  TimeUtils.formatTime(prayer.value),
+                                  style: TextStyle(
+                                    fontSize: 8.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
+                                  ),
                                 ),
                               ),
                             ],

@@ -52,17 +52,21 @@ class SafeGamingWindowsWidget extends ConsumerWidget {
               child: Row(
                 children: [
                   // Time range
-                  SizedBox(
-                    width: 110,
-                    child: Text(
-                      '${TimeUtils.formatTime24(window.start)}  -  ${TimeUtils.formatTime24(window.end)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isCurrent
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+                  Expanded(
+                    flex: 4,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '${TimeUtils.formatTime(window.start)}  -  ${TimeUtils.formatTime(window.end)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isCurrent
+                              ? AppColors.textPrimary
+                              : AppColors.textSecondary,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                       ),
                     ),
                   ),

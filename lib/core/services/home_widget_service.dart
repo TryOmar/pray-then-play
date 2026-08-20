@@ -6,6 +6,7 @@ import '../constants/app_constants.dart';
 import '../models/prayer_time.dart';
 import '../services/prayer_service.dart';
 import '../services/storage_service.dart';
+import '../utils/time_utils.dart';
 
 class HomeWidgetService {
   HomeWidgetService._();
@@ -45,7 +46,7 @@ class HomeWidgetService {
       int diffMinutes = 999;
 
       if (nextPrayerTime != null) {
-        prayerTimeStr = DateFormat('hh:mm a').format(nextPrayerTime);
+        prayerTimeStr = TimeUtils.formatTime(nextPrayerTime);
         diffMinutes = nextPrayerTime.difference(now).inMinutes;
 
         if (diffMinutes <= 0) {
@@ -106,15 +107,15 @@ class HomeWidgetService {
           asrMethod: StorageService.asrMethod,
         );
         await HomeWidget.saveWidgetData<String>(
-            'fajr_time', DateFormat('HH:mm').format(daily.fajr));
+            'fajr_time', TimeUtils.formatTime(daily.fajr));
         await HomeWidget.saveWidgetData<String>(
-            'dhuhr_time', DateFormat('HH:mm').format(daily.dhuhr));
+            'dhuhr_time', TimeUtils.formatTime(daily.dhuhr));
         await HomeWidget.saveWidgetData<String>(
-            'asr_time', DateFormat('HH:mm').format(daily.asr));
+            'asr_time', TimeUtils.formatTime(daily.asr));
         await HomeWidget.saveWidgetData<String>(
-            'maghrib_time', DateFormat('HH:mm').format(daily.maghrib));
+            'maghrib_time', TimeUtils.formatTime(daily.maghrib));
         await HomeWidget.saveWidgetData<String>(
-            'isha_time', DateFormat('HH:mm').format(daily.isha));
+            'isha_time', TimeUtils.formatTime(daily.isha));
       }
 
       // Save Recommended Safe Gaming Modes Data
