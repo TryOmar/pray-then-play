@@ -77,11 +77,11 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
               _LiveBadge(primaryColor: primaryColor),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
-          // Visual Timeline Canvas
+          // Visual Timeline Canvas (Clean HUD)
           SizedBox(
-            height: 108,
+            height: 38,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
@@ -94,12 +94,12 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                     Positioned(
                       left: 0,
                       right: 0,
-                      top: 36,
-                      height: 24,
+                      top: 6,
+                      height: 26,
                       child: Container(
                         decoration: BoxDecoration(
                           color: surfaceHighlight.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: surfaceHighlight.withValues(alpha: 0.5),
                             width: 1,
@@ -118,8 +118,8 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                       userGames: userGames,
                     ),
 
-                    // Collision-Free Staggered Prayer Markers
-                    ..._buildCollisionFreePrayerMarkers(
+                    // Prayer Marker Tick Beacons (Exact, Non-overlapping)
+                    ..._buildPrayerMarkerTicks(
                       prayerTimes: prayerTimes,
                       width: width,
                       totalMinutes: totalMinutes,
@@ -135,7 +135,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
           // 24H Axis Grid Markers
           Row(
@@ -151,83 +151,13 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
 
           const SizedBox(height: 14),
 
-          // Dedicated Prayer Schedule Strip (100% Collision-Free)
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: prayerTimes.allPrayers.map((prayer) {
-                final isNext = nextPrayer?.key == prayer.key;
-                final isPast = DateTime.now().isAfter(prayer.value.add(const Duration(minutes: 15)));
-
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: InkWell(
-                    onTap: () => _showPrayerInfoModal(context, prayer.key, prayer.value),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: isNext
-                            ? primaryColor.withValues(alpha: 0.15)
-                            : Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isNext
-                              ? primaryColor
-                              : (Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight),
-                          width: isNext ? 1.2 : 0.8,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            prayer.key,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: isNext ? FontWeight.w800 : FontWeight.w600,
-                              color: isNext
-                                  ? primaryColor
-                                  : (isPast ? AppColors.textMuted : Theme.of(context).colorScheme.onSurface),
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            TimeUtils.formatTime(prayer.value),
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: isNext ? FontWeight.w700 : FontWeight.w500,
-                              color: isNext
-                                  ? primaryColor
-                                  : (isPast ? AppColors.textMuted : AppColors.textSecondary),
-                            ),
-                          ),
-                          if (isNext) ...[
-                            const SizedBox(width: 4),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                              decoration: BoxDecoration(
-                                color: primaryColor,
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                              child: const Text(
-                                'NEXT',
-                                style: TextStyle(
-                                  fontSize: 7.5,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.black,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
+          // Perfectly Aligned Symmetrical 5-Prayer Cards Strip
+          _buildPrayerScheduleStrip(
+            context: context,
+            prayerTimes: prayerTimes,
+            nextPrayer: nextPrayer,
+            primaryColor: primaryColor,
+            surfaceHighlight: surfaceHighlight,
           ),
 
           const SizedBox(height: 14),
@@ -250,7 +180,153 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     );
   }
 
-  List<Widget> _buildCollisionFreePrayerMarkers({
+  Widget _buildPrayerScheduleStrip({
+    required BuildContext context,
+    required DailyPrayerTimes prayerTimes,
+    required MapEntry<String, DateTime>? nextPrayer,
+    required Color primaryColor,
+    required Color surfaceHighlight,
+  }) {
+    final prayers = prayerTimes.allPrayers;
+    final now = DateTime.now();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 420;
+
+        final cards = prayers.map((prayer) {
+          final isNext = nextPrayer?.key == prayer.key;
+          final isPast =
+              now.isAfter(prayer.value.add(const Duration(minutes: 15)));
+
+          final cardContent = Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+            decoration: BoxDecoration(
+              color: isNext
+                  ? primaryColor.withValues(alpha: 0.12)
+                  : Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isNext
+                    ? primaryColor
+                    : surfaceHighlight.withValues(alpha: 0.6),
+                width: isNext ? 1.5 : 0.8,
+              ),
+              boxShadow: isNext
+                  ? [
+                      BoxShadow(
+                        color: primaryColor.withValues(alpha: 0.2),
+                        blurRadius: 6,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                if (isNext) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: const Text(
+                      'NEXT',
+                      style: TextStyle(
+                        fontSize: 6.5,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.black,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                ],
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    prayer.key,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: isNext ? FontWeight.w800 : FontWeight.w600,
+                      color: isNext
+                          ? primaryColor
+                          : (isPast
+                              ? AppColors.textMuted
+                              : Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color ??
+                                  AppColors.textPrimary),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    TimeUtils.formatTime(prayer.value),
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: isNext ? FontWeight.w700 : FontWeight.w500,
+                      color: isNext
+                          ? primaryColor
+                          : (isPast
+                              ? AppColors.textMuted
+                              : Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.color ??
+                                  AppColors.textSecondary),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+
+          return GestureDetector(
+            onTap: () =>
+                _showPrayerInfoModal(context, prayer.key, prayer.value),
+            child: cardContent,
+          );
+        }).toList();
+
+        if (isCompact) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: cards.map((w) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: SizedBox(
+                    width: 78,
+                    child: w,
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        }
+
+        return Row(
+          children: cards.map((w) {
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: w,
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  List<Widget> _buildPrayerMarkerTicks({
     required DailyPrayerTimes prayerTimes,
     required double width,
     required double totalMinutes,
@@ -258,160 +334,34 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     required Color primaryColor,
   }) {
     final prayers = prayerTimes.allPrayers;
-    final exactPositions = prayers.map((prayer) {
+    final widgets = <Widget>[];
+
+    for (final prayer in prayers) {
       final minuteOfDay = prayer.value.hour * 60.0 +
           prayer.value.minute +
           prayer.value.second / 60.0;
-      return (minuteOfDay / totalMinutes) * width;
-    }).toList();
+      final exactX = (minuteOfDay / totalMinutes) * width;
 
-    // Calculate anti-collision horizontally shifted positions for labels
-    final labelPositions = List<double>.from(exactPositions);
-    const minSeparation = 52.0;
-
-    // Iterative relaxation to resolve any overlap
-    for (int pass = 0; pass < 2; pass++) {
-      for (int i = 0; i < labelPositions.length - 1; i++) {
-        final diff = labelPositions[i + 1] - labelPositions[i];
-        if (diff < minSeparation) {
-          final overlap = (minSeparation - diff) / 2.0;
-          labelPositions[i] = (labelPositions[i] - overlap);
-          labelPositions[i + 1] = (labelPositions[i + 1] + overlap);
-        }
-      }
-    }
-
-    // Clamp label positions within bounds
-    for (int i = 0; i < labelPositions.length; i++) {
-      labelPositions[i] = labelPositions[i].clamp(24.0, width - 24.0);
-    }
-
-    final widgets = <Widget>[];
-
-    for (int i = 0; i < prayers.length; i++) {
-      final prayer = prayers[i];
-      final exactX = exactPositions[i];
-      final labelX = labelPositions[i];
-      final isShifted = (labelX - exactX).abs() > 2.0;
-
-      // 1. Exact timeline tick line on the track
       widgets.add(
         Positioned(
           left: (exactX - 1.0).clamp(0.0, width - 2.0),
-          top: 36,
-          height: 24,
-          child: IgnorePointer(
-            child: Container(
-              width: 2.0,
-              decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha: 0.9),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withValues(alpha: 0.35),
-                    blurRadius: 2,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // 2. Interactive text label column positioned at shifted labelX
-      widgets.add(
-        Positioned(
-          left: (labelX - 24).clamp(0.0, width - 48),
-          top: 0,
-          bottom: 0,
+          top: 2,
+          bottom: 2,
           child: GestureDetector(
             onTap: () =>
                 _showPrayerInfoModal(context, prayer.key, prayer.value),
-            child: Column(
-              children: [
-                // Top Label (Prayer Name)
-                SizedBox(
-                  height: 32,
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 1.5),
-                      decoration: isShifted
-                          ? BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surface
-                                  .withValues(alpha: 0.92),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color: primaryColor.withValues(alpha: 0.4),
-                                width: 0.8,
-                              ),
-                            )
-                          : null,
-                      child: Text(
-                        prayer.key,
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.color ??
-                              AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
+            child: Container(
+              width: 2.0,
+              decoration: BoxDecoration(
+                color: primaryColor,
+                borderRadius: BorderRadius.circular(1),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.6),
+                    blurRadius: 3,
                   ),
-                ),
-
-                // Space for track
-                const SizedBox(height: 32),
-
-                // Bottom Label (Prayer Time)
-                SizedBox(
-                  height: 32,
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 3.5, vertical: 1),
-                      decoration: isShifted
-                          ? BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surface
-                                  .withValues(alpha: 0.92),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color: Theme.of(context)
-                                        .dividerTheme
-                                        .color ??
-                                    AppColors.surfaceHighlight,
-                                width: 0.8,
-                              ),
-                            )
-                          : null,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          TimeUtils.formatTime(prayer.value),
-                          style: TextStyle(
-                            fontSize: 8.5,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.color ??
-                                AppColors.textMuted,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -446,9 +396,9 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
       widgets.add(
         Positioned(
           left: pLeft,
-          top: 36,
+          top: 6,
           width: pWidth.clamp(3.0, width),
-          height: 24,
+          height: 26,
           child: GestureDetector(
             onTap: () => _showPrayerInfoModal(context, current.key, current.value),
             child: Container(
@@ -476,9 +426,9 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           widgets.add(
             Positioned(
               left: sLeft,
-              top: 36,
+              top: 6,
               width: sWidth.clamp(2.0, width),
-              height: 24,
+              height: 26,
               child: GestureDetector(
                 onTap: () => _showWindowInspectionModal(
                   context: context,
@@ -511,9 +461,9 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           widgets.add(
             Positioned(
               left: cLeft,
-              top: 36,
+              top: 6,
               width: cWidth.clamp(2.0, width),
-              height: 24,
+              height: 26,
               child: GestureDetector(
                 onTap: () => _showWindowInspectionModal(
                   context: context,
@@ -724,47 +674,50 @@ class _LiveNeedle extends ConsumerWidget {
 
     final nowMinutes = now.hour * 60.0 + now.minute + now.second / 60.0;
     final nowFraction = (nowMinutes / totalMinutes).clamp(0.0, 1.0);
-    final posX = (nowFraction * width - 1.5).clamp(0.0, width - 3.0);
+    final posX = (nowFraction * width).clamp(0.0, width);
 
     return Positioned(
-      left: posX,
+      left: (posX - 14).clamp(0.0, width - 28.0),
       top: 0,
       bottom: 0,
+      width: 28,
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
             decoration: BoxDecoration(
               color: AppColors.dangerRed,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(3),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.dangerRed.withValues(alpha: 0.4),
-                  blurRadius: 4,
+                  color: AppColors.dangerRed.withValues(alpha: 0.5),
+                  blurRadius: 3,
                 ),
               ],
             ),
             child: const Text(
               'NOW',
               style: TextStyle(
-                fontSize: 7.5,
+                fontSize: 6.5,
                 fontWeight: FontWeight.w900,
                 color: Colors.white,
-                letterSpacing: 0.5,
+                letterSpacing: 0.4,
               ),
             ),
           ),
           Expanded(
-            child: Container(
-              width: 2,
-              decoration: BoxDecoration(
-                color: AppColors.dangerRed,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.dangerRed.withValues(alpha: 0.5),
-                    blurRadius: 3,
-                  ),
-                ],
+            child: Center(
+              child: Container(
+                width: 2,
+                decoration: BoxDecoration(
+                  color: AppColors.dangerRed,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.dangerRed.withValues(alpha: 0.6),
+                      blurRadius: 3,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
