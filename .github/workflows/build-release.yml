@@ -161,7 +161,7 @@ jobs:
         run: flutter pub get
 
       - name: 🏗️ Build Web Application
-        run: flutter build web --release --base-href /app/
+        run: flutter build web --release --base-href "/pray-then-play-website/app/"
 
       - name: 🗜️ Package Web Bundle
         run: |
@@ -172,9 +172,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-release-bundle
-          path: |
-            build/web/
-            dist/web/*
+          path: dist/web/pray-then-play-web-bundle.zip
           if-no-files-found: error
 
   # =====================================================================
