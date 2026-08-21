@@ -377,64 +377,67 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     final lang = AppLanguage.values[index];
                     final isSelected = lang == current;
 
-                    return InkWell(
-                      onTap: () {
-                        ref.read(appLanguageProvider.notifier).setLanguage(lang);
-                        Navigator.pop(ctx);
-                      },
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? _selectedTheme.primaryAccent.withValues(alpha: 0.12)
-                              : _selectedTheme.surfaceElevated,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected
-                                ? _selectedTheme.primaryAccent
-                                : _selectedTheme.borderColor,
-                            width: isSelected ? 1.5 : 1,
+                    return MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          ref.read(appLanguageProvider.notifier).setLanguage(lang);
+                          Navigator.pop(ctx);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            Text(lang.flag, style: const TextStyle(fontSize: 22)),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    lang.nativeName,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: isSelected
-                                          ? _selectedTheme.primaryAccent
-                                          : _selectedTheme.textPrimary,
-                                    ),
-                                  ),
-                                  Text(
-                                    lang.englishName,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: _selectedTheme.textMuted,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? _selectedTheme.primaryAccent.withValues(alpha: 0.12)
+                                : _selectedTheme.surfaceElevated,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? _selectedTheme.primaryAccent
+                                  : _selectedTheme.borderColor,
+                              width: isSelected ? 1.5 : 1,
                             ),
-                            if (isSelected)
-                              Icon(
-                                Icons.check_circle_rounded,
-                                color: _selectedTheme.primaryAccent,
-                                size: 20,
+                          ),
+                          child: Row(
+                            children: [
+                              Text(lang.flag, style: const TextStyle(fontSize: 22)),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      lang.nativeName,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: isSelected
+                                            ? _selectedTheme.primaryAccent
+                                            : _selectedTheme.textPrimary,
+                                      ),
+                                    ),
+                                    Text(
+                                      lang.englishName,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: _selectedTheme.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                          ],
+                              if (isSelected)
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  color: _selectedTheme.primaryAccent,
+                                  size: 20,
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -488,35 +491,38 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  InkWell(
-                    onTap: () => _showOnboardingLanguagePicker(context),
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _selectedTheme.surfaceElevated,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: _selectedTheme.borderColor,
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(currentLanguage.flag, style: const TextStyle(fontSize: 13)),
-                          const SizedBox(width: 4),
-                          Text(
-                            currentLanguage.nativeName,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: _selectedTheme.textPrimary,
-                            ),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => _showOnboardingLanguagePicker(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: _selectedTheme.surfaceElevated,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _selectedTheme.borderColor,
+                            width: 1,
                           ),
-                          const SizedBox(width: 2),
-                          Icon(Icons.arrow_drop_down_rounded, size: 14, color: _selectedTheme.textMuted),
-                        ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(currentLanguage.flag, style: const TextStyle(fontSize: 13)),
+                            const SizedBox(width: 5),
+                            Text(
+                              currentLanguage.nativeName,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: _selectedTheme.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(width: 3),
+                            Icon(Icons.arrow_drop_down_rounded, size: 16, color: _selectedTheme.textMuted),
+                          ],
+                        ),
                       ),
                     ),
                   ),

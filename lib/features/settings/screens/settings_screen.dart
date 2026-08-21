@@ -437,68 +437,71 @@ class SettingsScreen extends ConsumerWidget {
                     final isSelected = lang == current;
                     final primary = theme.primaryColor;
 
-                    return InkWell(
-                      onTap: () {
-                        ref.read(appLanguageProvider.notifier).setLanguage(lang);
-                        Navigator.pop(ctx);
-                      },
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? primary.withValues(alpha: 0.12)
-                              : theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected
-                                ? primary
-                                : theme.dividerTheme.color ??
-                                    AppColors.surfaceHighlight,
-                            width: isSelected ? 1.5 : 1,
+                    return MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          ref.read(appLanguageProvider.notifier).setLanguage(lang);
+                          Navigator.pop(ctx);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            Text(
-                              lang.flag,
-                              style: const TextStyle(fontSize: 24),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? primary.withValues(alpha: 0.12)
+                                : theme.colorScheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? primary
+                                  : theme.dividerTheme.color ??
+                                      AppColors.surfaceHighlight,
+                              width: isSelected ? 1.5 : 1,
                             ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    lang.nativeName,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: isSelected
-                                          ? primary
-                                          : theme.textTheme.bodyMedium?.color,
-                                    ),
-                                  ),
-                                  Text(
-                                    lang.englishName,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textMuted,
-                                    ),
-                                  ),
-                                ],
+                          ),
+                          child: Row(
+                            children: [
+                              Text(
+                                lang.flag,
+                                style: const TextStyle(fontSize: 24),
                               ),
-                            ),
-                            if (isSelected)
-                              Icon(
-                                Icons.check_circle_rounded,
-                                color: primary,
-                                size: 20,
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      lang.nativeName,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: isSelected
+                                            ? primary
+                                            : theme.textTheme.bodyMedium?.color,
+                                      ),
+                                    ),
+                                    Text(
+                                      lang.englishName,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                          ],
+                              if (isSelected)
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  color: primary,
+                                  size: 20,
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     );
