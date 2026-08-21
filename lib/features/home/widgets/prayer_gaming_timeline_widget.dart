@@ -194,74 +194,73 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 420;
 
-        final cards = prayers.map((prayer) {
+        final items = prayers.map((prayer) {
           final isNext = nextPrayer?.key == prayer.key;
           final isPast =
               now.isAfter(prayer.value.add(const Duration(minutes: 15)));
 
-          final cardContent = Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          final itemContent = Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
             decoration: BoxDecoration(
               color: isNext
-                  ? primaryColor.withValues(alpha: 0.12)
-                  : Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: isNext
-                    ? primaryColor
-                    : surfaceHighlight.withValues(alpha: 0.6),
-                width: isNext ? 1.5 : 0.8,
-              ),
-              boxShadow: isNext
-                  ? [
-                      BoxShadow(
-                        color: primaryColor.withValues(alpha: 0.2),
-                        blurRadius: 6,
-                      ),
-                    ]
-                  : null,
+                  ? primaryColor.withValues(alpha: 0.1)
+                  : surfaceHighlight.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(8),
+              border: isNext
+                  ? Border.all(
+                      color: primaryColor.withValues(alpha: 0.6),
+                      width: 1,
+                    )
+                  : Border.all(
+                      color: surfaceHighlight.withValues(alpha: 0.35),
+                      width: 0.6,
+                    ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                if (isNext) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 4, vertical: 1),
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    child: const Text(
-                      'NEXT',
-                      style: TextStyle(
-                        fontSize: 6.5,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.black,
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                ],
                 FittedBox(
                   fit: BoxFit.scaleDown,
-                  child: Text(
-                    prayer.key,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: isNext ? FontWeight.w800 : FontWeight.w600,
-                      color: isNext
-                          ? primaryColor
-                          : (isPast
-                              ? AppColors.textMuted
-                              : Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.color ??
-                                  AppColors.textPrimary),
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isNext) ...[
+                        Container(
+                          width: 4.5,
+                          height: 4.5,
+                          margin: const EdgeInsets.only(right: 3.5),
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: primaryColor.withValues(alpha: 0.7),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      Text(
+                        prayer.key,
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight:
+                              isNext ? FontWeight.w800 : FontWeight.w600,
+                          color: isNext
+                              ? primaryColor
+                              : (isPast
+                                  ? AppColors.textMuted
+                                  : Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.color ??
+                                      AppColors.textSecondary),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -271,16 +270,17 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                     TimeUtils.formatTime(prayer.value),
                     style: TextStyle(
                       fontSize: 9.5,
-                      fontWeight: isNext ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight:
+                          isNext ? FontWeight.w700 : FontWeight.w500,
                       color: isNext
                           ? primaryColor
                           : (isPast
-                              ? AppColors.textMuted
+                              ? AppColors.textMuted.withValues(alpha: 0.7)
                               : Theme.of(context)
                                       .textTheme
                                       .bodySmall
                                       ?.color ??
-                                  AppColors.textSecondary),
+                                  AppColors.textMuted),
                     ),
                   ),
                 ),
@@ -291,7 +291,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           return GestureDetector(
             onTap: () =>
                 _showPrayerInfoModal(context, prayer.key, prayer.value),
-            child: cardContent,
+            child: itemContent,
           );
         }).toList();
 
@@ -299,11 +299,11 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: cards.map((w) {
+              children: items.map((w) {
                 return Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: SizedBox(
-                    width: 78,
+                    width: 72,
                     child: w,
                   ),
                 );
@@ -313,10 +313,10 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
         }
 
         return Row(
-          children: cards.map((w) {
+          children: items.map((w) {
             return Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 2.5),
                 child: w,
               ),
             );
