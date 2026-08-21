@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'app/router.dart';
@@ -154,6 +155,11 @@ class _PrayThenPlayAppState extends ConsumerState<PrayThenPlayApp>
         routerConfig: router,
         locale: currentLanguage.locale,
         supportedLocales: AppLanguage.values.map((e) => e.locale).toList(),
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         builder: (context, child) {
           return Directionality(
             textDirection: currentLanguage.direction,

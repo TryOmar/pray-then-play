@@ -1,10 +1,28 @@
 import 'package:intl/intl.dart';
+import '../localization/app_language.dart';
 import '../services/storage_service.dart';
 
 class TimeUtils {
   static String formatTime(DateTime time, {bool? is24Hour}) {
     final use24 = is24Hour ?? StorageService.is24HourFormat;
-    return use24 ? DateFormat('HH:mm').format(time) : DateFormat('h:mm a').format(time);
+    if (use24) {
+      return DateFormat('HH:mm').format(time);
+    }
+    final hour = time.hour;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final isPm = hour >= 12;
+    final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+
+    final lang = StorageService.appLanguage;
+    if (lang == AppLanguage.arabic) {
+      final period = isPm ? 'م' : 'ص';
+      return '$displayHour:$minute $period';
+    } else if (lang == AppLanguage.urdu) {
+      final period = isPm ? 'شام' : 'صبح';
+      return '$displayHour:$minute $period';
+    }
+    final period = isPm ? 'PM' : 'AM';
+    return '$displayHour:$minute $period';
   }
 
   static String formatTime24(DateTime time) {
