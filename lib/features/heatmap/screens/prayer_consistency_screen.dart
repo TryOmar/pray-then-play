@@ -702,19 +702,19 @@ class _PrayerConsistencyScreenState
             runSpacing: 6,
             children: [
               _buildSemanticLegendChip(
-                isLight ? const Color(0xFF10B981) : const Color(0xFF00C853),
+                isLight ? const Color(0xFF059669) : const Color(0xFF10B981),
                 '5/5 Perfect',
               ),
               _buildSemanticLegendChip(
-                isLight ? const Color(0xFF0284C7) : const Color(0xFF00E5FF),
+                isLight ? const Color(0xFF0284C7) : const Color(0xFF06B6D4),
                 '4/5 On time',
               ),
               _buildSemanticLegendChip(
-                isLight ? const Color(0xFF0D9488) : const Color(0xFF14B8A6),
+                isLight ? const Color(0xFF2563EB) : const Color(0xFF3B82F6),
                 '3/5 On time',
               ),
               _buildSemanticLegendChip(
-                isLight ? const Color(0xFFD97706) : const Color(0xFFFFB800),
+                isLight ? const Color(0xFFD97706) : const Color(0xFFF59E0B),
                 'Contains late',
               ),
               _buildSemanticLegendChip(
@@ -722,7 +722,7 @@ class _PrayerConsistencyScreenState
                 'Partial (1–2)',
               ),
               _buildSemanticLegendChip(
-                isLight ? const Color(0xFFEF4444) : const Color(0xFFFF3D5A),
+                isLight ? const Color(0xFFDC2626) : const Color(0xFFEF4444),
                 'Missed',
               ),
               _buildSemanticLegendChip(
@@ -797,7 +797,7 @@ class _PrayerConsistencyScreenState
   Color _getCellColor(bool isLight, DailyPrayerRecord? record) {
     if (record == null || record.completedCount == 0) {
       if (record != null && record.missedCount > 0) {
-        return isLight ? const Color(0xFFEF4444) : const Color(0xFFFF3D5A); // Crimson
+        return isLight ? const Color(0xFFDC2626) : const Color(0xFFEF4444); // Crimson
       }
       // Not recorded
       return isLight ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B);
@@ -805,21 +805,21 @@ class _PrayerConsistencyScreenState
 
     // If missed prayers exist
     if (record.missedCount > 0) {
-      return isLight ? const Color(0xFFEF4444) : const Color(0xFFFF3D5A); // Red
+      return isLight ? const Color(0xFFDC2626) : const Color(0xFFEF4444); // Red
     }
 
     // If late prayers exist
     if (record.lateCount >= 1 && record.onTimeCount < 5) {
-      return isLight ? const Color(0xFFD97706) : const Color(0xFFFFB800); // Solar Amber
+      return isLight ? const Color(0xFFD97706) : const Color(0xFFF59E0B); // Solar Amber
     }
 
     // Pure On-Time Spectrum
     if (record.onTimeCount >= 5) {
-      return isLight ? const Color(0xFF10B981) : const Color(0xFF00C853); // Glowing Radiant Emerald
+      return isLight ? const Color(0xFF059669) : const Color(0xFF10B981); // Emerald Green
     } else if (record.onTimeCount == 4) {
-      return isLight ? const Color(0xFF0284C7) : const Color(0xFF00E5FF); // Electric Cyan
+      return isLight ? const Color(0xFF0284C7) : const Color(0xFF06B6D4); // Electric Cyan
     } else if (record.onTimeCount == 3) {
-      return isLight ? const Color(0xFF0D9488) : const Color(0xFF14B8A6); // Teal
+      return isLight ? const Color(0xFF2563EB) : const Color(0xFF3B82F6); // Royal Blue
     } else {
       // 1-2 on time (Partial day)
       return isLight ? const Color(0xFF7C3AED) : const Color(0xFFA855F7); // Amethyst Purple
