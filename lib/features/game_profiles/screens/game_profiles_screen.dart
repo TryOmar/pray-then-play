@@ -1385,42 +1385,6 @@ class _GameCardState extends ConsumerState<_GameCard> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        ref
-                            .read(userGamesProvider.notifier)
-                            .deleteActivity(game.id, activity.id);
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                '${activity.name} removed from ${game.name}'),
-                            duration: const Duration(seconds: 3),
-                            action: SnackBarAction(
-                              label: 'Undo',
-                              textColor: Theme.of(context).primaryColor,
-                              onPressed: () {
-                                ref
-                                    .read(userGamesProvider.notifier)
-                                    .addCustomActivity(game.id, activity);
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.delete_outline_rounded,
-                          size: 16, color: AppColors.dangerRed),
-                      label: const Text('Delete'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.dangerRed,
-                        side: const BorderSide(color: AppColors.dangerRed),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
                     flex: 2,
                     child: ElevatedButton(
                       onPressed: () {
@@ -1458,6 +1422,42 @@ class _GameCardState extends ConsumerState<_GameCard> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: const Text('Save Changes'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        ref
+                            .read(userGamesProvider.notifier)
+                            .deleteActivity(game.id, activity.id);
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                '${activity.name} removed from ${game.name}'),
+                            duration: const Duration(seconds: 3),
+                            action: SnackBarAction(
+                              label: 'Undo',
+                              textColor: Theme.of(context).primaryColor,
+                              onPressed: () {
+                                ref
+                                    .read(userGamesProvider.notifier)
+                                    .addCustomActivity(game.id, activity);
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.delete_outline_rounded,
+                          size: 16, color: AppColors.dangerRed),
+                      label: const Text('Delete'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.dangerRed,
+                        side: const BorderSide(color: AppColors.dangerRed),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
                     ),
                   ),
                 ],
