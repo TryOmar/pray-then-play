@@ -46,22 +46,22 @@ class SettingsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Settings',
-                            style: TextStyle(
+                            ref.tr('settings_title'),
+                            style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.5,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
-                            'Configure your gaming schedule and prayer discipline',
-                            style: TextStyle(
+                            ref.tr('settings_subtitle'),
+                            style: const TextStyle(
                               color: AppColors.textMuted,
                               fontSize: 13,
                             ),
@@ -83,13 +83,13 @@ class SettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // LANGUAGE / اللغات
+                  // LANGUAGE
                   _SettingsSection(
-                    title: 'LANGUAGE / اللغة',
+                    title: ref.tr('section_language'),
                     children: [
                       _SettingsTile(
                         icon: Icons.language_rounded,
-                        title: 'App Language',
+                        title: ref.tr('setting_app_language'),
                         subtitle: '${currentLanguage.flag} ${currentLanguage.nativeName} (${currentLanguage.englishName})',
                         onTap: () => _showLanguagePicker(context, ref),
                       ),
@@ -99,17 +99,17 @@ class SettingsScreen extends ConsumerWidget {
 
                   // LOCATION
                   _SettingsSection(
-                    title: 'PRAYER LOCATION',
+                    title: ref.tr('section_location'),
                     children: [
                       _SettingsTile(
                         icon: Icons.location_on_rounded,
                         title: '$city, $country',
                         subtitle: StorageService.latitude != null && StorageService.longitude != null
-                            ? 'Coordinates: ${StorageService.latitude!.toStringAsFixed(2)}, ${StorageService.longitude!.toStringAsFixed(2)}'
-                            : 'Location configured',
+                            ? '${ref.tr('coordinates_label')}: ${StorageService.latitude!.toStringAsFixed(2)}, ${StorageService.longitude!.toStringAsFixed(2)}'
+                            : ref.tr('location_configured'),
                         trailing: TextButton(
                           onPressed: () => _showLocationOptions(context, ref),
-                          child: const Text('Change'),
+                          child: Text(ref.tr('change')),
                         ),
                       ),
                     ],
@@ -118,19 +118,19 @@ class SettingsScreen extends ConsumerWidget {
 
                   // PRAYER CALCULATION & MADHHAB
                   _SettingsSection(
-                    title: 'CALCULATION & MADHHAB',
+                    title: ref.tr('section_calculation'),
                     children: [
                       _SettingsTile(
                         icon: Icons.calculate_rounded,
-                        title: 'Calculation Method',
-                        subtitle: calcMethod.displayName,
+                        title: ref.tr('setting_calculation_method'),
+                        subtitle: calcMethod.getLocalizedName(context),
                         onTap: () => _showMethodPicker(context, ref),
                       ),
                       const Divider(height: 1, indent: 50),
                       _SettingsTile(
                         icon: Icons.access_time_rounded,
-                        title: 'Asr Calculation',
-                        subtitle: asrMethod.displayName,
+                        title: ref.tr('setting_asr_calculation'),
+                        subtitle: asrMethod.getLocalizedName(context),
                         onTap: () => _showAsrPicker(context, ref),
                       ),
                     ],
@@ -139,14 +139,14 @@ class SettingsScreen extends ConsumerWidget {
 
                   // TIME DISPLAY & FORMAT
                   _SettingsSection(
-                    title: 'TIME DISPLAY & FORMAT',
+                    title: ref.tr('section_time_display'),
                     children: [
                       _SettingsTile(
                         icon: Icons.schedule_rounded,
-                        title: 'Time Format',
+                        title: ref.tr('setting_time_format'),
                         subtitle: is24Hour
-                            ? '24-Hour (e.g. 15:47)'
-                            : '12-Hour (e.g. 03:47 PM)',
+                            ? ref.tr('time_format_24')
+                            : ref.tr('time_format_12'),
                         trailing: Switch.adaptive(
                           value: is24Hour,
                           activeTrackColor: Theme.of(context).primaryColor,
@@ -168,12 +168,12 @@ class SettingsScreen extends ConsumerWidget {
 
                   // PRAYER PROTECTION & SAFETY BUFFER
                   _SettingsSection(
-                    title: 'PRAYER PROTECTION & BUFFER',
+                    title: ref.tr('section_protection'),
                     children: [
                       _SettingsTile(
                         icon: Icons.shield_rounded,
-                        title: 'Safety Margin',
-                        subtitle: '${protectionLevel.label} (${protectionLevel.bufferMinutes} min buffer)',
+                        title: ref.tr('setting_safety_margin'),
+                        subtitle: '${protectionLevel.getLocalizedLabel(context)} (${protectionLevel.getLocalizedBadge(context)})',
                         trailing: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
@@ -181,7 +181,7 @@ class SettingsScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            '${protectionLevel.bufferMinutes}m buffer',
+                            '${protectionLevel.bufferMinutes}${ref.tr('min')}',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -197,12 +197,12 @@ class SettingsScreen extends ConsumerWidget {
 
                   // MY GAMES & ACTIVITIES
                   _SettingsSection(
-                    title: 'MY GAMES & ACTIVITIES (${userGames.where((g) => g.isSelected).length} active)',
+                    title: '${ref.tr('section_games')} (${userGames.where((g) => g.isSelected).length} ${ref.tr('active_count')})',
                     children: [
                       _SettingsTile(
                         icon: Icons.sports_esports_rounded,
-                        title: 'Configure Games & Activities',
-                        subtitle: 'Manage enabled modes, typical durations, and custom servers',
+                        title: ref.tr('setting_configure_games'),
+                        subtitle: ref.tr('setting_configure_games_sub'),
                         trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
                         onTap: () => context.push('/games'),
                       ),
@@ -212,12 +212,12 @@ class SettingsScreen extends ConsumerWidget {
 
                   // THEME & VISUAL IDENTITY
                   _SettingsSection(
-                    title: 'VISUAL IDENTITY & THEMES',
+                    title: ref.tr('section_themes'),
                     children: [
                       _SettingsTile(
                         icon: Icons.auto_mode_rounded,
-                        title: 'Theme Mode',
-                        subtitle: themeMode.description,
+                        title: ref.tr('setting_theme_mode'),
+                        subtitle: themeMode.getLocalizedDesc(context),
                         trailing: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
@@ -225,7 +225,7 @@ class SettingsScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            themeMode.label,
+                            themeMode.getLocalizedLabel(context),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -257,20 +257,20 @@ class SettingsScreen extends ConsumerWidget {
 
                   // SPECIAL MODES
                   _SettingsSection(
-                    title: 'SPECIAL REMINDER MODES',
+                    title: ref.tr('section_special_modes'),
                     children: [
                       _SettingsToggle(
                         icon: Icons.event_rounded,
-                        title: "Jumu'ah Mode",
-                        subtitle: 'Extra early reminders on Friday for Jumu\'ah prayer',
+                        title: ref.tr('setting_jumuah_mode'),
+                        subtitle: ref.tr('setting_jumuah_sub'),
                         value: jumuahMode,
                         onChanged: (_) => ref.read(jumuahModeProvider.notifier).toggle(),
                       ),
                       const Divider(height: 1, indent: 50),
                       _SettingsToggle(
                         icon: Icons.dark_mode_rounded,
-                        title: 'Fajr Protection Mode',
-                        subtitle: 'Late-night gaming reminders to safeguard Dawn prayer',
+                        title: ref.tr('setting_fajr_mode'),
+                        subtitle: ref.tr('setting_fajr_sub'),
                         value: fajrMode,
                         onChanged: (_) => ref.read(fajrModeProvider.notifier).toggle(),
                       ),
@@ -280,12 +280,12 @@ class SettingsScreen extends ConsumerWidget {
 
                   // WIZARD & SETUP
                   _SettingsSection(
-                    title: 'WIZARD & SETUP',
+                    title: ref.tr('section_wizard'),
                     children: [
                       _SettingsTile(
                         icon: Icons.restart_alt_rounded,
-                        title: 'Restart Setup Wizard',
-                        subtitle: 'Reconfigure location, prayer rules, games and preferences',
+                        title: ref.tr('setting_restart_wizard'),
+                        subtitle: ref.tr('setting_restart_wizard_sub'),
                         onTap: () => context.go('/onboarding'),
                       ),
                     ],
@@ -294,12 +294,12 @@ class SettingsScreen extends ConsumerWidget {
                   // WINDOWS DESKTOP SETTINGS
                   if (DesktopService.isDesktop) ...[
                     _SettingsSection(
-                      title: 'WINDOWS DESKTOP',
+                      title: ref.tr('section_desktop'),
                       children: [
                         _SettingsTile(
                           icon: Icons.window_rounded,
-                          title: 'Minimize to System Tray on Close',
-                          subtitle: 'Keep prayer alerts running in the background when clicking X',
+                          title: ref.tr('setting_minimize_tray'),
+                          subtitle: ref.tr('setting_minimize_tray_sub'),
                           trailing: Switch.adaptive(
                             value: minimizeToTray,
                             onChanged: (val) => ref
@@ -310,8 +310,8 @@ class SettingsScreen extends ConsumerWidget {
                         const Divider(height: 1, indent: 50),
                         _SettingsTile(
                           icon: Icons.power_settings_new_rounded,
-                          title: 'Launch on Windows Startup',
-                          subtitle: 'Automatically start Pray Then Play minimized on PC boot',
+                          title: ref.tr('setting_launch_startup'),
+                          subtitle: ref.tr('setting_launch_startup_sub'),
                           trailing: Switch.adaptive(
                             value: launchOnStartup,
                             onChanged: (val) async {
@@ -334,12 +334,12 @@ class SettingsScreen extends ConsumerWidget {
 
                   // DATA MANAGEMENT
                   _SettingsSection(
-                    title: 'DATA MANAGEMENT',
+                    title: ref.tr('section_data'),
                     children: [
                       _SettingsTile(
                         icon: Icons.cleaning_services_rounded,
-                        title: 'Clear History & Reset to Day 1',
-                        subtitle: 'Erase all logged prayer records, streaks, and reset to clean slate',
+                        title: ref.tr('setting_clear_history'),
+                        subtitle: ref.tr('setting_clear_history_sub'),
                         titleColor: const Color(0xFFEF4444),
                         iconColor: const Color(0xFFEF4444),
                         onTap: () => _confirmResetData(context, ref),
@@ -347,13 +347,13 @@ class SettingsScreen extends ConsumerWidget {
                       const Divider(height: 1, indent: 50),
                       _SettingsTile(
                         icon: Icons.science_outlined,
-                        title: 'Load Sample Demo History',
-                        subtitle: 'Populate 30-day realistic sample data for testing and previews',
+                        title: ref.tr('setting_load_demo'),
+                        subtitle: ref.tr('setting_load_demo_sub'),
                         onTap: () async {
                           await ref.read(prayerConsistencyProvider.notifier).loadDemoHistory();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Sample 30-day prayer history loaded successfully!')),
+                              SnackBar(content: Text(ref.tr('demo_loaded_msg'))),
                             );
                           }
                         },
@@ -364,9 +364,9 @@ class SettingsScreen extends ConsumerWidget {
 
                   // ABOUT PRAY THEN PLAY
                   _SettingsSection(
-                    title: 'ABOUT',
+                    title: ref.tr('section_about'),
                     children: [
-                      _SettingsTile(
+                      const _SettingsTile(
                         icon: Icons.info_outline_rounded,
                         title: AppConstants.appName,
                         subtitle: 'v${AppConstants.version} • ${AppConstants.tagline}',
@@ -416,10 +416,10 @@ class SettingsScreen extends ConsumerWidget {
                     children: [
                       Icon(Icons.language_rounded, size: 24, color: primary),
                       const SizedBox(width: 10),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Select Language / اختر اللغة',
-                          style: TextStyle(
+                          ref.tr('select_language_title'),
+                          style: const TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
                           ),
@@ -432,9 +432,9 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Choose your preferred language across all app features',
-                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  Text(
+                    ref.tr('setting_language_subtitle'),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                   ),
                   const SizedBox(height: 14),
                   Flexible(
@@ -530,14 +530,14 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reset All Prayer Data?'),
-        content: const Text(
-          'This will erase all recorded prayer logs, streaks, and reset your consistency heatmap to a clean Day 1 slate.\n\nYour location and game preferences will be kept.',
+        title: Text(ref.tr('reset_confirm_title')),
+        content: Text(
+          ref.tr('reset_confirm_body'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(ref.tr('cancel')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -549,11 +549,11 @@ class SettingsScreen extends ConsumerWidget {
               await ref.read(prayerConsistencyProvider.notifier).resetHistory();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Prayer history has been reset to Day 1.')),
+                  SnackBar(content: Text(ref.tr('history_reset_msg'))),
                 );
               }
             },
-            child: const Text('Reset to Day 1'),
+            child: Text(ref.tr('reset_confirm_btn')),
           ),
         ],
       ),
@@ -586,21 +586,21 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Theme Mode', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(ref.tr('setting_theme_mode'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 14),
               ...ThemeModeOption.values.map((mode) {
                 final isSelected = ref.watch(themeModeProvider) == mode;
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   title: Text(
-                    mode.label,
+                    mode.getLocalizedLabel(context),
                     style: TextStyle(
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                       color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   subtitle: Text(
-                    mode.description,
+                    mode.getLocalizedDesc(context),
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
@@ -660,7 +660,7 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Text('Theme Identities', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                      Text(ref.tr('theme_identities_title'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.close_rounded, size: 20),
@@ -669,9 +669,9 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Distinct environments with balanced light, dark, and gaming styles.',
-                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  Text(
+                    ref.tr('theme_identities_sub'),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                   ),
                   const SizedBox(height: 12),
 
@@ -680,13 +680,13 @@ class SettingsScreen extends ConsumerWidget {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterChip('All (11)', filterIndex == 0, () => setModalState(() => filterIndex = 0), context),
+                        _buildFilterChip(ref.tr('theme_filter_all'), filterIndex == 0, () => setModalState(() => filterIndex = 0), context),
                         const SizedBox(width: 8),
-                        _buildFilterChip('Dark (5)', filterIndex == 1, () => setModalState(() => filterIndex = 1), context),
+                        _buildFilterChip(ref.tr('theme_filter_dark'), filterIndex == 1, () => setModalState(() => filterIndex = 1), context),
                         const SizedBox(width: 8),
-                        _buildFilterChip('Light (5)', filterIndex == 2, () => setModalState(() => filterIndex = 2), context),
+                        _buildFilterChip(ref.tr('theme_filter_light'), filterIndex == 2, () => setModalState(() => filterIndex = 2), context),
                         const SizedBox(width: 8),
-                        _buildFilterChip('Special / OLED', filterIndex == 3, () => setModalState(() => filterIndex = 3), context),
+                        _buildFilterChip(ref.tr('theme_filter_special'), filterIndex == 3, () => setModalState(() => filterIndex = 3), context),
                       ],
                     ),
                   ),
@@ -771,12 +771,12 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Change Prayer Location', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+              Text(ref.tr('change_prayer_location'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               const SizedBox(height: 16),
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                 leading: Icon(Icons.my_location_rounded, color: Theme.of(context).primaryColor),
-                title: const Text('Use GPS Location'),
+                title: Text(ref.tr('use_gps_location')),
                 onTap: () async {
                   Navigator.pop(ctx);
                   try {
@@ -785,7 +785,7 @@ class SettingsScreen extends ConsumerWidget {
                       final city = await LocationService.getCityName(pos.latitude, pos.longitude);
                       await StorageService.setLocation(pos.latitude, pos.longitude, city);
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Location updated: $city')));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ref.trFormat('location_updated_format', {'city': city}))));
                       }
                     } else {
                       final ipLoc = await LocationService.fetchIpLocation();
@@ -798,20 +798,20 @@ class SettingsScreen extends ConsumerWidget {
                         );
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Location updated from PC: ${ipLoc['city']}')),
+                            SnackBar(content: Text(ref.trFormat('location_updated_pc_format', {'city': ipLoc['city']}))),
                           );
                         }
                       } else {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('GPS not detected. Please search your city below.')),
+                            SnackBar(content: Text(ref.tr('gps_not_detected_settings'))),
                           );
                         }
                       }
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Location error: $e')));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ref.trFormat('location_error_format', {'error': e.toString()}))));
                     }
                   }
                 },
@@ -819,7 +819,7 @@ class SettingsScreen extends ConsumerWidget {
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                 leading: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor),
-                title: const Text('Search City Database'),
+                title: Text(ref.tr('search_city_database')),
                 onTap: () {
                   Navigator.pop(ctx);
                   _showCitySearch(context, ref);
@@ -861,7 +861,7 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Text('Search City Database', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                    Text(ref.tr('search_city_database'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                     const Spacer(),
                     IconButton(
                       icon: const Icon(Icons.close_rounded, size: 20),
@@ -872,7 +872,7 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
                 TextField(
                   autofocus: true,
-                  decoration: const InputDecoration(hintText: 'Search city...', prefixIcon: Icon(Icons.search_rounded)),
+                  decoration: InputDecoration(hintText: ref.tr('search_city_hint'), prefixIcon: const Icon(Icons.search_rounded)),
                   onChanged: (q) {
                     setModalState(() {
                       filtered = CityDatabase.search(q);
@@ -933,7 +933,7 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  const Text('Calculation Method', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text(ref.tr('setting_calculation_method'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close_rounded, size: 20),
@@ -954,7 +954,7 @@ class SettingsScreen extends ConsumerWidget {
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       title: Text(
-                        method.displayName,
+                        method.getLocalizedName(context),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
@@ -1004,21 +1004,21 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Asr Madhhab Calculation', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              Text(ref.tr('asr_madhhab_title'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
               const SizedBox(height: 14),
               ...AsrMethodType.values.map((m) {
                 final isSelected = ref.watch(asrMethodProvider) == m;
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   title: Text(
-                    m.displayName,
+                    m.getLocalizedName(context),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                       color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  subtitle: Text(m.description,
+                  subtitle: Text(m.getLocalizedDesc(context),
                       style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted)),
@@ -1063,20 +1063,20 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Safety Margin / Protection', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              Text(ref.tr('safety_margin_title'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
               const SizedBox(height: 14),
               ...ProtectionLevel.values.map((level) {
                 final isSelected = ref.watch(protectionLevelProvider) == level;
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   title: Text(
-                    '${level.label} (${level.bufferMinutes} min buffer)',
+                    '${level.getLocalizedLabel(context)} (${level.getLocalizedBadge(context)})',
                     style: TextStyle(
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                       color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  subtitle: Text(level.description,
+                  subtitle: Text(level.getLocalizedDesc(context),
                       style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted)),

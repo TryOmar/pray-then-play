@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/models/game_profile.dart';
 import '../../../core/models/prayer_time.dart';
 import '../../../core/providers/gaming_provider.dart';
@@ -28,7 +29,9 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
 
     final axisLabels = is24Hour
         ? const ['00:00', '06:00', '12:00', '18:00', '23:59']
-        : const ['12 AM', '6 AM', '12 PM', '6 PM', '12 AM'];
+        : context.isRtl
+            ? const ['12 ص', '6 ص', '12 م', '6 م', '12 ص']
+            : const ['12 AM', '6 AM', '12 PM', '6 PM', '12 AM'];
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -53,11 +56,11 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '24H PRAYER & GAMING TIMELINE',
+                    Text(
+                      context.tr('timeline_header').toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textMuted,
@@ -66,7 +69,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Calculated by Adhan & buffer',
+                      context.tr('timeline_sub'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -85,105 +88,114 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           const SizedBox(height: 18),
 
           // Visual Timeline Canvas (Clean HUD)
-          SizedBox(
-            height: 38,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final width = constraints.maxWidth;
-                const totalMinutes = 1440.0; // 24 hours in minutes
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: SizedBox(
+              height: 38,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final width = constraints.maxWidth;
+                  const totalMinutes = 1440.0; // 24 hours in minutes
 
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    // Base track
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      top: 6,
-                      height: 26,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: surfaceHighlight.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: surfaceHighlight.withValues(alpha: 0.5),
-                            width: 1,
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Base track
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        top: 6,
+                        height: 26,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: surfaceHighlight.withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: surfaceHighlight.withValues(alpha: 0.5),
+                              width: 1,
+                            ),
                           ),
                         ),
                       ),
-                    ),
 
-                    // Dynamic Slot Segments (Safe Green, Caution Amber, Prayer Break Red)
-                    ..._buildMathematicalSegments(
-                      prayerTimes: prayerTimes,
-                      bufferMinutes: bufferMinutes,
-                      width: width,
-                      totalMinutes: totalMinutes,
-                      context: context,
-                      userGames: userGames,
-                      is24Hour: is24Hour,
-                    ),
+                      // Dynamic Slot Segments (Safe Green, Caution Amber, Prayer Break Red)
+                      ..._buildMathematicalSegments(
+                        prayerTimes: prayerTimes,
+                        bufferMinutes: bufferMinutes,
+                        width: width,
+                        totalMinutes: totalMinutes,
+                        context: context,
+                        userGames: userGames,
+                        is24Hour: is24Hour,
+                      ),
 
-                    // Prayer Marker Tick Beacons (Exact, Non-overlapping)
-                    ..._buildPrayerMarkerTicks(
-                      prayerTimes: prayerTimes,
-                      width: width,
-                      totalMinutes: totalMinutes,
-                      context: context,
-                      primaryColor: primaryColor,
-                      is24Hour: is24Hour,
-                    ),
+                      // Prayer Marker Tick Beacons (Exact, Non-overlapping)
+                      ..._buildPrayerMarkerTicks(
+                        prayerTimes: prayerTimes,
+                        width: width,
+                        totalMinutes: totalMinutes,
+                        context: context,
+                        primaryColor: primaryColor,
+                        is24Hour: is24Hour,
+                      ),
 
-                    // Pulsing LIVE NOW Needle
-                    _LiveNeedle(width: width, totalMinutes: totalMinutes),
-                  ],
-                );
-              },
+                      // Pulsing LIVE NOW Needle
+                      _LiveNeedle(width: width, totalMinutes: totalMinutes),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
 
           const SizedBox(height: 8),
 
           // 24H Axis Grid Markers (Dynamic 12 AM/PM or 24H format)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: axisLabels.map((lbl) {
-              return Text(
-                lbl,
-                style: TextStyle(
-                  fontSize: 8.5,
-                  color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
-                  fontWeight: FontWeight.w600,
-                ),
-              );
-            }).toList(),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: axisLabels.map((lbl) {
+                return Text(
+                  lbl,
+                  style: TextStyle(
+                    fontSize: 8.5,
+                    color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                );
+              }).toList(),
+            ),
           ),
 
           const SizedBox(height: 14),
 
           // Perfectly Aligned Symmetrical 5-Prayer Cards Strip
-          _buildPrayerScheduleStrip(
-            context: context,
-            prayerTimes: prayerTimes,
-            nextPrayer: nextPrayer,
-            primaryColor: primaryColor,
-            surfaceHighlight: surfaceHighlight,
-            is24Hour: is24Hour,
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: _buildPrayerScheduleStrip(
+              context: context,
+              prayerTimes: prayerTimes,
+              nextPrayer: nextPrayer,
+              primaryColor: primaryColor,
+              surfaceHighlight: surfaceHighlight,
+              is24Hour: is24Hour,
+            ),
           ),
 
           const SizedBox(height: 14),
 
           // Legend
-          const Wrap(
+          Wrap(
             alignment: WrapAlignment.center,
             spacing: 12,
             runSpacing: 6,
             children: [
               _LegendItem(
-                  color: AppColors.successGreen, label: 'Safe Gaming'),
+                  color: AppColors.successGreen, label: context.tr('safe_to_play_short')),
               _LegendItem(
-                  color: AppColors.warningAmber, label: 'Safety Buffer'),
-              _LegendItem(color: AppColors.dangerRed, label: 'Prayer Time'),
+                  color: AppColors.warningAmber, label: context.tr('safety_buffer')),
+              _LegendItem(color: AppColors.dangerRed, label: context.tr('prayer_time_badge')),
             ],
           ),
         ],
@@ -256,7 +268,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                         ),
                       ],
                       Text(
-                        prayer.key,
+                        context.tr('prayer_${prayer.key.toLowerCase()}'),
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight:

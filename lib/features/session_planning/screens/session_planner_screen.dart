@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/services/prayer_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/time_utils.dart';
@@ -16,18 +17,11 @@ class SessionPlannerScreen extends ConsumerStatefulWidget {
 
 class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
   double _sessionHours = 2.0;
-  List<_TimelineEntry> _timeline = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _buildTimeline();
-  }
-
-  void _buildTimeline() {
+  List<_TimelineEntry> _buildTimeline(BuildContext context) {
     final lat = StorageService.latitude;
     final lng = StorageService.longitude;
-    if (lat == null || lng == null) return;
+    if (lat == null || lng == null) return [];
 
     final now = DateTime.now();
     final sessionEnd =
@@ -45,16 +39,17 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
     // Session start
     entries.add(_TimelineEntry(
       time: now,
-      label: 'Gaming session starts',
+      label: context.tr('gaming_session_starts'),
       type: _EntryType.gaming,
     ));
 
     // Add prayers that fall within the session
     for (final prayer in prayers.allPrayers) {
       if (prayer.value.isAfter(now) && prayer.value.isBefore(sessionEnd)) {
+        final localizedPrayer = context.tr('prayer_${prayer.key.toLowerCase()}');
         entries.add(_TimelineEntry(
           time: prayer.value,
-          label: '${prayer.key} - Pray',
+          label: '$localizedPrayer - ${context.tr('pray_action')}',
           type: _EntryType.prayer,
         ));
         // Resume gaming after prayer (15 min)
@@ -62,7 +57,7 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
         if (resume.isBefore(sessionEnd)) {
           entries.add(_TimelineEntry(
             time: resume,
-            label: 'Continue gaming',
+            label: context.tr('continue_gaming'),
             type: _EntryType.gaming,
           ));
         }
@@ -72,22 +67,24 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
     // Session end
     entries.add(_TimelineEntry(
       time: sessionEnd,
-      label: 'Session ends',
+      label: context.tr('session_ends'),
       type: _EntryType.end,
     ));
 
-    setState(() => _timeline = entries);
+    return entries;
   }
 
   @override
   Widget build(BuildContext context) {
+    final timeline = _buildTimeline(context);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => context.pop(),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: const Text('Session Planner'),
+        title: Text(context.tr('session_planner_title')),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -101,9 +98,9 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'How long do you want to play?',
-                    style: TextStyle(
+                  Text(
+                    context.tr('how_long_play'),
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -119,7 +116,6 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
                           divisions: 11,
                           onChanged: (v) {
                             setState(() => _sessionHours = v);
-                            _buildTimeline();
                           },
                         ),
                       ),
@@ -152,7 +148,7 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
             const SizedBox(height: 24),
 
             Text(
-              'SESSION TIMELINE',
+              context.tr('session_planner_title').toUpperCase(),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -166,10 +162,11 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
             // Timeline
             Expanded(
               child: ListView.builder(
-                itemCount: _timeline.length,
+                itemCount: timeline.length,
                 itemBuilder: (context, index) {
-                  final entry = _timeline[index];
-                  final isLast = index == _timeline.length - 1;
+                  final entry = timeline[index];
+                  final isLast = index == timeline.length - 1;
+
 
                   final color = entry.type == _EntryType.prayer
                       ? Theme.of(context).primaryColor

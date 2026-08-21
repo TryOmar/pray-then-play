@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme.dart';
 import '../../../core/constants/game_data.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/models/game_profile.dart';
 import '../../../core/providers/gaming_provider.dart';
 import '../../../core/widgets/game_icon_widget.dart';
@@ -32,7 +33,7 @@ class GameProfilesScreen extends ConsumerWidget {
                             fit: BoxFit.scaleDown,
                             alignment: AlignmentDirectional.centerStart,
                             child: Text(
-                              'My Games & Activities',
+                              ref.tr('my_games_title'),
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
@@ -42,11 +43,11 @@ class GameProfilesScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            'Customize durations, pauseability & custom modes',
+                          Text(
+                            ref.tr('my_games_subtitle'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.textMuted,
                               fontSize: 12.5,
                             ),
@@ -58,7 +59,7 @@ class GameProfilesScreen extends ConsumerWidget {
                     ElevatedButton.icon(
                       onPressed: () => _showAddGameDialog(context, ref),
                       icon: const Icon(Icons.add_rounded, size: 16),
-                      label: const Text('Add Game'),
+                      label: Text(ref.tr('add_game')),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 8),
@@ -82,23 +83,23 @@ class GameProfilesScreen extends ConsumerWidget {
                         const Icon(Icons.sports_esports_outlined,
                             size: 48, color: AppColors.textMuted),
                         const SizedBox(height: 12),
-                        const Text(
-                          'No Games in Library',
-                          style: TextStyle(
+                        Text(
+                          ref.tr('no_games_title'),
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          'Add your favorite games and servers from our catalog or create custom ones.',
+                        Text(
+                          ref.tr('no_games_subtitle'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 13, color: AppColors.textMuted),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: () => _showAddGameDialog(context, ref),
                           icon: const Icon(Icons.add_rounded, size: 18),
-                          label: const Text('Browse Games Catalog'),
+                          label: Text(ref.tr('add_game')),
                         ),
                       ],
                     ),
@@ -469,19 +470,19 @@ class GameProfilesScreen extends ConsumerWidget {
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              const Text('Category:',
-                                  style: TextStyle(
+                              Text(context.tr('category_label'),
+                                  style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600)),
                               ChoiceChip(
-                                label: const Text('Casual / Flexible'),
+                                label: Text(context.tr('casual_flexible')),
                                 selected:
                                     selectedCategory == GameCategory.casual,
                                 onSelected: (val) => setModalState(
                                     () => selectedCategory = GameCategory.casual),
                               ),
                               ChoiceChip(
-                                label: const Text('Competitive'),
+                                label: Text(context.tr('competitive_locked')),
                                 selected: selectedCategory ==
                                     GameCategory.competitive,
                                 onSelected: (val) => setModalState(() =>
@@ -591,7 +592,7 @@ class GameProfilesScreen extends ConsumerWidget {
                               });
                             },
                             icon: const Icon(Icons.add, size: 16),
-                            label: const Text('+ Add Another Activity'),
+                            label: Text(context.tr('add_another_activity')),
                           ),
                           const SizedBox(height: 16),
                           SizedBox(
@@ -645,7 +646,7 @@ class GameProfilesScreen extends ConsumerWidget {
                                     .addCustomGame(game);
                                 Navigator.pop(ctx);
                               },
-                              child: const Text('Add Game to My Library'),
+                              child: Text(context.tr('add_game_to_library')),
                             ),
                           ),
                         ],
@@ -803,12 +804,12 @@ class _GameCardState extends ConsumerState<_GameCard> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'ACTIVITIES & MODES',
+                          context.tr('activities_modes_header'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
                             color: AppColors.textMuted,
@@ -820,7 +821,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       InkWell(
                         onTap: () => _showAddActivityDialog(context, game),
                         child: Text(
-                          '+ Add Mode',
+                          context.tr('add_mode_btn'),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -900,7 +901,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                                 BorderRadius.circular(3),
                                           ),
                                           child: Text(
-                                            'Custom',
+                                            context.tr('custom_badge'),
                                             style: TextStyle(
                                               fontSize: 9,
                                               fontWeight: FontWeight.w700,
@@ -920,16 +921,16 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                     children: [
                                       if (activity.canPause &&
                                           !activity.requiresCompletion) ...[
-                                        const Text(
-                                          'Pauseable •',
-                                          style: TextStyle(
+                                        Text(
+                                          context.tr('pauseable_badge'),
+                                          style: const TextStyle(
                                               fontSize: 10,
                                               fontWeight: FontWeight.w600,
                                               color: AppColors.successGreen),
                                         ),
                                       ],
                                       Text(
-                                        '~${activity.typicalDuration}m (${activity.minMinutes}–${activity.maxMinutes}m)',
+                                        '${activity.typicalDuration} ${context.tr('min')} (${activity.minMinutes}–${activity.maxMinutes} ${context.tr('min')})',
                                         style: const TextStyle(
                                             fontSize: 10,
                                             color: AppColors.textMuted),
@@ -940,7 +941,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                       activity.notes!.isNotEmpty) ...[
                                     const SizedBox(height: 2),
                                     Text(
-                                      'Notes: ${activity.notes}',
+                                      '${context.tr('notes_label')}: ${activity.notes}',
                                       style: const TextStyle(
                                           fontSize: 10,
                                           fontStyle: FontStyle.italic,
@@ -993,7 +994,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                               _showAddActivityDialog(context, game),
                           icon: Icon(Icons.add_rounded,
                               size: 15, color: Theme.of(context).primaryColor),
-                          label: const Text('+ Add Mode'),
+                          label: Text(context.tr('add_mode_btn')),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Theme.of(context).primaryColor,
                             side: BorderSide(
@@ -1042,11 +1043,10 @@ class _GameCardState extends ConsumerState<_GameCard> {
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content:
-                                    Text('${game.name} removed from library'),
+                                content: Text(context.trFormat('removed_from_library_format', {'game': game.name})),
                                 duration: const Duration(seconds: 3),
                                 action: SnackBarAction(
-                                  label: 'Undo',
+                                  label: context.tr('undo'),
                                   textColor: Theme.of(context).primaryColor,
                                   onPressed: () {
                                     ref
@@ -1172,14 +1172,14 @@ class _GameCardState extends ConsumerState<_GameCard> {
               const SizedBox(height: 10),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Can Pause Safely?'),
-                subtitle: const Text('Can exit or save anytime without penalty'),
+                title: Text(context.tr('can_pause_safely_q')),
+                subtitle: Text(context.tr('can_pause_safely_sub')),
                 value: canPause,
                 onChanged: (v) => setModalState(() => canPause = v),
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Competitive / Match Locked?'),
+                title: Text(context.tr('competitive_match_locked_q')),
                 value: isCompetitive,
                 onChanged: (v) => setModalState(() => isCompetitive = v),
               ),
@@ -1228,7 +1228,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                         .addCustomActivity(game.id, act);
                     Navigator.pop(ctx);
                   },
-                  child: const Text('Save Activity'),
+                  child: Text(context.tr('save_activity_btn')),
                 ),
               ),
             ],
@@ -1285,11 +1285,13 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content:
-                              Text('${activity.name} removed from ${game.name}'),
+                          content: Text(context.trFormat('activity_removed_format', {
+                            'activity': activity.name,
+                            'game': game.name,
+                          })),
                           duration: const Duration(seconds: 3),
                           action: SnackBarAction(
-                            label: 'Undo',
+                            label: context.tr('undo'),
                             textColor: Theme.of(context).primaryColor,
                             onPressed: () {
                               ref
@@ -1361,14 +1363,14 @@ class _GameCardState extends ConsumerState<_GameCard> {
               const SizedBox(height: 10),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Can Pause Safely?'),
-                subtitle: const Text('Can exit or save anytime without penalty'),
+                title: Text(context.tr('can_pause_safely_q')),
+                subtitle: Text(context.tr('can_pause_safely_sub')),
                 value: canPause,
                 onChanged: (v) => setModalState(() => canPause = v),
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Competitive / Match Locked?'),
+                title: Text(context.tr('competitive_match_locked_q')),
                 value: isCompetitive,
                 onChanged: (v) => setModalState(() => isCompetitive = v),
               ),
@@ -1421,7 +1423,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text('Save Changes'),
+                      child: Text(context.tr('save_changes_btn')),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -1452,7 +1454,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                       },
                       icon: const Icon(Icons.delete_outline_rounded,
                           size: 16, color: AppColors.dangerRed),
-                      label: const Text('Delete'),
+                      label: Text(context.tr('delete_btn')),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.dangerRed,
                         side: const BorderSide(color: AppColors.dangerRed),

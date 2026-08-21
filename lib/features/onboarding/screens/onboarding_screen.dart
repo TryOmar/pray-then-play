@@ -95,7 +95,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (permission.toString().contains('denied')) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('GPS permission denied. You can search or select a city below.')),
+            SnackBar(content: Text(context.tr('gps_denied_msg'))),
           );
         }
         setState(() => _locationLoading = false);
@@ -127,7 +127,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           setState(() => _locationLoading = false);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('GPS not detected on this device. Please choose or search your city below.')),
+              SnackBar(content: Text(context.tr('gps_not_detected_msg'))),
             );
           }
         }
@@ -136,7 +136,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       setState(() => _locationLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not get location: $e. You can choose your city directly.')),
+          SnackBar(content: Text(context.tr('gps_error_msg'))),
         );
       }
     }
@@ -266,9 +266,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Enter Location Coordinates', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+            Text(context.tr('enter_coords_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 16),
-            TextField(controller: cityController, decoration: const InputDecoration(labelText: 'City Name')),
+            TextField(controller: cityController, decoration: InputDecoration(labelText: context.tr('city_name'))),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -292,7 +292,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   });
                   Navigator.pop(ctx);
                 },
-                child: const Text('Save Location'),
+                child: Text(context.tr('save_location_btn')),
               ),
             ),
           ],
@@ -699,7 +699,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Location Selected', style: TextStyle(fontWeight: FontWeight.w700)),
+                        Text(context.tr('location_selected'), style: const TextStyle(fontWeight: FontWeight.w700)),
                         Text('$_cityName, $_countryName', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                       ],
                     ),
@@ -715,7 +715,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             _LocationOptionButton(
               icon: Icons.my_location_rounded,
               title: context.tr('btn_use_gps'),
-              subtitle: _locationLoading ? 'Detecting coordinates...' : 'Fastest & most accurate',
+              subtitle: _locationLoading ? context.tr('gps_detecting') : context.tr('gps_fastest'),
               isLoading: _locationLoading,
               onTap: _getLocationGPS,
             ),
@@ -723,14 +723,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             _LocationOptionButton(
               icon: Icons.search_rounded,
               title: context.tr('btn_choose_city'),
-              subtitle: 'Select from 50+ major cities without GPS',
+              subtitle: context.tr('city_select_sub'),
               onTap: _showCitySearchDialog,
             ),
             const SizedBox(height: 10),
             _LocationOptionButton(
               icon: Icons.edit_location_alt_rounded,
-              title: 'Enter location manually',
-              subtitle: 'Specify custom latitude and longitude',
+              title: context.tr('enter_location_manual'),
+              subtitle: context.tr('enter_coords_sub'),
               onTap: _showManualCoordinatesDialog,
             ),
           ],
@@ -755,7 +755,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               dropdownColor: Theme.of(context).colorScheme.surface,
               underline: const SizedBox(),
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 13),
-              items: CalculationMethodType.values.map((m) => DropdownMenuItem(value: m, child: Text(m.displayName, overflow: TextOverflow.ellipsis))).toList(),
+              items: CalculationMethodType.values.map((m) => DropdownMenuItem(value: m, child: Text(m.getLocalizedName(context), overflow: TextOverflow.ellipsis))).toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _calcMethod = v);
               },
@@ -782,7 +782,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               dropdownColor: Theme.of(context).colorScheme.surface,
               underline: const SizedBox(),
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 13),
-              items: AsrMethodType.values.map((m) => DropdownMenuItem(value: m, child: Text(m.displayName, overflow: TextOverflow.ellipsis))).toList(),
+              items: AsrMethodType.values.map((m) => DropdownMenuItem(value: m, child: Text(m.getLocalizedName(context), overflow: TextOverflow.ellipsis))).toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _asrMethod = v);
               },
@@ -1110,7 +1110,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               runSpacing: 4,
                               children: [
                                 Text(
-                                  level.label,
+                                  level.getLocalizedLabel(context),
                                   style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700),
@@ -1124,7 +1124,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
-                                    level.badge,
+                                    level.getLocalizedBadge(context),
                                     style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700,
@@ -1134,7 +1134,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text(level.description,
+                            Text(level.getLocalizedDesc(context),
                                 style: const TextStyle(
                                     fontSize: 13,
                                     color: AppColors.textSecondary)),
@@ -1229,8 +1229,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         Flexible(
                           child: Text(
                             isNarrow
-                                ? 'STEP 6/6 • THEME'
-                                : 'STEP 6 OF 6 • VISUAL IDENTITY',
+                                ? context.tr('theme_badge_step')
+                                : context.tr('theme_badge_step_full'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -1399,22 +1399,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     runSpacing: 8,
                     children: [
                       _buildOnboardingFilterChip(
-                        'All (11)',
+                        context.tr('theme_filter_all'),
                         _themeFilterIndex == 0,
                         () => setState(() => _themeFilterIndex = 0),
                       ),
                       _buildOnboardingFilterChip(
-                        'Dark (5)',
+                        context.tr('theme_filter_dark'),
                         _themeFilterIndex == 1,
                         () => setState(() => _themeFilterIndex = 1),
                       ),
                       _buildOnboardingFilterChip(
-                        'Light (5)',
+                        context.tr('theme_filter_light'),
                         _themeFilterIndex == 2,
                         () => setState(() => _themeFilterIndex = 2),
                       ),
                       _buildOnboardingFilterChip(
-                        'Specialized (2)',
+                        context.tr('theme_filter_special'),
                         _themeFilterIndex == 3,
                         () => setState(() => _themeFilterIndex = 3),
                       ),
@@ -1596,7 +1596,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Widget _buildThemeModeBadge(AppGamingTheme theme, bool isNarrow) {
-    String label = theme.isLight ? 'LIGHT' : 'DARK';
+    String label = theme.isLight ? context.tr('theme_badge_light') : context.tr('theme_badge_dark');
     if (theme == AppGamingTheme.oled) label = 'OLED';
     if (theme == AppGamingTheme.tactical) label = 'SPEC-OPS';
 

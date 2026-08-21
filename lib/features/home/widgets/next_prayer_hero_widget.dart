@@ -265,11 +265,11 @@ class NextPrayerHeroWidget extends ConsumerWidget {
                 } catch (_) {}
               },
               icon: const Icon(Icons.shield_outlined, size: 16),
-              label: const FittedBox(
+              label: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  'Evaluate Match Queue Safety',
-                  style: TextStyle(fontWeight: FontWeight.w800),
+                  context.tr('evaluate_match_queue_btn'),
+                  style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
               ),
               style: ElevatedButton.styleFrom(
@@ -313,7 +313,7 @@ class _LiveCountdownWidget extends ConsumerWidget {
       runSpacing: 2,
       children: [
         Text(
-          isArrived ? 'NOW' : TimeUtils.formatCountdown(remaining),
+          isArrived ? context.tr('now') : TimeUtils.formatCountdown(remaining),
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w900,
@@ -323,7 +323,7 @@ class _LiveCountdownWidget extends ConsumerWidget {
           ),
         ),
         Text(
-          isArrived ? 'Adhan reached' : 'remaining',
+          isArrived ? context.tr('adhan_called') : context.tr('remaining'),
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,

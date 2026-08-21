@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../app/theme.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/models/prayer_record.dart';
 import '../../../core/providers/prayer_heatmap_provider.dart';
 
@@ -91,11 +92,11 @@ class _PrayerConsistencyScreenState
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
               child: Row(
                 children: [
-                  _buildTabButton('Contribution Heatmap', 0),
+                  _buildTabButton(context.tr('tab_contribution_heatmap'), 0),
                   const SizedBox(width: 8),
-                  _buildTabButton('5-Prayer Matrix', 1),
+                  _buildTabButton(context.tr('tab_5prayer_matrix'), 1),
                   const SizedBox(width: 8),
-                  _buildTabButton('Gaming Decisions', 2),
+                  _buildTabButton(context.tr('tab_gaming_decisions'), 2),
                 ],
               ),
             ),
@@ -238,11 +239,11 @@ class _PrayerConsistencyScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Prayer Consistency',
+                    Text(
+                      context.tr('consistency_nav'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textMuted,
@@ -250,11 +251,11 @@ class _PrayerConsistencyScreenState
                       ),
                     ),
                     Text(
-                      '${monthlySummary.onTimeRate.toStringAsFixed(0)}% on-time this month',
+                      context.trFormat('on_time_this_month_format', {'rate': monthlySummary.onTimeRate.toStringAsFixed(0)}),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: FontWeight.w800,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -262,7 +263,7 @@ class _PrayerConsistencyScreenState
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -290,27 +291,27 @@ class _PrayerConsistencyScreenState
             children: [
               _buildMetricCapsule(
                 context,
-                title: 'Streak',
-                value: '$streak days',
-                subtitle: 'Current active',
+                title: context.tr('streak_stat'),
+                value: context.trFormat('days_count', {'days': streak}),
+                subtitle: context.tr('current_active'),
                 color: AppColors.primaryCyan,
                 icon: Icons.local_fire_department_rounded,
               ),
               const SizedBox(width: 8),
               _buildMetricCapsule(
                 context,
-                title: 'Protected',
+                title: context.tr('protected_stat'),
                 value: '$protectedCount',
-                subtitle: 'Gaming sessions',
+                subtitle: context.tr('gaming_sessions_label'),
                 color: AppColors.successGreen,
                 icon: Icons.shield_rounded,
               ),
               const SizedBox(width: 8),
               _buildMetricCapsule(
                 context,
-                title: 'Late',
+                title: context.tr('late_stat'),
                 value: '${monthlySummary.lateCount}',
-                subtitle: 'This month',
+                subtitle: context.tr('this_month_label'),
                 color: monthlySummary.lateCount == 0
                     ? AppColors.textMuted
                     : AppColors.warningAmber,
@@ -418,7 +419,7 @@ class _PrayerConsistencyScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Start Your Salah Consistency Journey',
+                  context.tr('starter_guide_title'),
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
@@ -427,7 +428,7 @@ class _PrayerConsistencyScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Each prayer you complete and log on time will illuminate your heatmap grid with green squares and unlock discipline badges. Log today\'s prayers above to begin!',
+                  context.tr('starter_guide_body'),
                   style: TextStyle(
                     fontSize: 12,
                     color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8) ?? AppColors.textSecondary,
@@ -466,7 +467,7 @@ class _PrayerConsistencyScreenState
             children: [
               Expanded(
                 child: Text(
-                  'Today\'s Salah',
+                  context.tr('today_salah_title'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -478,7 +479,7 @@ class _PrayerConsistencyScreenState
               ),
               const SizedBox(width: 8),
               Text(
-                '${record.completedCount}/5 recorded',
+                context.trFormat('prayers_recorded_count', {'count': record.completedCount}),
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
@@ -513,7 +514,7 @@ class _PrayerConsistencyScreenState
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            name,
+                            context.tr('prayer_${name.toLowerCase()}'),
                             maxLines: 1,
                             style: TextStyle(
                               fontSize: 11,
@@ -525,7 +526,7 @@ class _PrayerConsistencyScreenState
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            status.label,
+                            status.getLocalizedLabel(context),
                             maxLines: 1,
                             style: TextStyle(
                               fontSize: 8,
@@ -634,13 +635,13 @@ class _PrayerConsistencyScreenState
                       width: 32,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          SizedBox(height: 17 * 0, child: Text('Mon', style: TextStyle(fontSize: 9, color: AppColors.textMuted))),
-                          SizedBox(height: 17 * 1, child: SizedBox()),
-                          SizedBox(height: 17 * 0, child: Text('Wed', style: TextStyle(fontSize: 9, color: AppColors.textMuted))),
-                          SizedBox(height: 17 * 1, child: SizedBox()),
-                          SizedBox(height: 17 * 0, child: Text('Fri', style: TextStyle(fontSize: 9, color: AppColors.textMuted))),
-                          SizedBox(height: 17 * 2, child: SizedBox()),
+                        children: [
+                          SizedBox(height: 17 * 0, child: Text(context.tr('weekday_mon'), style: const TextStyle(fontSize: 9, color: AppColors.textMuted))),
+                          const SizedBox(height: 17 * 1, child: SizedBox()),
+                          SizedBox(height: 17 * 0, child: Text(context.tr('weekday_wed'), style: const TextStyle(fontSize: 9, color: AppColors.textMuted))),
+                          const SizedBox(height: 17 * 1, child: SizedBox()),
+                          SizedBox(height: 17 * 0, child: Text(context.tr('weekday_fri'), style: const TextStyle(fontSize: 9, color: AppColors.textMuted))),
+                          const SizedBox(height: 17 * 2, child: SizedBox()),
                         ],
                       ),
                     ),
@@ -703,31 +704,31 @@ class _PrayerConsistencyScreenState
             children: [
               _buildSemanticLegendChip(
                 isLight ? const Color(0xFF059669) : const Color(0xFF10B981),
-                '5/5 Perfect',
+                context.tr('legend_5_perfect'),
               ),
               _buildSemanticLegendChip(
                 isLight ? const Color(0xFF0284C7) : const Color(0xFF06B6D4),
-                '4/5 On time',
+                context.tr('legend_4_ontime'),
               ),
               _buildSemanticLegendChip(
                 isLight ? const Color(0xFF2563EB) : const Color(0xFF3B82F6),
-                '3/5 On time',
+                context.tr('legend_3_ontime'),
               ),
               _buildSemanticLegendChip(
                 isLight ? const Color(0xFFD97706) : const Color(0xFFF59E0B),
-                'Contains late',
+                context.tr('legend_contains_late'),
               ),
               _buildSemanticLegendChip(
                 isLight ? const Color(0xFF7C3AED) : const Color(0xFFA855F7),
-                'Partial (1–2)',
+                context.tr('legend_partial'),
               ),
               _buildSemanticLegendChip(
                 isLight ? const Color(0xFFDC2626) : const Color(0xFFEF4444),
-                'Missed',
+                context.tr('status_missed'),
               ),
               _buildSemanticLegendChip(
                 isLight ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B),
-                'Not recorded',
+                context.tr('status_not_recorded'),
               ),
             ],
           ),
@@ -869,17 +870,17 @@ class _PrayerConsistencyScreenState
               const Icon(Icons.view_week_rounded,
                   size: 18, color: AppColors.successGreen),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  '5-Prayer Breakdown Grid',
+                  context.tr('five_prayer_grid_title'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800),
+                  style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800),
                 ),
               ),
               const SizedBox(width: 6),
               Text(
-                '${summary.onTimeCount}/${summary.totalRecorded} on time',
+                context.trFormat('on_time_count_format', {'count': summary.onTimeCount, 'total': summary.totalRecorded}),
                 style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -892,10 +893,10 @@ class _PrayerConsistencyScreenState
           // Table header
           Row(
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 50,
-                child: Text('Date',
-                    style: TextStyle(
+                child: Text(context.tr('date_header'),
+                    style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textMuted)),
@@ -903,21 +904,21 @@ class _PrayerConsistencyScreenState
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const [
-                    Text('F', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
-                    Text('D', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
-                    Text('A', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
-                    Text('M', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
-                    Text('I', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+                  children: [
+                    Text(context.tr('prayer_fajr')[0], style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+                    Text(context.tr('prayer_dhuhr')[0], style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+                    Text(context.tr('prayer_asr')[0], style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+                    Text(context.tr('prayer_maghrib')[0], style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+                    Text(context.tr('prayer_isha')[0], style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted)),
                   ],
                 ),
               ),
-              const SizedBox(
+              SizedBox(
                 width: 44,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: Text('Rate',
-                      style: TextStyle(
+                  child: Text(context.tr('rate_header'),
+                      style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textMuted)),
@@ -1059,27 +1060,27 @@ class _PrayerConsistencyScreenState
               Icon(Icons.sports_esports_rounded,
                   color: theme.primaryColor, size: 20),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Gaming & Salah Decisions',
+                  context.tr('gaming_salah_decisions_title'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Reflect on how your match decisions help protect your prayer routine.',
-            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+          Text(
+            context.tr('gaming_salah_decisions_sub'),
+            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: 16),
 
           _buildDecisionStatRow(
             context,
             count: state.avoidedRiskyQueue,
-            label: 'Times avoided starting a risky match before prayer',
+            label: context.tr('decision_avoided_risky'),
             icon: Icons.shield_rounded,
             color: theme.primaryColor,
           ),
@@ -1087,7 +1088,7 @@ class _PrayerConsistencyScreenState
           _buildDecisionStatRow(
             context,
             count: state.stoppedToPray,
-            label: 'Times paused or stopped gaming session to pray on time',
+            label: context.tr('decision_stopped_to_pray'),
             icon: Icons.pause_circle_filled_rounded,
             color: AppColors.successGreen,
           ),
@@ -1095,7 +1096,7 @@ class _PrayerConsistencyScreenState
           _buildDecisionStatRow(
             context,
             count: state.choseShortGame,
-            label: 'Times chose a short arcade game instead of long ranked queue',
+            label: context.tr('decision_chose_short_game'),
             icon: Icons.timer_outlined,
             color: AppColors.warningAmber,
           ),
@@ -1183,12 +1184,12 @@ class _PrayerConsistencyScreenState
               Icon(Icons.psychology_rounded,
                   color: theme.primaryColor, size: 20),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Weekly Habit Reflection',
+                  context.tr('weekly_habit_reflection_title'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
                 ),
               ),
             ],
@@ -1204,7 +1205,11 @@ class _PrayerConsistencyScreenState
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'What went well: You were most consistent with ${reflection.mostConsistentPrayer} this week.',
+                  context.trFormat('reflection_what_went_well', {
+                    'prayer': reflection.mostConsistentPrayer == 'None yet'
+                        ? context.tr('none_yet')
+                        : context.tr('prayer_${reflection.mostConsistentPrayer.toLowerCase()}'),
+                  }),
                   style: TextStyle(
                     fontSize: 13,
                     color: theme.colorScheme.onSurface,
@@ -1225,7 +1230,10 @@ class _PrayerConsistencyScreenState
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Opportunity: ${reflection.behavioralInsight}',
+                  '${context.tr('opportunity_label')}: ' +
+                      (reflection.opportunityPrayer != null
+                          ? context.tr('reflection_insight_short_games')
+                          : context.tr('reflection_insight_complete_prayers')),
                   style: TextStyle(
                     fontSize: 13,
                     color: theme.textTheme.bodyMedium?.color,
@@ -1277,15 +1285,15 @@ class _PrayerConsistencyScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Habit & Discipline Badges',
+                    Text(
+                      context.tr('badges_title'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                          const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
                     ),
                     Text(
-                      '$unlockedCount of $totalCount unlocked',
+                      context.trFormat('badges_unlocked_format', {'unlocked': unlockedCount, 'total': totalCount}),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -1305,7 +1313,7 @@ class _PrayerConsistencyScreenState
                       color: theme.primaryColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(
-                  '${(progress * 100).toInt()}% Done',
+                  context.trFormat('percent_done_format', {'percent': (progress * 100).toInt()}),
                   style: TextStyle(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w700,
@@ -1432,7 +1440,7 @@ class _PrayerConsistencyScreenState
                   runSpacing: 2,
                   children: [
                     Text(
-                      badge.title,
+                      context.tr('badge_${badge.id}_title'),
                       style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
@@ -1450,7 +1458,7 @@ class _PrayerConsistencyScreenState
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        badge.category.toUpperCase(),
+                        context.tr('badge_cat_${badge.category.toLowerCase().replaceAll(' ', '_')}').toUpperCase(),
                         style: TextStyle(
                           fontSize: 8,
                           fontWeight: FontWeight.w800,
@@ -1464,7 +1472,7 @@ class _PrayerConsistencyScreenState
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  badge.description,
+                  context.tr('badge_${badge.id}_desc'),
                   style: TextStyle(
                     fontSize: 11,
                     color: isUnlocked
@@ -1507,7 +1515,7 @@ class _PrayerConsistencyScreenState
                 ),
                 const SizedBox(width: 3),
                 Text(
-                  isUnlocked ? 'Unlocked' : 'Locked',
+                  isUnlocked ? context.tr('unlocked') : context.tr('locked'),
                   style: TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w700,
@@ -1608,7 +1616,7 @@ class _PrayerConsistencyScreenState
                         Icon(status.icon, size: 18, color: status.color),
                         const SizedBox(width: 10),
                         Text(
-                          name,
+                          context.tr('prayer_${name.toLowerCase()}'),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -1637,7 +1645,7 @@ class _PrayerConsistencyScreenState
                                           ),
                                         ),
                                         const SizedBox(width: 6),
-                                        Text(s.label,
+                                        Text(s.getLocalizedLabel(context),
                                             style: TextStyle(
                                                 fontSize: 12,
                                                 color: theme.colorScheme.onSurface)),
@@ -1822,22 +1830,18 @@ class _PrayerConsistencyScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        title: const Text('Prayer Consistency Philosophy',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
-        content: const SingleChildScrollView(
+        title: Text(context.tr('philosophy_title'),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+        content: SingleChildScrollView(
           child: Text(
-            'The Prayer Consistency Heatmap is designed for personal reflection and habit-building.\n\n'
-            '• Unrecorded prayers are treated as "not recorded", not missed.\n'
-            '• Worship is not reduced to a video game score; metrics reflect routine and balance.\n'
-            '• Your prayer history is strictly private and stored securely on your device.\n'
-            '• Discover how gaming session timings overlap with your prayer schedule to build better gaming habits.',
-            style: TextStyle(fontSize: 13, height: 1.4),
+            context.tr('philosophy_content'),
+            style: const TextStyle(fontSize: 13, height: 1.4),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Understood'),
+            child: Text(context.tr('understood_btn')),
           ),
         ],
       ),

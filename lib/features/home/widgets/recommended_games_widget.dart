@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/models/game_profile.dart';
 import '../../../core/providers/gaming_provider.dart';
 import '../../../core/providers/settings_provider.dart';
@@ -55,13 +56,13 @@ class RecommendedGamesWidget extends ConsumerWidget {
           children: [
             Icon(Icons.sports_esports_outlined, size: 36, color: textMuted),
             const SizedBox(height: 10),
-            const Text(
-              'No games selected yet',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            Text(
+              context.tr('no_games_selected_title'),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
             Text(
-              'Configure your games in Settings or Onboarding to see recommendations.',
+              context.tr('no_games_selected_sub'),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: textMuted),
             ),
@@ -75,10 +76,10 @@ class RecommendedGamesWidget extends ConsumerWidget {
       children: [
         // Recommended now
         if (recommendedNow.isNotEmpty) ...[
-          const _SectionHeader(
+          _SectionHeader(
             icon: Icons.check_circle_rounded,
-            title: 'RECOMMENDED NOW',
-            subtitle: 'Fits comfortably within your available time',
+            title: context.tr('rec_now_title'),
+            subtitle: context.tr('rec_now_sub'),
             color: AppColors.successGreen,
           ),
           const SizedBox(height: 8),
@@ -91,10 +92,10 @@ class RecommendedGamesWidget extends ConsumerWidget {
 
         // Use caution
         if (useCaution.isNotEmpty) ...[
-          const _SectionHeader(
+          _SectionHeader(
             icon: Icons.warning_rounded,
-            title: 'USE CAUTION',
-            subtitle: 'Standard match fits, but overtime risks prayer delay',
+            title: context.tr('use_caution_title'),
+            subtitle: context.tr('use_caution_sub'),
             color: AppColors.warningAmber,
           ),
           const SizedBox(height: 8),
@@ -107,10 +108,10 @@ class RecommendedGamesWidget extends ConsumerWidget {
 
         // Not recommended right now
         if (notRecommended.isNotEmpty) ...[
-          const _SectionHeader(
+          _SectionHeader(
             icon: Icons.block_rounded,
-            title: 'NOT RECOMMENDED RIGHT NOW',
-            subtitle: 'Match duration is too long for the remaining window',
+            title: context.tr('not_rec_title'),
+            subtitle: context.tr('not_rec_sub'),
             color: AppColors.dangerRed,
           ),
           const SizedBox(height: 8),
@@ -212,8 +213,8 @@ class _GameModeCard extends StatelessWidget {
                 ),
                 Text(
                   isFlexible
-                      ? 'Flexible · Pause anytime'
-                      : '~${item.mode.estimatedMinutes} min (${item.mode.minMinutes}–${item.mode.maxMinutes}m)',
+                      ? context.tr('can_pause_safely')
+                      : '${item.mode.estimatedMinutes} ${context.tr('min')} (${item.mode.minMinutes}–${item.mode.maxMinutes} ${context.tr('min')})',
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
@@ -229,7 +230,7 @@ class _GameModeCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              isFlexible ? 'Flexible' : '~${item.mode.estimatedMinutes}m',
+              isFlexible ? context.tr('pauseable_badge') : '${item.mode.estimatedMinutes} ${context.tr('min')}',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,

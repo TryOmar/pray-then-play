@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/providers/gaming_provider.dart';
 import '../../../core/services/prayer_service.dart';
 import '../../../core/services/storage_service.dart';
@@ -128,7 +129,7 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                         Icon(Icons.circle, size: 8, color: statusColor),
                         const SizedBox(width: 6),
                         Text(
-                          'IN MATCH',
+                          context.tr('in_match_mode_title').toUpperCase(),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -173,7 +174,7 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'match duration',
+                      context.tr('match_duration'),
                       style: TextStyle(
                         fontSize: 13,
                         color: textMuted,
@@ -202,8 +203,8 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                         children: [
                           Text(
                             _prayerArrived
-                                ? '$_nextPrayerName has begun'
-                                : '$_nextPrayerName in $_minutesUntilPrayer min',
+                                ? '${context.tr('prayer_${_nextPrayerName.toLowerCase()}')} ${context.tr('adhan_called')}'
+                                : '${context.tr('prayer_${_nextPrayerName.toLowerCase()}')} ${context.tr('in_time')} $_minutesUntilPrayer ${context.tr('min')}',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: statusColor,
@@ -213,8 +214,8 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                           const SizedBox(height: 2),
                           Text(
                             _prayerArrived
-                                ? 'Finish safely, then pray as soon as possible.'
-                                : "You're in a match. Focus on the game.",
+                                ? context.tr('caution_wrap_up')
+                                : context.tr('in_match_mode_title'),
                             style: TextStyle(
                               color: textSecondary,
                               fontSize: 12,
@@ -235,7 +236,7 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _endMatch,
                   icon: const Icon(Icons.stop_rounded, size: 20),
-                  label: const Text('Match Finished'),
+                  label: Text(context.tr('end_match_btn')),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: statusColor,
                     foregroundColor: statusColor.computeLuminance() > 0.55
@@ -284,16 +285,16 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                       color: AppColors.successGreen,
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Match Complete',
-                      style: TextStyle(
+                    Text(
+                      context.tr('match_ended_title'),
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Duration: ${TimeUtils.formatDuration(_matchDuration)}',
+                      '${context.tr('match_duration')}: ${TimeUtils.formatDuration(_matchDuration)}',
                       style: TextStyle(
                         color: textSecondary,
                         fontSize: 14,
@@ -327,8 +328,8 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                           const SizedBox(height: 8),
                           Text(
                             isPrayerTime
-                                ? '$_nextPrayerName is currently in progress.\nPray before starting another match.'
-                                : '$_nextPrayerName is in $_minutesUntilPrayer minutes.',
+                                ? '${context.tr('prayer_${_nextPrayerName.toLowerCase()}')} ${context.tr('adhan_called')}.\n${context.tr('pray_action')}!'
+                                : '${context.tr('prayer_${_nextPrayerName.toLowerCase()}')} ${context.tr('in_time')} $_minutesUntilPrayer ${context.tr('min')}.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
@@ -355,7 +356,7 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                 child: ElevatedButton.icon(
                   onPressed: () => context.go('/'),
                   icon: const Icon(Icons.mosque_rounded, size: 18),
-                  label: const Text('Pray Now'),
+                  label: Text(context.tr('pray_action')),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: actionColor,
                     foregroundColor: actionColor.computeLuminance() > 0.55
@@ -372,7 +373,7 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () => context.go('/'),
-                    child: const Text('Continue Gaming'),
+                    child: Text(context.tr('continue_gaming')),
                   ),
                 ),
               ],
@@ -383,3 +384,4 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
     );
   }
 }
+

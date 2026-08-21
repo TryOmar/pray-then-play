@@ -59,7 +59,10 @@ class PrayerStreakWidget extends ConsumerWidget {
                       fit: BoxFit.scaleDown,
                       alignment: AlignmentDirectional.centerStart,
                       child: Text(
-                        '$completedCount / 5 Completed · ${(dailyRecord.consistencyRate).round()}% Today',
+                        context.trFormat('completed_today_format', {
+                          'count': completedCount,
+                          'rate': (dailyRecord.consistencyRate).round(),
+                        }),
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w600,
@@ -96,15 +99,20 @@ class PrayerStreakWidget extends ConsumerWidget {
                           size: 13, color: AppColors.warningAmber),
                       const SizedBox(width: 3),
                       Text(
-                        '$streak d streak',
+                        context.trFormat('streak_days_badge', {'days': streak}),
                         style: const TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: AppColors.warningAmber,
                         ),
                       ),
-                      const Icon(Icons.chevron_right_rounded,
-                          size: 13, color: AppColors.textMuted),
+                      Icon(
+                        context.isRtl
+                            ? Icons.chevron_left_rounded
+                            : Icons.chevron_right_rounded,
+                        size: 13,
+                        color: AppColors.textMuted,
+                      ),
                     ],
                   ),
                 ),
@@ -182,7 +190,7 @@ class PrayerStreakWidget extends ConsumerWidget {
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'View 5-Prayer Heatmap & Reflection',
+                            context.tr('streak_view_heatmap_title'),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -191,19 +199,23 @@ class PrayerStreakWidget extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 1),
-                        const Text(
-                          'Track consistency, on-time rates & habit balance',
+                        Text(
+                          context.tr('streak_track_consistency_sub'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 10, color: AppColors.textMuted),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  Icon(Icons.arrow_forward_rounded,
-                      size: 14, color: primaryColor),
+                  Icon(
+                    context.isRtl
+                        ? Icons.arrow_back_rounded
+                        : Icons.arrow_forward_rounded,
+                    size: 14,
+                    color: primaryColor,
+                  ),
                 ],
               ),
             ),
@@ -236,6 +248,7 @@ class PrayerStreakWidget extends ConsumerWidget {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (modalContext, setModalState) {
+            final localizedPrayer = context.tr('prayer_${prayerName.toLowerCase()}');
             return Padding(
               padding: EdgeInsets.fromLTRB(
                 24,
@@ -261,13 +274,13 @@ class PrayerStreakWidget extends ConsumerWidget {
                   Row(
                     children: [
                       Text(
-                        'Edit $prayerName Record',
+                        context.trFormat('edit_prayer_record', {'prayer': localizedPrayer}),
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                       ),
                       const Spacer(),
                       if (adhanTime != null)
                         Text(
-                          'Adhan: ${TimeUtils.formatTime(adhanTime)}',
+                          context.trFormat('adhan_time_label', {'time': TimeUtils.formatTime(adhanTime)}),
                           style: const TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600),
                         ),
                     ],
@@ -275,12 +288,12 @@ class PrayerStreakWidget extends ConsumerWidget {
                   const SizedBox(height: 18),
 
                   // Status Selector
-                  const Text('PRAYER STATUS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: 1)),
+                  Text(context.tr('prayer_status_title'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: 1)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       _StatusOptionChip(
-                        label: 'On Time',
+                        label: context.tr('status_on_time'),
                         color: AppColors.successGreen,
                         icon: Icons.check_circle_rounded,
                         isSelected: selectedStatus == PrayerStatus.onTime,
@@ -288,7 +301,7 @@ class PrayerStreakWidget extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       _StatusOptionChip(
-                        label: 'Late',
+                        label: context.tr('status_late'),
                         color: AppColors.warningAmber,
                         icon: Icons.access_time_rounded,
                         isSelected: selectedStatus == PrayerStatus.late,
@@ -296,7 +309,7 @@ class PrayerStreakWidget extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       _StatusOptionChip(
-                        label: 'Missed',
+                        label: context.tr('status_missed'),
                         color: AppColors.dangerRed,
                         icon: Icons.cancel_rounded,
                         isSelected: selectedStatus == PrayerStatus.missed,
@@ -319,7 +332,7 @@ class PrayerStreakWidget extends ConsumerWidget {
                                 );
                             Navigator.pop(ctx);
                           },
-                          child: const Text('Reset Record'),
+                          child: Text(context.tr('reset_record_btn')),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -347,7 +360,7 @@ class PrayerStreakWidget extends ConsumerWidget {
                             ref.read(todayPrayerRecordProvider.notifier).saveRecordItem(item);
                             Navigator.pop(ctx);
                           },
-                          child: const Text('Save Record'),
+                          child: Text(context.tr('save_record_btn')),
                         ),
                       ),
                     ],
@@ -469,7 +482,7 @@ class _PrayerCard extends StatelessWidget {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                status == PrayerStatus.notRecorded ? 'Tap' : status.label,
+                status == PrayerStatus.notRecorded ? context.tr('status_not_recorded') : status.getLocalizedLabel(context),
                 maxLines: 1,
                 style: TextStyle(
                   fontSize: 8.5,

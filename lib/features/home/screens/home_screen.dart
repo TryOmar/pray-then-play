@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/providers/prayer_provider.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/services/desktop_service.dart';
@@ -29,7 +30,9 @@ class HomeScreen extends ConsumerWidget {
     final minutesUntilPrayer = nextPrayerTime != null
         ? nextPrayerTime.difference(DateTime.now()).inMinutes
         : 999;
-    final verdict = minutesUntilPrayer > bufferMinutes ? 'Safe to Play' : 'Caution / Wrap up';
+    final verdict = minutesUntilPrayer > bufferMinutes
+        ? ref.tr('safe_to_play_short')
+        : ref.tr('caution_wrap_up');
 
     // Sync data with Android Home Screen widgets & Windows Desktop Tray on update
     ref.listen<MapEntry<String, DateTime>?>(nextPrayerProvider, (previous, next) {
@@ -264,7 +267,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               Text(
-                'STAY ON TIME • PLAY WITH PEACE',
+                context.tr('app_tagline').toUpperCase(),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -328,7 +331,7 @@ class HomeScreen extends ConsumerWidget {
         Expanded(
           child: _QuickActionButton(
             icon: Icons.shield_rounded,
-            label: 'Can I Queue?',
+            label: context.tr('can_i_queue'),
             color: Theme.of(context).primaryColor,
             onTap: () => context.go('/queue-check'),
           ),
@@ -337,7 +340,7 @@ class HomeScreen extends ConsumerWidget {
         Expanded(
           child: _QuickActionButton(
             icon: Icons.play_circle_outline_rounded,
-            label: 'In a Match',
+            label: context.tr('in_a_match'),
             color: AppColors.warningAmber,
             onTap: () => context.push('/in-match'),
           ),
@@ -346,7 +349,7 @@ class HomeScreen extends ConsumerWidget {
         Expanded(
           child: _QuickActionButton(
             icon: Icons.event_note_rounded,
-            label: 'Planner',
+            label: context.tr('planner_label'),
             color: AppColors.successGreen,
             onTap: () => context.push('/session-planner'),
           ),

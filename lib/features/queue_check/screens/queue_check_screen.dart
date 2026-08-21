@@ -194,9 +194,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                         padding: const EdgeInsets.all(16),
                         decoration:
                             GlassmorphicDecoration.card(context: context),
-                        child: const Text(
-                          'No games configured yet. Go to My Games or Settings to add games.',
-                          style: TextStyle(
+                        child: Text(
+                          context.tr('no_games_selected_sub'),
+                          style: const TextStyle(
                               color: AppColors.textMuted, fontSize: 13),
                         ),
                       )
@@ -278,12 +278,12 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                     children: [
                       Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'WHAT ARE YOU PLANNING TO PLAY?',
+                              context.tr('what_planning_play'),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.textMuted,
@@ -296,7 +296,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                             onTap: () => _showAddActivityQuickDialog(
                                 context, _selectedGame!),
                             child: Text(
-                              '+ Add Activity',
+                              context.tr('add_activity_btn'),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
@@ -312,9 +312,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                           padding: const EdgeInsets.all(14),
                           decoration:
                               GlassmorphicDecoration.card(context: context),
-                          child: const Text(
-                            'No activities enabled for this game.',
-                            style: TextStyle(
+                          child: Text(
+                            context.tr('no_activities_for_game'),
+                            style: const TextStyle(
                                 color: AppColors.textMuted, fontSize: 13),
                           ),
                         )
@@ -386,7 +386,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                                             4),
                                                   ),
                                                   child: Text(
-                                                    'Custom',
+                                                    context.tr('custom_badge'),
                                                     style: TextStyle(
                                                       fontSize: 8.5,
                                                       fontWeight:
@@ -414,9 +414,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                                     color:
                                                         AppColors.successGreen),
                                                 const SizedBox(width: 2),
-                                                const Text(
-                                                  'Pauseable •',
-                                                  style: TextStyle(
+                                                Text(
+                                                  context.tr('pauseable_badge'),
+                                                  style: const TextStyle(
                                                       color: AppColors
                                                           .successGreen,
                                                       fontSize: 10.5,
@@ -425,7 +425,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                                 ),
                                               ],
                                               Text(
-                                                '~${activity.typicalDuration}m (${activity.minMinutes}–${activity.maxMinutes}m)',
+                                                '${activity.typicalDuration} ${context.tr('min')} (${activity.minMinutes}–${activity.maxMinutes} ${context.tr('min')})',
                                                 style: const TextStyle(
                                                   color: AppColors.textMuted,
                                                   fontSize: 10.5,
@@ -480,9 +480,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'HOW LONG DO YOU WANT TO PLAY?',
-                        style: TextStyle(
+                      Text(
+                        context.tr('how_long_play'),
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w800,
                           color: AppColors.textMuted,
@@ -495,8 +495,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                         child: Row(
                           children: [
                             _buildDurationChip(
-                              label:
-                                  'Typical (~${_selectedActivity!.typicalDuration}m)',
+                              label: context.trFormat('duration_typical', {'duration': _selectedActivity!.typicalDuration}),
                               isSelected: _desiredSessionMinutes == null,
                               onTap: () {
                                 setState(() => _desiredSessionMinutes = null);
@@ -505,7 +504,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                             ),
                             const SizedBox(width: 8),
                             _buildDurationChip(
-                              label: '15 min',
+                              label: '15 ${context.tr('min')}',
                               isSelected: _desiredSessionMinutes == 15,
                               onTap: () {
                                 setState(() => _desiredSessionMinutes = 15);
@@ -514,7 +513,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                             ),
                             const SizedBox(width: 8),
                             _buildDurationChip(
-                              label: '30 min',
+                              label: '30 ${context.tr('min')}',
                               isSelected: _desiredSessionMinutes == 30,
                               onTap: () {
                                 setState(() => _desiredSessionMinutes = 30);
@@ -523,7 +522,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                             ),
                             const SizedBox(width: 8),
                             _buildDurationChip(
-                              label: '45 min',
+                              label: '45 ${context.tr('min')}',
                               isSelected: _desiredSessionMinutes == 45,
                               onTap: () {
                                 setState(() => _desiredSessionMinutes = 45);
@@ -532,7 +531,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                             ),
                             const SizedBox(width: 8),
                             _buildDurationChip(
-                              label: '60 min',
+                              label: '60 ${context.tr('min')}',
                               isSelected: _desiredSessionMinutes == 60,
                               onTap: () {
                                 setState(() => _desiredSessionMinutes = 60);
@@ -544,8 +543,8 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                               label: _desiredSessionMinutes != null &&
                                       ![15, 30, 45, 60]
                                           .contains(_desiredSessionMinutes)
-                                  ? '${_desiredSessionMinutes}m (Custom)'
-                                  : 'Custom...',
+                                  ? context.trFormat('duration_custom_active', {'duration': _desiredSessionMinutes})
+                                  : context.tr('duration_custom'),
                               isSelected: _desiredSessionMinutes != null &&
                                   ![15, 30, 45, 60]
                                       .contains(_desiredSessionMinutes),
@@ -620,6 +619,69 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
     final plannedDuration =
         _desiredSessionMinutes ?? _selectedActivity!.typicalDuration;
 
+    final String localizedVerdictTitle;
+    final String localizedMessage;
+    final String localizedRecommendation;
+    final localizedPrayer = _nextPrayerName.isNotEmpty
+        ? context.tr('prayer_${_nextPrayerName.toLowerCase()}')
+        : context.tr('next_prayer');
+
+    if (_selectedActivity!.canPause && !_selectedActivity!.requiresCompletion) {
+      if (_minutesUntilPrayer <= effectiveBuffer) {
+        localizedVerdictTitle = context.tr('verdict_prayer_imminent');
+        localizedMessage = context.trFormat('msg_prayer_imminent', {
+          'prayer': localizedPrayer,
+          'mins': _minutesUntilPrayer,
+          'buffer': effectiveBuffer,
+        });
+        localizedRecommendation = context.trFormat('rec_prayer_imminent', {
+          'game': _selectedGame!.name,
+          'activity': _selectedActivity!.name,
+        });
+      } else {
+        localizedVerdictTitle = context.tr('verdict_pauseable_session');
+        localizedMessage = context.trFormat('msg_pauseable_safe', {
+          'game': _selectedGame!.name,
+          'activity': _selectedActivity!.name,
+        });
+        localizedRecommendation = context.trFormat('rec_pauseable_safe', {
+          'prayer': localizedPrayer,
+          'mins': _minutesUntilPrayer,
+          'safe': result.availableSafeMinutes,
+        });
+      }
+    } else {
+      if (result.riskLevel == RiskLevel.low) {
+        localizedVerdictTitle = context.tr('verdict_safe_start');
+        localizedMessage = context.trFormat('msg_safe_start', {
+          'duration': plannedDuration,
+          'safe': result.availableSafeMinutes,
+          'buffer': effectiveBuffer,
+        });
+        localizedRecommendation = context.trFormat('rec_safe_start', {
+          'prayer': localizedPrayer,
+          'mins': _minutesUntilPrayer,
+        });
+      } else if (result.riskLevel == RiskLevel.medium) {
+        localizedVerdictTitle = context.tr('verdict_overtime_risk');
+        localizedMessage = context.trFormat('msg_overtime_risk', {
+          'duration': _selectedActivity!.typicalDuration,
+          'max': _selectedActivity!.maxMinutes,
+          'buffer': effectiveBuffer,
+        });
+        localizedRecommendation = context.tr('rec_overtime_risk');
+      } else {
+        localizedVerdictTitle = context.tr('verdict_not_recommended');
+        localizedMessage = context.trFormat('msg_not_rec', {
+          'duration': _selectedActivity!.typicalDuration,
+          'safe': result.availableSafeMinutes,
+        });
+        localizedRecommendation = context.trFormat('rec_not_rec', {
+          'prayer': localizedPrayer,
+        });
+      }
+    }
+
     // Fetch personal history statistics for this activity
     final stats = StorageService.getActivitySessionStats(
       _selectedGame!.id,
@@ -656,9 +718,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                         border: Border.all(color: color, width: 1.2),
                       ),
                       child: Text(
-                        result.verdictTitle.isNotEmpty
-                            ? result.verdictTitle
-                            : RiskCalculator.getRiskLabel(result.riskLevel),
+                        localizedVerdictTitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,
@@ -670,7 +730,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      result.message,
+                      localizedMessage,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 14,
@@ -680,7 +740,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      result.recommendation,
+                      localizedRecommendation,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
@@ -699,25 +759,25 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
               // Breakdown Data Rows
               _buildBreakdownRow(
                 icon: Icons.mosque_rounded,
-                title: 'Next Salah',
+                title: context.tr('next_salah_label'),
                 value:
-                    '$_nextPrayerName in $_minutesUntilPrayer min',
+                    '${_nextPrayerName.isNotEmpty ? context.tr('prayer_${_nextPrayerName.toLowerCase()}') : context.tr('next_prayer')} ${context.tr('in_time')} $_minutesUntilPrayer ${context.tr('min')}',
                 valueColor: Theme.of(context).primaryColor,
               ),
               const SizedBox(height: 10),
               _buildBreakdownRow(
                 icon: Icons.shield_rounded,
-                title: 'Safe Available Window',
+                title: context.tr('safe_available_window'),
                 value:
-                    '${result.availableSafeMinutes} min (with ${effectiveBuffer}m buffer)',
+                    '${result.availableSafeMinutes} ${context.tr('min')} (${context.trFormat('in_prayer_buffer_sub', {'buffer': effectiveBuffer})})',
                 valueColor: AppColors.successGreen,
               ),
               const SizedBox(height: 10),
               _buildBreakdownRow(
                 icon: Icons.timer_rounded,
-                title: 'Planned Session',
+                title: context.tr('planned_session_label'),
                 value:
-                    '${_selectedActivity!.name} ($plannedDuration min)',
+                    '${_selectedActivity!.name} ($plannedDuration ${context.tr('min')})',
                 valueColor: Theme.of(context).colorScheme.onSurface,
               ),
               const SizedBox(height: 10),
@@ -725,10 +785,10 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                 icon: _selectedActivity!.canPause
                     ? Icons.check_circle_outline_rounded
                     : Icons.lock_clock_rounded,
-                title: 'Pauseability',
+                title: context.tr('pauseability_label'),
                 value: _selectedActivity!.canPause
-                    ? 'Can pause / exit safely anytime'
-                    : 'Match locked (cannot pause safely)',
+                    ? context.tr('can_pause_safely')
+                    : context.tr('cannot_pause_safely'),
                 valueColor: _selectedActivity!.canPause
                     ? AppColors.successGreen
                     : AppColors.warningAmber,
@@ -813,7 +873,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                       context.go('/consistency');
                     },
                     icon: const Icon(Icons.mosque_rounded, size: 18),
-                    label: const Text('Pray First'),
+                    label: Text(context.tr('pray_first_btn')),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: color,
                       foregroundColor: color.computeLuminance() > 0.55
@@ -875,7 +935,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                         onPressed: () => _startSessionTracker(
                             context, _selectedGame!, _selectedActivity!, plannedDuration),
                         icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                        label: const Text('Start & Track Session'),
+                        label: Text(context.tr('start_track_session_btn')),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: color,
                           foregroundColor: color.computeLuminance() > 0.55
@@ -940,8 +1000,8 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          title: const Text('Set Session Duration',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          title: Text(context.tr('set_session_duration_title'),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -968,7 +1028,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: Text(context.tr('cancel_btn')),
             ),
             ElevatedButton(
               onPressed: () {
@@ -976,7 +1036,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                 _calculate();
                 Navigator.pop(ctx);
               },
-              child: const Text('Apply'),
+              child: Text(context.tr('set_duration_btn')),
             ),
           ],
         ),
@@ -1009,7 +1069,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Add Activity to ${game.name}',
+                  '${context.tr('add_activity_quick_title')} (${game.name})',
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.w700),
                 ),
@@ -1017,10 +1077,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
               const SizedBox(height: 14),
               TextField(
                 controller: nameCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Activity Name',
-                  hintText: 'e.g. Skyblock, Ranked',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.tr('activity_name_hint'),
+                  border: const OutlineInputBorder(),
                   isDense: true,
                 ),
               ),
@@ -1028,24 +1087,23 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
               TextField(
                 controller: durCtrl,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Typical Duration',
-                  suffixText: 'mins',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.tr('duration_selector_title'),
+                  suffixText: context.tr('min'),
+                  border: const OutlineInputBorder(),
                   isDense: true,
                 ),
               ),
               const SizedBox(height: 10),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Can pause safely?'),
-                subtitle: const Text('Singleplayer, casual, or pauseable'),
+                title: Text(context.tr('can_pause_safely')),
                 value: canPause,
                 onChanged: (val) => setModalState(() => canPause = val),
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Competitive / Match locked?'),
+                title: Text(context.tr('cannot_pause_safely')),
                 value: isCompetitive,
                 onChanged: (val) => setModalState(() => isCompetitive = val),
               ),
@@ -1078,7 +1136,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                     });
                     _calculate();
                   },
-                  child: const Text('Save Activity'),
+                  child: Text(context.tr('save_btn')),
                 ),
               ),
             ],
@@ -1134,7 +1192,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Keep Playing'),
+            child: Text(context.tr('keep_playing_btn')),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -1166,7 +1224,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                 setState(() {});
               }
             },
-            child: const Text('Finish Session'),
+            child: Text(context.tr('finish_session_btn')),
           ),
         ],
       ),
@@ -1201,11 +1259,13 @@ class _TimeComparisonBar extends StatelessWidget {
         // Match Duration
         Row(
           children: [
-            const SizedBox(
-              width: 76,
+            SizedBox(
+              width: 80,
               child: Text(
-                'Session',
-                style: TextStyle(
+                context.tr('planned_session_label'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.textMuted,
                     fontWeight: FontWeight.w600),
@@ -1231,10 +1291,10 @@ class _TimeComparisonBar extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 50,
+              width: 55,
               child: Text(
-                ' ${matchDuration}m',
-                textAlign: TextAlign.right,
+                '$matchDuration ${context.tr('min')}',
+                textAlign: TextAlign.end,
                 style: TextStyle(
                     fontSize: 11, color: color, fontWeight: FontWeight.w700),
               ),
@@ -1246,11 +1306,13 @@ class _TimeComparisonBar extends StatelessWidget {
         // Available Prayer Time
         Row(
           children: [
-            const SizedBox(
-              width: 76,
+            SizedBox(
+              width: 80,
               child: Text(
-                'Until Salah',
-                style: TextStyle(
+                context.tr('next_salah_label'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.textMuted,
                     fontWeight: FontWeight.w600),
@@ -1276,10 +1338,10 @@ class _TimeComparisonBar extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 50,
+              width: 55,
               child: Text(
-                ' ${minutesUntilPrayer}m',
-                textAlign: TextAlign.right,
+                '$minutesUntilPrayer ${context.tr('min')}',
+                textAlign: TextAlign.end,
                 style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.primaryCyan,

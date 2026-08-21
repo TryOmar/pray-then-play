@@ -249,7 +249,7 @@ class _PrayerTimesScreenState extends ConsumerState<PrayerTimesScreen> {
                                       ),
                                       if (isNext)
                                         Text(
-                                          'in ${minutesUntil}m',
+                                          '${context.tr('in_time')} $minutesUntil ${context.tr('min')}',
                                           style: TextStyle(
                                             fontSize: 11,
                                             color: statusColor,
@@ -258,7 +258,7 @@ class _PrayerTimesScreenState extends ConsumerState<PrayerTimesScreen> {
                                         ),
                                       if (isCurrent)
                                         Text(
-                                          'NOW',
+                                          context.tr('now'),
                                           style: TextStyle(
                                             fontSize: 11,
                                             color: statusColor,
