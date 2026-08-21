@@ -69,3 +69,7 @@ flutter:
     - assets/branding/icon/
     - assets/branding/logo/
     - assets/branding/logo/themes/
+
+dependency_overrides:
+  path_provider_android: 2.2.17
+
