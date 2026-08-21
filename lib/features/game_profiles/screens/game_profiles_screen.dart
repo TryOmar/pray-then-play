@@ -893,17 +893,19 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 5, vertical: 1),
                                           decoration: BoxDecoration(
-                                            color: AppColors.primaryCyan
+                                            color: Theme.of(context)
+                                                .primaryColor
                                                 .withValues(alpha: 0.2),
                                             borderRadius:
                                                 BorderRadius.circular(3),
                                           ),
-                                          child: const Text(
+                                          child: Text(
                                             'Custom',
                                             style: TextStyle(
                                               fontSize: 9,
                                               fontWeight: FontWeight.w700,
-                                              color: AppColors.primaryCyan),
+                                              color: Theme.of(context)
+                                                  .primaryColor),
                                           ),
                                         ),
                                       ],

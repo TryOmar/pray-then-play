@@ -1,9 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
-import 'package:intl/intl.dart';
-import '../constants/app_constants.dart';
-import '../models/prayer_time.dart';
 import '../services/prayer_service.dart';
 import '../services/storage_service.dart';
 import '../utils/time_utils.dart';

@@ -175,12 +175,12 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           // 24H Axis Grid Markers
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('00:00', style: TextStyle(fontSize: 8.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
-              Text('06:00', style: TextStyle(fontSize: 8.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
-              Text('12:00', style: TextStyle(fontSize: 8.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
-              Text('18:00', style: TextStyle(fontSize: 8.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
-              Text('23:59', style: TextStyle(fontSize: 8.5, color: AppColors.textMuted, fontWeight: FontWeight.w600)),
+            children: [
+              Text('00:00', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
+              Text('06:00', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
+              Text('12:00', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
+              Text('18:00', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
+              Text('23:59', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
             ],
           ),
 
@@ -605,6 +605,9 @@ class _LegendItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textSecondary = Theme.of(context).textTheme.bodyMedium?.color ??
+        AppColors.textSecondary;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -619,9 +622,9 @@ class _LegendItem extends StatelessWidget {
         const SizedBox(width: 5),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 10,
-            color: AppColors.textSecondary,
+            color: textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),

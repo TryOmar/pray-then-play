@@ -23,23 +23,27 @@ class PrayerCountdownWidget extends StatelessWidget {
         ? 1.0
         : (1.0 - (minutesRemaining / 120)).clamp(0.0, 1.0);
 
+    final primaryColor = Theme.of(context).primaryColor;
     final ringColor = minutesRemaining <= 5
         ? AppColors.dangerRed
         : minutesRemaining <= 15
             ? AppColors.warningAmber
-            : AppColors.primaryCyan;
+            : primaryColor;
+
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final textMuted =
+        Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
+    final textSecondary =
+        Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.textSecondary;
+    final trackColor =
+        Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
 
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: GlassmorphicDecoration.card(
-        borderColor: ringColor.withValues(alpha: 0.2),
-        glowShadows: [
-          BoxShadow(
-            color: ringColor.withValues(alpha: 0.08),
-            blurRadius: 30,
-            spreadRadius: 2,
-          ),
-        ],
+        context: context,
+        customBorder: ringColor.withValues(alpha: 0.25),
+        glow: true,
       ),
       child: Column(
         children: [
@@ -70,13 +74,13 @@ class PrayerCountdownWidget extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 // Background ring
-                const SizedBox(
+                SizedBox(
                   width: 180,
                   height: 180,
                   child: CircularProgressIndicator(
                     value: 1.0,
                     strokeWidth: 6,
-                    color: AppColors.surfaceHighlight,
+                    color: trackColor,
                     strokeCap: StrokeCap.round,
                   ),
                 ),
@@ -118,19 +122,19 @@ class PrayerCountdownWidget extends StatelessWidget {
                   children: [
                     Text(
                       TimeUtils.formatCountdown(countdown),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 38,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: onSurface,
                         letterSpacing: 2,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'remaining',
                       style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textMuted,
+                        color: textMuted,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -145,9 +149,9 @@ class PrayerCountdownWidget extends StatelessWidget {
           if (prayerTime != null)
             Text(
               'Begins at ${TimeUtils.formatTime(prayerTime!)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AppColors.textSecondary,
+                color: textSecondary,
               ),
             ),
         ],

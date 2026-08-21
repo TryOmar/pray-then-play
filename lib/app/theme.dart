@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Balanced 11-Theme Matrix for Pray Then Play
@@ -32,8 +33,8 @@ enum AppGamingTheme {
     secondaryAccent: Color(0xFFA1A1AA),
     background: Color(0xFF000000),
     backgroundSecondary: Color(0xFF050505),
-    surface: Color(0xFF080808),
-    surfaceElevated: Color(0xFF121212),
+    surface: Color(0xFF0A0A0A),
+    surfaceElevated: Color(0xFF141414),
     surfaceHighlight: Color(0xFF222222),
     borderColor: Color(0xFF1F1F1F),
     textPrimary: Color(0xFFFFFFFF),
@@ -56,7 +57,7 @@ enum AppGamingTheme {
     borderColor: Color(0xFF2D192B),
     textPrimary: Color(0xFFFFF1F2),
     textSecondary: Color(0xFFFDA4AF),
-    textMuted: Color(0xFF9F1239),
+    textMuted: Color(0xFFF43F5E),
     buttonTextColor: Colors.white,
     isLight: false,
   ),
@@ -74,7 +75,7 @@ enum AppGamingTheme {
     borderColor: Color(0xFF1B3B2A),
     textPrimary: Color(0xFFECFDF5),
     textSecondary: Color(0xFFA7F3D0),
-    textMuted: Color(0xFF6EE7B7),
+    textMuted: Color(0xFF34D399),
     buttonTextColor: Color(0xFF08140E),
     isLight: false,
   ),
@@ -92,7 +93,7 @@ enum AppGamingTheme {
     borderColor: Color(0xFF362720),
     textPrimary: Color(0xFFFFFBEB),
     textSecondary: Color(0xFFFDE68A),
-    textMuted: Color(0xFFB45309),
+    textMuted: Color(0xFFFBBF24),
     buttonTextColor: Color(0xFF14100E),
     isLight: false,
   ),
@@ -138,7 +139,7 @@ enum AppGamingTheme {
     displayName: 'Sand',
     tagline: 'Warm Calm Ivory',
     description: 'Warm dune ivory with refined desert gold accents',
-    primaryAccent: Color(0xFFB7791F),
+    primaryAccent: Color(0xFFB45309),
     secondaryAccent: Color(0xFFD97706),
     background: Color(0xFFF7F1E5),
     backgroundSecondary: Color(0xFFEDE5D4),
@@ -184,7 +185,7 @@ enum AppGamingTheme {
     borderColor: Color(0xFFE0D7FE),
     textPrimary: Color(0xFF1E1B4B),
     textSecondary: Color(0xFF4C1D95),
-    textMuted: Color(0xFF7C3AED),
+    textMuted: Color(0xFF6B7280),
     buttonTextColor: Colors.white,
     isLight: true,
   ),
@@ -348,6 +349,56 @@ class PrayThenPlayTheme {
         foregroundColor: gamingTheme.textPrimary,
         elevation: 0,
         centerTitle: false,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isLight ? Brightness.dark : Brightness.light,
+          statusBarBrightness: isLight ? Brightness.light : Brightness.dark,
+          systemNavigationBarColor: gamingTheme.background,
+          systemNavigationBarIconBrightness:
+              isLight ? Brightness.dark : Brightness.light,
+          systemNavigationBarDividerColor: Colors.transparent,
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: gamingTheme.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(
+            color: isOled ? const Color(0xFF222222) : gamingTheme.borderColor,
+            width: 1,
+          ),
+        ),
+        titleTextStyle: GoogleFonts.outfit(
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          color: gamingTheme.textPrimary,
+        ),
+        contentTextStyle: GoogleFonts.outfit(
+          fontSize: 13.5,
+          color: gamingTheme.textSecondary,
+          height: 1.4,
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: gamingTheme.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: gamingTheme.surfaceElevated,
+        labelStyle: GoogleFonts.outfit(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: gamingTheme.textPrimary,
+        ),
+        side: BorderSide(
+          color: isOled ? const Color(0xFF222222) : gamingTheme.borderColor,
+          width: 0.8,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       cardTheme: CardThemeData(
         color: gamingTheme.surface,
@@ -533,16 +584,18 @@ class GlassmorphicDecoration {
     double borderRadius = 16,
     BuildContext? context,
   }) {
+    final isDark =
+        context == null || Theme.of(context).brightness == Brightness.dark;
     return BoxDecoration(
-      color: statusColor.withValues(alpha: 0.1),
+      color: statusColor.withValues(alpha: isDark ? 0.1 : 0.08),
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
-        color: statusColor.withValues(alpha: 0.35),
+        color: statusColor.withValues(alpha: isDark ? 0.35 : 0.28),
         width: 1,
       ),
       boxShadow: [
         BoxShadow(
-          color: statusColor.withValues(alpha: 0.12),
+          color: statusColor.withValues(alpha: isDark ? 0.12 : 0.06),
           blurRadius: 16,
           spreadRadius: 1,
         ),
@@ -559,16 +612,27 @@ class GlassmorphicDecoration {
     double glowIntensity = 0.18,
     double borderWidth = 1.0,
   }) {
+    final isDark =
+        context == null || Theme.of(context).brightness == Brightness.dark;
+    final defaultBg = context != null
+        ? Theme.of(context).colorScheme.surface
+        : const Color(0xFF111827);
+    final defaultBorder = context != null
+        ? (borderColor ??
+            glowColor.withValues(alpha: isDark ? 0.35 : 0.28))
+        : (borderColor ?? glowColor.withValues(alpha: 0.35));
+
     return BoxDecoration(
-      color: backgroundColor ?? const Color(0xFF111827),
+      color: backgroundColor ?? defaultBg,
       borderRadius: BorderRadius.circular(borderRadius),
       border: Border.all(
-        color: borderColor ?? glowColor.withValues(alpha: 0.35),
+        color: defaultBorder,
         width: borderWidth,
       ),
       boxShadow: [
         BoxShadow(
-          color: glowColor.withValues(alpha: glowIntensity),
+          color: glowColor
+              .withValues(alpha: isDark ? glowIntensity : glowIntensity * 0.6),
           blurRadius: 18,
           spreadRadius: 1,
         ),

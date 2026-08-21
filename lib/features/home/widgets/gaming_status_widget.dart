@@ -22,6 +22,7 @@ class GamingStatusWidget extends StatelessWidget {
       duration: const Duration(milliseconds: 500),
       padding: const EdgeInsets.all(18),
       decoration: GlassmorphicDecoration.statusCard(
+        context: context,
         statusColor: config.color,
       ),
       child: Row(
@@ -58,9 +59,10 @@ class GamingStatusWidget extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   config.subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ??
+                        AppColors.textSecondary,
                   ),
                 ),
               ],

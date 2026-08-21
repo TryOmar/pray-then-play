@@ -292,12 +292,12 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                           GestureDetector(
                             onTap: () => _showAddActivityQuickDialog(
                                 context, _selectedGame!),
-                            child: const Text(
+                            child: Text(
                               '+ Add Activity',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.primaryCyan,
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
                           ),
@@ -375,20 +375,21 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                                                       horizontal: 5,
                                                       vertical: 1.5),
                                                   decoration: BoxDecoration(
-                                                    color: AppColors.primaryCyan
+                                                    color: Theme.of(context)
+                                                        .primaryColor
                                                         .withValues(alpha: 0.2),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             4),
                                                   ),
-                                                  child: const Text(
+                                                  child: Text(
                                                     'Custom',
                                                     style: TextStyle(
                                                       fontSize: 8.5,
                                                       fontWeight:
                                                           FontWeight.w700,
-                                                      color:
-                                                          AppColors.primaryCyan,
+                                                      color: Theme.of(context)
+                                                          .primaryColor,
                                                     ),
                                                   ),
                                                 ),
@@ -698,7 +699,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                 title: 'Next Salah',
                 value:
                     '$_nextPrayerName in $_minutesUntilPrayer min',
-                valueColor: AppColors.primaryCyan,
+                valueColor: Theme.of(context).primaryColor,
               ),
               const SizedBox(height: 10),
               _buildBreakdownRow(
@@ -744,28 +745,29 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.analytics_rounded,
-                          size: 18, color: AppColors.primaryCyan),
+                      Icon(Icons.analytics_rounded,
+                          size: 18, color: Theme.of(context).primaryColor),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'PERSONAL SESSION HISTORY',
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.primaryCyan,
+                                color: Theme.of(context).primaryColor,
                                 letterSpacing: 0.8,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Global estimate: ${_selectedActivity!.minMinutes}–${_selectedActivity!.maxMinutes}m  •  Your average: ~${stats.averageDurationMinutes}m (${stats.sessionCount} sessions logged)',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
-                                color: AppColors.textSecondary,
+                                color: Theme.of(context).textTheme.bodyMedium?.color ??
+                                    AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -811,8 +813,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                     label: const Text('Pray First'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: color,
-                      foregroundColor:
-                          Theme.of(context).scaffoldBackgroundColor,
+                      foregroundColor: color.computeLuminance() > 0.55
+                          ? Colors.black
+                          : Colors.white,
                     ),
                   ),
                 ),
@@ -872,8 +875,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                         label: const Text('Start & Track Session'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: color,
-                          foregroundColor:
-                              Theme.of(context).scaffoldBackgroundColor,
+                          foregroundColor: color.computeLuminance() > 0.55
+                              ? Colors.black
+                              : Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),

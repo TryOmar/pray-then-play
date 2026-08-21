@@ -82,16 +82,23 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
   }
 
   Widget _buildInMatch() {
+    final primaryColor = Theme.of(context).primaryColor;
     final statusColor = _prayerArrived
         ? AppColors.dangerRed
         : _minutesUntilPrayer <= 5
             ? AppColors.dangerRed
             : _minutesUntilPrayer <= 15
                 ? AppColors.warningAmber
-                : AppColors.primaryCyan;
+                : primaryColor;
+
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    final textSecondary = Theme.of(context).textTheme.bodyMedium?.color ??
+        AppColors.textSecondary;
+    final textMuted = Theme.of(context).textTheme.bodySmall?.color ??
+        AppColors.textMuted;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -141,6 +148,7 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
               Container(
                 padding: const EdgeInsets.all(32),
                 decoration: GlassmorphicDecoration.neonCard(
+                  context: context,
                   glowColor: statusColor,
                   glowIntensity: _prayerArrived ? 0.25 : 0.1,
                 ),
@@ -156,18 +164,19 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                     const SizedBox(height: 16),
                     Text(
                       TimeUtils.formatCountdown(_matchDuration),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.w700,
+                        color: onSurface,
                         letterSpacing: 3,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'match duration',
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.textMuted,
+                        color: textMuted,
                       ),
                     ),
                   ],
@@ -180,6 +189,7 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: GlassmorphicDecoration.statusCard(
+                  context: context,
                   statusColor: statusColor,
                 ),
                 child: Row(
@@ -205,8 +215,8 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                             _prayerArrived
                                 ? 'Finish safely, then pray as soon as possible.'
                                 : "You're in a match. Focus on the game.",
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: textSecondary,
                               fontSize: 12,
                             ),
                           ),
@@ -228,6 +238,9 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                   label: const Text('Match Finished'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: statusColor,
+                    foregroundColor: statusColor.computeLuminance() > 0.55
+                        ? Colors.black
+                        : Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
@@ -241,9 +254,14 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
 
   Widget _buildPostMatch() {
     final isPrayerTime = _minutesUntilPrayer <= 0;
+    final primaryColor = Theme.of(context).primaryColor;
+    final glowColor = isPrayerTime ? AppColors.dangerRed : AppColors.successGreen;
+    final actionColor = isPrayerTime ? AppColors.dangerRed : primaryColor;
+    final textSecondary = Theme.of(context).textTheme.bodyMedium?.color ??
+        AppColors.textSecondary;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -254,9 +272,8 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
               Container(
                 padding: const EdgeInsets.all(32),
                 decoration: GlassmorphicDecoration.neonCard(
-                  glowColor: isPrayerTime
-                      ? AppColors.dangerRed
-                      : AppColors.successGreen,
+                  context: context,
+                  glowColor: glowColor,
                   glowIntensity: 0.15,
                 ),
                 child: Column(
@@ -277,8 +294,8 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                     const SizedBox(height: 8),
                     Text(
                       'Duration: ${TimeUtils.formatDuration(_matchDuration)}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: textSecondary,
                         fontSize: 14,
                       ),
                     ),
@@ -290,12 +307,12 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                       decoration: BoxDecoration(
                         color: isPrayerTime
                             ? AppColors.dangerRed.withValues(alpha: 0.1)
-                            : AppColors.primaryCyan.withValues(alpha: 0.08),
+                            : primaryColor.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isPrayerTime
                               ? AppColors.dangerRed.withValues(alpha: 0.3)
-                              : AppColors.primaryCyan.withValues(alpha: 0.2),
+                              : primaryColor.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
@@ -304,7 +321,7 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                             Icons.mosque_rounded,
                             color: isPrayerTime
                                 ? AppColors.dangerRed
-                                : AppColors.primaryCyan,
+                                : primaryColor,
                             size: 24,
                           ),
                           const SizedBox(height: 8),
@@ -317,7 +334,7 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                               fontSize: 14,
                               color: isPrayerTime
                                   ? AppColors.dangerRed
-                                  : AppColors.textSecondary,
+                                  : textSecondary,
                               fontWeight: isPrayerTime
                                   ? FontWeight.w600
                                   : FontWeight.w400,
@@ -340,9 +357,10 @@ class _InMatchScreenState extends ConsumerState<InMatchScreen> {
                   icon: const Icon(Icons.mosque_rounded, size: 18),
                   label: const Text('Pray Now'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isPrayerTime
-                        ? AppColors.dangerRed
-                        : AppColors.primaryCyan,
+                    backgroundColor: actionColor,
+                    foregroundColor: actionColor.computeLuminance() > 0.55
+                        ? Colors.black
+                        : Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),

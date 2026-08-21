@@ -127,7 +127,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surface,
+      backgroundColor: _selectedTheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -143,7 +143,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceHighlight,
+                    color: _selectedTheme.surfaceHighlight,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -187,13 +187,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.surfaceElevated,
+                          color: _selectedTheme.surfaceElevated,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.location_city_rounded, size: 18, color: AppColors.primaryCyan),
+                        child: Icon(Icons.location_city_rounded, size: 18, color: _selectedTheme.primaryAccent),
                       ),
                       title: Text(city.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                      subtitle: Text(city.country, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                      subtitle: Text(city.country, style: TextStyle(fontSize: 12, color: _selectedTheme.textMuted)),
                       onTap: () {
                         setState(() {
                           _cityName = city.name;
@@ -223,7 +223,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surface,
+      backgroundColor: _selectedTheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -238,7 +238,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceHighlight,
+                  color: _selectedTheme.surfaceHighlight,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1475,7 +1475,7 @@ class _PhilosophyTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: GlassmorphicDecoration.card(),
+      decoration: GlassmorphicDecoration.card(context: context),
       child: Row(
         children: [
           Container(
@@ -1493,7 +1493,14 @@ class _PhilosophyTile extends StatelessWidget {
               children: [
                 Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).textTheme.bodySmall?.color ??
+                        AppColors.textMuted,
+                  ),
+                ),
               ],
             ),
           ),
@@ -1520,38 +1527,52 @@ class _LocationOptionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor =
+        Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
+    final textMuted =
+        Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
+
     return GestureDetector(
       onTap: isLoading ? null : onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: surfaceColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.surfaceHighlight),
+          border: Border.all(color: borderColor),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                color: primaryColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: isLoading
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryCyan))
-                  : Icon(icon, color: AppColors.primaryCyan, size: 20),
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: primaryColor))
+                  : Icon(icon, color: primaryColor, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                  Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 13)),
+                  Text(subtitle,
+                      style: TextStyle(fontSize: 11, color: textMuted)),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 18),
+            Icon(Icons.chevron_right_rounded, color: textMuted, size: 18),
           ],
         ),
       ),
@@ -1589,6 +1610,12 @@ class _GameSelectRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor =
+        Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
+    final textMuted =
+        Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: GestureDetector(
@@ -1597,29 +1624,37 @@ class _GameSelectRow extends StatelessWidget {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: game.isSelected ? Color(game.color).withValues(alpha: 0.15) : AppColors.surface,
+            color: game.isSelected
+                ? Color(game.color).withValues(alpha: 0.15)
+                : surfaceColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: game.isSelected ? Color(game.color) : AppColors.surfaceHighlight,
+              color: game.isSelected ? Color(game.color) : borderColor,
               width: game.isSelected ? 1.5 : 1,
             ),
           ),
           child: Row(
             children: [
-              GameIconWidget(iconName: game.iconName, size: 32, fallbackColor: game.color),
+              GameIconWidget(
+                  iconName: game.iconName, size: 32, fallbackColor: game.color),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(game.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                    Text('${game.activities.length} activities & modes', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                    Text(game.name,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 14)),
+                    Text('${game.activities.length} activities & modes',
+                        style: TextStyle(fontSize: 11, color: textMuted)),
                   ],
                 ),
               ),
               Icon(
-                game.isSelected ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
-                color: game.isSelected ? Color(game.color) : AppColors.textMuted,
+                game.isSelected
+                    ? Icons.check_box_rounded
+                    : Icons.check_box_outline_blank_rounded,
+                color: game.isSelected ? Color(game.color) : textMuted,
                 size: 22,
               ),
             ],

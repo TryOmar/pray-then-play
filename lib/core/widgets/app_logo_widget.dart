@@ -47,7 +47,7 @@ class AppLogoWidget extends ConsumerWidget {
     } catch (_) {
       // In isolated environments outside ProviderScope
       for (final t in AppGamingTheme.values) {
-        if (t.primaryAccent.value == theme.primaryColor.value) {
+        if (t.primaryAccent.toARGB32() == theme.primaryColor.toARGB32()) {
           activeTheme = t;
           break;
         }

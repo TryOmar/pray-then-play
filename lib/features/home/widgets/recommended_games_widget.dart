@@ -46,22 +46,24 @@ class RecommendedGamesWidget extends ConsumerWidget {
     }
 
     if (userGames.isEmpty) {
+      final textMuted =
+          Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
       return Container(
         padding: const EdgeInsets.all(20),
-        decoration: GlassmorphicDecoration.card(),
-        child: const Column(
+        decoration: GlassmorphicDecoration.card(context: context),
+        child: Column(
           children: [
-            Icon(Icons.sports_esports_outlined, size: 36, color: AppColors.textMuted),
-            SizedBox(height: 10),
-            Text(
+            Icon(Icons.sports_esports_outlined, size: 36, color: textMuted),
+            const SizedBox(height: 10),
+            const Text(
               'No games selected yet',
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               'Configure your games in Settings or Onboarding to see recommendations.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+              style: TextStyle(fontSize: 12, color: textMuted),
             ),
           ],
         ),
@@ -158,7 +160,11 @@ class _SectionHeader extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           subtitle,
-          style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).textTheme.bodySmall?.color ??
+                AppColors.textMuted,
+          ),
         ),
       ],
     );

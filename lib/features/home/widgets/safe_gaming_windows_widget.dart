@@ -14,15 +14,24 @@ class SafeGamingWindowsWidget extends ConsumerWidget {
 
     if (windows.isEmpty) return const SizedBox();
 
+    final theme = Theme.of(context);
+    final surfaceColor = theme.colorScheme.surface;
+    final borderColor = theme.dividerTheme.color ?? AppColors.surfaceHighlight;
+    final textPrimary = theme.colorScheme.onSurface;
+    final textSecondary =
+        theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary;
+    final textMuted =
+        theme.textTheme.bodySmall?.color ?? AppColors.textMuted;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "TODAY'S GAMING WINDOWS",
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.textMuted,
+            color: textMuted,
             letterSpacing: 1.5,
           ),
         ),
@@ -40,12 +49,12 @@ class SafeGamingWindowsWidget extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: isCurrent
                     ? color.withValues(alpha: 0.08)
-                    : AppColors.surface,
+                    : surfaceColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isCurrent
                       ? color.withValues(alpha: 0.4)
-                      : AppColors.surfaceHighlight,
+                      : borderColor,
                   width: isCurrent ? 1.5 : 1,
                 ),
               ),
@@ -63,8 +72,8 @@ class SafeGamingWindowsWidget extends ConsumerWidget {
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: isCurrent
-                              ? AppColors.textPrimary
-                              : AppColors.textSecondary,
+                              ? textPrimary
+                              : textSecondary,
                           fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
@@ -96,7 +105,7 @@ class SafeGamingWindowsWidget extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: isCurrent ? color : AppColors.textSecondary,
+                        color: isCurrent ? color : textSecondary,
                       ),
                     ),
                   ),

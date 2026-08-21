@@ -219,7 +219,7 @@ class NextPrayerHeroWidget extends ConsumerWidget {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: statusColor,
-                foregroundColor: statusColor == AppColors.warningAmber
+                foregroundColor: statusColor.computeLuminance() > 0.55
                     ? Colors.black
                     : Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),

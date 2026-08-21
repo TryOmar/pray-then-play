@@ -97,7 +97,7 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
             // Duration selector
             Container(
               padding: const EdgeInsets.all(18),
-              decoration: GlassmorphicDecoration.card(),
+              decoration: GlassmorphicDecoration.card(context: context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -128,14 +128,16 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 8),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                          color: Theme.of(context)
+                              .primaryColor
+                              .withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           TimeUtils.formatMinutes(
                               (_sessionHours * 60).toInt()),
-                          style: const TextStyle(
-                            color: AppColors.primaryCyan,
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
                           ),
@@ -149,12 +151,13 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
 
             const SizedBox(height: 24),
 
-            const Text(
+            Text(
               'SESSION TIMELINE',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textMuted,
+                color: Theme.of(context).textTheme.bodySmall?.color ??
+                    AppColors.textMuted,
                 letterSpacing: 1.5,
               ),
             ),
@@ -169,10 +172,11 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
                   final isLast = index == _timeline.length - 1;
 
                   final color = entry.type == _EntryType.prayer
-                      ? AppColors.primaryCyan
+                      ? Theme.of(context).primaryColor
                       : entry.type == _EntryType.gaming
                           ? AppColors.successGreen
-                          : AppColors.textMuted;
+                          : (Theme.of(context).textTheme.bodySmall?.color ??
+                              AppColors.textMuted);
 
                   final icon = entry.type == _EntryType.prayer
                       ? Icons.mosque_rounded
@@ -207,7 +211,10 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
                                     width: 2,
                                     margin:
                                         const EdgeInsets.symmetric(vertical: 4),
-                                    color: AppColors.surfaceHighlight,
+                                    color: Theme.of(context)
+                                            .dividerTheme
+                                            .color ??
+                                        AppColors.surfaceHighlight,
                                   ),
                                 ),
                             ],
@@ -233,9 +240,13 @@ class _SessionPlannerScreenState extends ConsumerState<SessionPlannerScreen> {
                                 const SizedBox(height: 2),
                                 Text(
                                   entry.label,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: AppColors.textSecondary,
+                                    color: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.color ??
+                                        AppColors.textSecondary,
                                   ),
                                 ),
                               ],

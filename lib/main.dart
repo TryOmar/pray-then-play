@@ -103,12 +103,26 @@ class _PrayThenPlayAppState extends ConsumerState<PrayThenPlayApp>
   Widget build(BuildContext context) {
     final activeTheme = ref.watch(effectiveThemeProvider);
     final router = ref.watch(routerProvider);
+    final isLight = activeTheme.isLight;
 
-    return MaterialApp.router(
-      title: 'Pray Then Play',
-      debugShowCheckedModeBanner: false,
-      theme: PrayThenPlayTheme.getTheme(activeTheme),
-      routerConfig: router,
+    final overlayStyle = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isLight ? Brightness.dark : Brightness.light,
+      statusBarBrightness: isLight ? Brightness.light : Brightness.dark,
+      systemNavigationBarColor: activeTheme.background,
+      systemNavigationBarIconBrightness:
+          isLight ? Brightness.dark : Brightness.light,
+      systemNavigationBarDividerColor: Colors.transparent,
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: MaterialApp.router(
+        title: 'Pray Then Play',
+        debugShowCheckedModeBanner: false,
+        theme: PrayThenPlayTheme.getTheme(activeTheme),
+        routerConfig: router,
+      ),
     );
   }
 }

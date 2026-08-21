@@ -43,12 +43,13 @@ class PrayerStreakWidget extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "TODAY'S SALAH",
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textMuted,
+                        color: Theme.of(context).textTheme.bodySmall?.color ??
+                            AppColors.textMuted,
                         letterSpacing: 1.1,
                       ),
                     ),
@@ -63,7 +64,8 @@ class PrayerStreakWidget extends ConsumerWidget {
                           fontWeight: FontWeight.w600,
                           color: completedCount == 5
                               ? AppColors.successGreen
-                              : AppColors.textSecondary,
+                              : (Theme.of(context).textTheme.bodyMedium?.color ??
+                                  AppColors.textSecondary),
                         ),
                       ),
                     ),
@@ -449,8 +451,10 @@ class _PrayerCard extends StatelessWidget {
                   fontSize: 9,
                   fontWeight: FontWeight.w600,
                   color: isCompleted
-                      ? AppColors.textSecondary
-                      : AppColors.textMuted,
+                      ? (Theme.of(context).textTheme.bodyMedium?.color ??
+                          AppColors.textSecondary)
+                      : (Theme.of(context).textTheme.bodySmall?.color ??
+                          AppColors.textMuted),
                 ),
               ),
             ),
@@ -497,29 +501,39 @@ class _StatusOptionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final borderColor = Theme.of(context).dividerTheme.color ??
+        AppColors.surfaceHighlight;
+    final textSecondary = Theme.of(context).textTheme.bodyMedium?.color ??
+        AppColors.textSecondary;
+    final textMuted = Theme.of(context).textTheme.bodySmall?.color ??
+        AppColors.textMuted;
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? color.withValues(alpha: 0.18) : Colors.transparent,
+            color: isSelected
+                ? color.withValues(alpha: 0.18)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? color : AppColors.surfaceHighlight,
+              color: isSelected ? color : borderColor,
               width: isSelected ? 1.5 : 1.0,
             ),
           ),
           child: Column(
             children: [
-              Icon(icon, size: 18, color: isSelected ? color : AppColors.textMuted),
+              Icon(icon,
+                  size: 18, color: isSelected ? color : textMuted),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                  color: isSelected ? color : AppColors.textSecondary,
+                  color: isSelected ? color : textSecondary,
                 ),
               ),
             ],

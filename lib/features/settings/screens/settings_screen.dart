@@ -128,7 +128,7 @@ class SettingsScreen extends ConsumerWidget {
                             : '12-Hour (e.g. 03:47 PM)',
                         trailing: Switch.adaptive(
                           value: is24Hour,
-                          activeColor: Theme.of(context).primaryColor,
+                          activeTrackColor: Theme.of(context).primaryColor,
                           onChanged: (val) {
                             ref
                                 .read(timeFormatIs24HourProvider.notifier)

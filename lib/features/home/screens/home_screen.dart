@@ -320,7 +320,7 @@ class HomeScreen extends ConsumerWidget {
         Expanded(
           child: _QuickActionButton(
             icon: Icons.play_circle_outline_rounded,
-            label: "In a Match",
+            label: 'In a Match',
             color: AppColors.warningAmber,
             onTap: () => context.push('/in-match'),
           ),
@@ -329,7 +329,7 @@ class HomeScreen extends ConsumerWidget {
         Expanded(
           child: _QuickActionButton(
             icon: Icons.event_note_rounded,
-            label: "Planner",
+            label: 'Planner',
             color: AppColors.successGreen,
             onTap: () => context.push('/session-planner'),
           ),
