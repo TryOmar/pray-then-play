@@ -53,8 +53,20 @@ jobs:
             echo "keyAlias=$KEY_ALIAS" >> android/key.properties
             echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
             echo "✅ Release signing key configured from repository secrets."
+          elif [ -f "android/app/upload-keystore.jks" ]; then
+            echo "storeFile=upload-keystore.jks" > android/key.properties
+            echo "storePassword=ptppassword2026" >> android/key.properties
+            echo "keyAlias=upload" >> android/key.properties
+            echo "keyPassword=ptppassword2026" >> android/key.properties
+            echo "✅ Release signing configured from local keystore."
           else
-            echo "ℹ️ No secret keystore found. Building with existing local/debug configuration."
+            echo "ℹ️ Generating CI release signing keystore..."
+            keytool -genkeypair -v -keystore android/app/upload-keystore.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000 -storepass ptppassword2026 -keypass ptppassword2026 -dname "CN=PrayThenPlay, OU=Dev, O=PTP, L=Cairo, S=Cairo, C=EG"
+            echo "storeFile=upload-keystore.jks" > android/key.properties
+            echo "storePassword=ptppassword2026" >> android/key.properties
+            echo "keyAlias=upload" >> android/key.properties
+            echo "keyPassword=ptppassword2026" >> android/key.properties
+            echo "✅ CI release keystore generated successfully."
           fi
 
       - name: 🏗️ Build Android App Bundle (AAB for Google Play)
