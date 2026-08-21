@@ -6,6 +6,8 @@ import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/city_data.dart';
 import '../../../core/constants/prayer_constants.dart';
+import '../../../core/localization/app_language.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/providers/gaming_provider.dart';
 import '../../../core/providers/prayer_heatmap_provider.dart';
 import '../../../core/providers/settings_provider.dart';
@@ -31,6 +33,7 @@ class SettingsScreen extends ConsumerWidget {
     final minimizeToTray = ref.watch(desktopMinimizeToTrayProvider);
     final launchOnStartup = ref.watch(desktopLaunchOnStartupProvider);
     final userGames = ref.watch(userGamesProvider);
+    final currentLanguage = ref.watch(appLanguageProvider);
     final city = StorageService.cityName;
     final country = StorageService.countryName;
 
@@ -80,6 +83,20 @@ class SettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  // LANGUAGE / اللغات
+                  _SettingsSection(
+                    title: 'LANGUAGE / اللغة',
+                    children: [
+                      _SettingsTile(
+                        icon: Icons.language_rounded,
+                        title: 'App Language',
+                        subtitle: '${currentLanguage.flag} ${currentLanguage.nativeName} (${currentLanguage.englishName})',
+                        onTap: () => _showLanguagePicker(context, ref),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
                   // LOCATION
                   _SettingsSection(
                     title: 'PRAYER LOCATION',
@@ -360,6 +377,136 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context, WidgetRef ref) {
+    final current = ref.read(appLanguageProvider);
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Material(
+        color: Colors.transparent,
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(ctx).size.height * 0.75,
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.language_rounded, size: 22),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Select Language / اختر اللغة',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Choose your preferred language across all app features',
+                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+              ),
+              const SizedBox(height: 14),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: AppLanguage.values.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final lang = AppLanguage.values[index];
+                    final isSelected = lang == current;
+                    final primary = theme.primaryColor;
+
+                    return InkWell(
+                      onTap: () {
+                        ref.read(appLanguageProvider.notifier).setLanguage(lang);
+                        Navigator.pop(ctx);
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? primary.withValues(alpha: 0.12)
+                              : theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected
+                                ? primary
+                                : theme.dividerTheme.color ??
+                                    AppColors.surfaceHighlight,
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              lang.flag,
+                              style: const TextStyle(fontSize: 24),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    lang.nativeName,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: isSelected
+                                          ? primary
+                                          : theme.textTheme.bodyMedium?.color,
+                                    ),
+                                  ),
+                                  Text(
+                                    lang.englishName,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isSelected)
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: primary,
+                                size: 20,
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

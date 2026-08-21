@@ -23,8 +23,8 @@ class AppConstants {
   static const String keyJumuahMode = 'jumuah_mode';
   static const String keyFajrMode = 'fajr_mode';
   static const String keyInMatch = 'in_match';
-  static const String keyMatchStartTime = 'match_start_time';
   static const String keyIs24HourFormat = 'time_format_is_24h';
+  static const String keyAppLanguage = 'app_language_code_v1';
 
   // Notification channels
   static const String notificationChannelId = 'pray_then_play_prayers';

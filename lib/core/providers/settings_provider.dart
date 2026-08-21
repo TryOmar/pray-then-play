@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/theme.dart';
 import '../constants/app_constants.dart';
 import '../constants/prayer_constants.dart';
+import '../localization/app_language.dart';
 import '../services/storage_service.dart';
 
 // System brightness listener state
@@ -199,6 +200,21 @@ class DesktopLaunchOnStartupNotifier extends StateNotifier<bool> {
 
   void toggle() {
     setLaunch(!state);
+  }
+}
+
+// App Language Notifier (Live switching across 10 global languages)
+final appLanguageProvider =
+    StateNotifierProvider<AppLanguageNotifier, AppLanguage>((ref) {
+  return AppLanguageNotifier();
+});
+
+class AppLanguageNotifier extends StateNotifier<AppLanguage> {
+  AppLanguageNotifier() : super(StorageService.appLanguage);
+
+  void setLanguage(AppLanguage language) {
+    state = language;
+    StorageService.setAppLanguage(language);
   }
 }
 

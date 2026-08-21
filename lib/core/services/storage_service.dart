@@ -4,6 +4,7 @@ import '../../app/theme.dart';
 import '../constants/app_constants.dart';
 import '../constants/game_data.dart';
 import '../constants/prayer_constants.dart';
+import '../localization/app_language.dart';
 import '../models/game_profile.dart';
 import '../models/game_session_record.dart';
 import '../models/prayer_record.dart';
@@ -98,6 +99,15 @@ class StorageService {
 
   static Future<void> setThemeMode(ThemeModeOption mode) =>
       _prefs.setInt(AppConstants.keyThemeMode, mode.index);
+
+  // App Language
+  static AppLanguage get appLanguage {
+    final code = _prefs.getString(AppConstants.keyAppLanguage);
+    return AppLanguage.fromCode(code);
+  }
+
+  static Future<void> setAppLanguage(AppLanguage language) =>
+      _prefs.setString(AppConstants.keyAppLanguage, language.code);
 
   // Time Format (12-Hour vs 24-Hour)
   static bool get is24HourFormat =>

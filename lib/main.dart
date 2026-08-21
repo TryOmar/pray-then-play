@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
+import 'core/localization/app_language.dart';
 import 'core/providers/settings_provider.dart';
 import 'core/services/desktop_service.dart';
 import 'core/services/notification_service.dart';
@@ -131,6 +132,7 @@ class _PrayThenPlayAppState extends ConsumerState<PrayThenPlayApp>
   @override
   Widget build(BuildContext context) {
     final activeTheme = ref.watch(effectiveThemeProvider);
+    final currentLanguage = ref.watch(appLanguageProvider);
     final router = ref.watch(routerProvider);
     final isLight = activeTheme.isLight;
 
@@ -151,6 +153,14 @@ class _PrayThenPlayAppState extends ConsumerState<PrayThenPlayApp>
         debugShowCheckedModeBanner: false,
         theme: PrayThenPlayTheme.getTheme(activeTheme),
         routerConfig: router,
+        locale: currentLanguage.locale,
+        supportedLocales: AppLanguage.values.map((e) => e.locale).toList(),
+        builder: (context, child) {
+          return Directionality(
+            textDirection: currentLanguage.direction,
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
       ),
     );
   }
