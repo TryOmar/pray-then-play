@@ -25,17 +25,21 @@ class RiskCalculator {
     int bufferMinutes = 10,
     int? desiredSessionMinutes,
   }) {
-    // Singleplayer / pauseable activities can be paused or exited cleanly anytime
-    if (activity.canPause && !activity.requiresCompletion) {
-      return RiskLevel.low;
-    }
-
     if (minutesUntilPrayer <= 0) {
       return RiskLevel.high;
     }
 
     final effectiveBuffer = activity.safetyBuffer ?? bufferMinutes;
     final safeAvailableTime = minutesUntilPrayer - effectiveBuffer;
+
+    // Singleplayer / pauseable activities can be paused or exited cleanly anytime
+    if (activity.canPause && !activity.requiresCompletion) {
+      // If prayer is within the safety buffer (e.g. <= 10m left), flag as caution
+      if (minutesUntilPrayer <= effectiveBuffer) {
+        return RiskLevel.medium;
+      }
+      return RiskLevel.low;
+    }
 
     // If user specified a target session duration
     if (desiredSessionMinutes != null && desiredSessionMinutes > 0) {
@@ -88,11 +92,19 @@ class RiskCalculator {
     int? tightMargin;
 
     if (activity.canPause && !activity.requiresCompletion) {
-      verdictTitle = '✓ PAUSEABLE SESSION';
-      message =
-          'You can pause, save, or leave ${game.name} · ${activity.name} anytime without penalties.';
-      recommendation =
-          '$nextPrayerName is in $minutesUntilPrayer min ($safeAvailableMinutes min safe window). Enjoy your session and pause when prayer arrives.';
+      if (minutesUntilPrayer <= effectiveBuffer) {
+        verdictTitle = '⚠ PRAYER IMMINENT (PAUSEABLE)';
+        message =
+            '$nextPrayerName is in only $minutesUntilPrayer min (inside your ${effectiveBuffer}m safety buffer).';
+        recommendation =
+            'While ${game.name} · ${activity.name} can be left anytime without penalty, we recommend preparing for Salah instead of starting a new match.';
+      } else {
+        verdictTitle = '✓ PAUSEABLE SESSION';
+        message =
+            'You can pause, save, or leave ${game.name} · ${activity.name} anytime without penalties.';
+        recommendation =
+            '$nextPrayerName is in $minutesUntilPrayer min ($safeAvailableMinutes min safe window). Enjoy your session and pause when prayer arrives.';
+      }
     } else {
       if (desiredSessionMinutes != null && desiredSessionMinutes > 0) {
         tightMargin = (minutesUntilPrayer - desiredSessionMinutes).clamp(0, 999);
