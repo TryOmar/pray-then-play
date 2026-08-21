@@ -68,13 +68,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
-    // Card starts expanded by default; verify activity removal button is present
-    final removeActivityBtn = find.byTooltip('Remove activity');
-    expect(removeActivityBtn, findsWidgets);
+    // Card starts expanded by default; verify edit activity button is present
+    final editActivityBtn = find.byTooltip('Edit activity');
+    expect(editActivityBtn, findsWidgets);
 
-    // Remove the first activity and verify Undo SnackBar
-    await tester.ensureVisible(removeActivityBtn.first);
-    await tester.tap(removeActivityBtn.first, warnIfMissed: false);
+    // Open edit dialog for first activity
+    await tester.ensureVisible(editActivityBtn.first);
+    await tester.tap(editActivityBtn.first, warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(find.text('Delete'), findsOneWidget);
+
+    // Delete the activity from inside the edit pop up
+    await tester.tap(find.text('Delete'), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(find.text('Undo'), findsOneWidget);
 

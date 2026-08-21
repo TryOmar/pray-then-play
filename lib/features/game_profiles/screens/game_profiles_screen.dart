@@ -968,54 +968,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                     .withValues(alpha: 0.12),
                                 foregroundColor:
                                     Theme.of(context).primaryColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline_rounded,
-                                  size: 16, color: AppColors.dangerRed),
-                              tooltip: 'Remove activity',
-                              visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.all(6),
-                              constraints: const BoxConstraints(
-                                minWidth: 32,
-                                minHeight: 32,
-                              ),
-                              style: IconButton.styleFrom(
-                                backgroundColor:
-                                    AppColors.dangerRed.withValues(alpha: 0.1),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              onPressed: () {
-                                ref
-                                    .read(userGamesProvider.notifier)
-                                    .deleteActivity(game.id, activity.id);
-                                ScaffoldMessenger.of(context)
-                                    .hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        '${activity.name} removed from ${game.name}'),
-                                    duration: const Duration(seconds: 3),
-                                    action: SnackBarAction(
-                                      label: 'Undo',
-                                      textColor:
-                                          Theme.of(context).primaryColor,
-                                      onPressed: () {
-                                        ref
-                                            .read(userGamesProvider.notifier)
-                                            .addCustomActivity(
-                                                game.id, activity);
-                                      },
-                                    ),
-                                  ),
-                                );
-                              },
                             ),
                           ],
                         ),
@@ -1147,7 +1100,7 @@ class _GameCardState extends ConsumerState<_GameCard> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
+        builder: (ctx, setModalState) => SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
               20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
           child: Column(
@@ -1304,21 +1257,54 @@ class _GameCardState extends ConsumerState<_GameCard> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
+        builder: (ctx, setModalState) => SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
               20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Edit ${activity.name}',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w700),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Edit ${activity.name}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      ref
+                          .read(userGamesProvider.notifier)
+                          .deleteActivity(game.id, activity.id);
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text('${activity.name} removed from ${game.name}'),
+                          duration: const Duration(seconds: 3),
+                          action: SnackBarAction(
+                            label: 'Undo',
+                            textColor: Theme.of(context).primaryColor,
+                            onPressed: () {
+                              ref
+                                  .read(userGamesProvider.notifier)
+                                  .addCustomActivity(game.id, activity);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.delete_outline_rounded,
+                        size: 20, color: AppColors.dangerRed),
+                    tooltip: 'Delete activity',
+                  ),
+                ],
               ),
               const SizedBox(height: 14),
               TextField(
