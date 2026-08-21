@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
+import '../constants/game_data.dart';
 import '../models/game_profile.dart';
 import '../models/game_session_record.dart';
 import '../models/gaming_window.dart';
@@ -87,6 +88,22 @@ class UserGamesNotifier extends StateNotifier<List<GameProfile>> {
       return g;
     }).toList();
     StorageService.setUserGames(state);
+  }
+
+  void restoreDefaultActivities(String gameId) {
+    final catalogMatch =
+        GameData.defaultCatalog.where((g) => g.id == gameId).firstOrNull;
+    if (catalogMatch != null) {
+      state = state.map((g) {
+        if (g.id == gameId) {
+          final customActs = g.activities.where((a) => a.isCustom).toList();
+          return g.copyWith(
+              activities: [...catalogMatch.activities, ...customActs]);
+        }
+        return g;
+      }).toList();
+      StorageService.setUserGames(state);
+    }
   }
 
   void addCustomGame(GameProfile game) {

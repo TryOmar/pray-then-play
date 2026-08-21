@@ -68,11 +68,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
-    // Expand the first game card
-    await tester.tap(find.byIcon(Icons.expand_more_rounded).first);
+    // Card starts expanded by default; verify activity removal button is present
+    final removeActivityBtn = find.byTooltip('Remove activity');
+    expect(removeActivityBtn, findsWidgets);
+
+    // Remove the first activity and verify Undo SnackBar
+    await tester.ensureVisible(removeActivityBtn.first);
+    await tester.tap(removeActivityBtn.first, warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(find.text('Undo'), findsOneWidget);
+
+    // Tap Undo to restore activity
+    await tester.tap(find.text('Undo'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    // Verify Remove Game button is present in expanded card and can remove game
+    // Verify Remove Game button is present and can remove game
     final removeBtn = find.text('Remove Game');
     expect(removeBtn, findsWidgets);
     await tester.ensureVisible(removeBtn.first);
@@ -80,8 +90,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Undo'), findsOneWidget);
 
-    // Tap Undo
-    await tester.ensureVisible(find.text('Undo'));
+    // Tap Undo to restore game
     await tester.tap(find.text('Undo'), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);

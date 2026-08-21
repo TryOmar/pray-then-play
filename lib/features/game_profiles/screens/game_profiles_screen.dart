@@ -973,40 +973,69 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                 ),
                               ),
                             ),
-                            if (activity.isCustom) ...[
-                              const SizedBox(width: 4),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline_rounded,
-                                    size: 16, color: AppColors.dangerRed),
-                                tooltip: 'Delete custom activity',
-                                visualDensity: VisualDensity.compact,
-                                padding: const EdgeInsets.all(6),
-                                constraints: const BoxConstraints(
-                                  minWidth: 32,
-                                  minHeight: 32,
-                                ),
-                                style: IconButton.styleFrom(
-                                  backgroundColor: AppColors.dangerRed
-                                      .withValues(alpha: 0.1),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  ref
-                                      .read(userGamesProvider.notifier)
-                                      .deleteActivity(game.id, activity.id);
-                                },
+                            const SizedBox(width: 4),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline_rounded,
+                                  size: 16, color: AppColors.dangerRed),
+                              tooltip: 'Remove activity',
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.all(6),
+                              constraints: const BoxConstraints(
+                                minWidth: 32,
+                                minHeight: 32,
                               ),
-                            ],
+                              style: IconButton.styleFrom(
+                                backgroundColor:
+                                    AppColors.dangerRed.withValues(alpha: 0.1),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () {
+                                ref
+                                    .read(userGamesProvider.notifier)
+                                    .deleteActivity(game.id, activity.id);
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        '${activity.name} removed from ${game.name}'),
+                                    duration: const Duration(seconds: 3),
+                                    action: SnackBarAction(
+                                      label: 'Undo',
+                                      textColor:
+                                          Theme.of(context).primaryColor,
+                                      onPressed: () {
+                                        ref
+                                            .read(userGamesProvider.notifier)
+                                            .addCustomActivity(
+                                                game.id, activity);
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       )),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
+                  Builder(builder: (ctx) {
+                    final catalogDefault = GameData.defaultCatalog
+                        .where((g) => g.id == game.id)
+                        .firstOrNull;
+                    final hasRemovedDefaults = catalogDefault != null &&
+                        catalogDefault.activities.any(
+                            (da) => !game.activities.any((ga) => ga.id == da.id));
+
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        OutlinedButton.icon(
                           onPressed: () =>
                               _showAddActivityDialog(context, game),
                           icon: Icon(Icons.add_rounded,
@@ -1018,53 +1047,77 @@ class _GameCardState extends ConsumerState<_GameCard> {
                                 color: Theme.of(context)
                                     .primaryColor
                                     .withValues(alpha: 0.35)),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                             textStyle: const TextStyle(
                                 fontSize: 11.5, fontWeight: FontWeight.w700),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton.icon(
-                        onPressed: () {
-                          ref
-                              .read(userGamesProvider.notifier)
-                              .removeGame(game.id);
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                                  Text('${game.name} removed from library'),
-                              duration: const Duration(seconds: 3),
-                              action: SnackBarAction(
-                                label: 'Undo',
-                                textColor: Theme.of(context).primaryColor,
-                                onPressed: () {
-                                  ref
-                                      .read(userGamesProvider.notifier)
-                                      .addCatalogGame(game);
-                                },
+                        if (hasRemovedDefaults)
+                          TextButton.icon(
+                            onPressed: () {
+                              ref
+                                  .read(userGamesProvider.notifier)
+                                  .restoreDefaultActivities(game.id);
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Default modes restored for ${game.name}'),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.settings_backup_restore_rounded,
+                                size: 14,
+                                color: Theme.of(context).primaryColor),
+                            label: Text(
+                              'Restore Defaults',
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.delete_outline_rounded,
-                            size: 15, color: AppColors.dangerRed),
-                        label: const Text(
-                          'Remove Game',
-                          style: TextStyle(
-                            color: AppColors.dangerRed,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
+                          ),
+                        TextButton.icon(
+                          onPressed: () {
+                            ref
+                                .read(userGamesProvider.notifier)
+                                .removeGame(game.id);
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content:
+                                    Text('${game.name} removed from library'),
+                                duration: const Duration(seconds: 3),
+                                action: SnackBarAction(
+                                  label: 'Undo',
+                                  textColor: Theme.of(context).primaryColor,
+                                  onPressed: () {
+                                    ref
+                                        .read(userGamesProvider.notifier)
+                                        .addCatalogGame(game);
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.delete_outline_rounded,
+                              size: 15, color: AppColors.dangerRed),
+                          label: const Text(
+                            'Remove Game',
+                            style: TextStyle(
+                              color: AppColors.dangerRed,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 8),
-                        ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  }),
                 ],
               ),
             ),
@@ -1343,42 +1396,85 @@ class _GameCardState extends ConsumerState<_GameCard> {
                 ),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final name = nameCtrl.text.trim();
-                    if (name.isEmpty) return;
-                    final dur = int.tryParse(durCtrl.text.trim()) ??
-                        activity.typicalDuration;
-                    final minM =
-                        int.tryParse(minCtrl.text.trim()) ?? activity.minMinutes;
-                    final maxM =
-                        int.tryParse(maxCtrl.text.trim()) ?? activity.maxMinutes;
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        ref
+                            .read(userGamesProvider.notifier)
+                            .deleteActivity(game.id, activity.id);
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                '${activity.name} removed from ${game.name}'),
+                            duration: const Duration(seconds: 3),
+                            action: SnackBarAction(
+                              label: 'Undo',
+                              textColor: Theme.of(context).primaryColor,
+                              onPressed: () {
+                                ref
+                                    .read(userGamesProvider.notifier)
+                                    .addCustomActivity(game.id, activity);
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.delete_outline_rounded,
+                          size: 16, color: AppColors.dangerRed),
+                      label: const Text('Delete'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.dangerRed,
+                        side: const BorderSide(color: AppColors.dangerRed),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        final name = nameCtrl.text.trim();
+                        if (name.isEmpty) return;
+                        final dur = int.tryParse(durCtrl.text.trim()) ??
+                            activity.typicalDuration;
+                        final minM =
+                            int.tryParse(minCtrl.text.trim()) ?? activity.minMinutes;
+                        final maxM =
+                            int.tryParse(maxCtrl.text.trim()) ?? activity.maxMinutes;
 
-                    final updated = activity.copyWith(
-                      name: name,
-                      typicalDuration: dur,
-                      minMinutes: minM,
-                      maxMinutes: maxM,
-                      canPause: canPause,
-                      requiresCompletion: !canPause,
-                      isCompetitive: isCompetitive,
-                      commitmentType: canPause
-                          ? GameCommitmentType.flexible
-                          : GameCommitmentType.commitment,
-                      notes: notesCtrl.text.trim().isNotEmpty
-                          ? notesCtrl.text.trim()
-                          : null,
-                    );
+                        final updated = activity.copyWith(
+                          name: name,
+                          typicalDuration: dur,
+                          minMinutes: minM,
+                          maxMinutes: maxM,
+                          canPause: canPause,
+                          requiresCompletion: !canPause,
+                          isCompetitive: isCompetitive,
+                          commitmentType: canPause
+                              ? GameCommitmentType.flexible
+                              : GameCommitmentType.commitment,
+                          notes: notesCtrl.text.trim().isNotEmpty
+                              ? notesCtrl.text.trim()
+                              : null,
+                        );
 
-                    ref
-                        .read(userGamesProvider.notifier)
-                        .updateActivity(game.id, updated);
-                    Navigator.pop(ctx);
-                  },
-                  child: const Text('Save Changes'),
-                ),
+                        ref
+                            .read(userGamesProvider.notifier)
+                            .updateActivity(game.id, updated);
+                        Navigator.pop(ctx);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text('Save Changes'),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
