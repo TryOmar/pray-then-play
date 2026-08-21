@@ -1230,10 +1230,7 @@ class _PrayerConsistencyScreenState
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  '${context.tr('opportunity_label')}: ' +
-                      (reflection.opportunityPrayer != null
-                          ? context.tr('reflection_insight_short_games')
-                          : context.tr('reflection_insight_complete_prayers')),
+                  '${context.tr('opportunity_label')}: ${(reflection.opportunityPrayer.isNotEmpty && reflection.opportunityPrayer != 'Build your baseline') ? context.tr('reflection_insight_short_games') : context.tr('reflection_insight_complete_prayers')}',
                   style: TextStyle(
                     fontSize: 13,
                     color: theme.textTheme.bodyMedium?.color,

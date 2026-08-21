@@ -115,7 +115,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text('Game / Server Name'), findsOneWidget);
       expect(find.text('Casual / Flexible'), findsOneWidget);
-      expect(find.text('Competitive'), findsOneWidget);
+      expect(find.text('Competitive / Locked'), findsOneWidget);
 
       // Close modal
       await tester.tap(find.byIcon(Icons.close_rounded));

@@ -18,7 +18,7 @@ void main() {
     });
 
     test('11-Theme Matrix has exactly 5 Dark, 5 Light, and 1 Special theme', () {
-      final allThemes = AppGamingTheme.values;
+      const allThemes = AppGamingTheme.values;
       expect(allThemes.length, equals(11));
 
       final darkThemes = allThemes.where((t) => !t.isLight && t != AppGamingTheme.tactical).toList();

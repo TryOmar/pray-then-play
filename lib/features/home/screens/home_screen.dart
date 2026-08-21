@@ -218,10 +218,10 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 24),
               // Right Column (24H Timeline, Salah Tracker)
-              Expanded(
+              const Expanded(
                 flex: 6,
                 child: Column(
-                  children: const [
+                  children: [
                     PrayerGamingTimelineWidget(),
                     SizedBox(height: 20),
                     PrayerStreakWidget(),

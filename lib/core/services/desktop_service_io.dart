@@ -5,7 +5,6 @@ import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:local_notifier/local_notifier.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
-import '../localization/app_language.dart';
 import '../localization/app_translations.dart';
 import 'storage_service.dart';
 
