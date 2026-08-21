@@ -813,19 +813,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('What do you play?', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+          Text(
+            context.tr('onboard_games_title'),
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 4),
-          const Text(
-            'Select your games. We\'ll only recommend modes from what you actually play.',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          Text(
+            context.tr('onboard_games_subtitle'),
+            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
 
           // Search Field
           TextField(
-            decoration: const InputDecoration(
-              hintText: 'Search games...',
-              prefixIcon: Icon(Icons.search_rounded, size: 20),
+            decoration: InputDecoration(
+              hintText: context.tr('search_games_hint'),
+              prefixIcon: const Icon(Icons.search_rounded, size: 20),
             ),
             onChanged: (q) => setState(() => _gameSearchQuery = q),
           ),
@@ -836,9 +839,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ListView(
               children: [
                 if (competitiveGames.isNotEmpty) ...[
-                  const _CategoryHeading(
-                    title: 'COMPETITIVE & MATCH-BASED',
-                    subtitle: 'Penalty for leaving · Requires safe queue warnings',
+                  _CategoryHeading(
+                    title: context.tr('cat_competitive'),
+                    subtitle: context.tr('cat_competitive_sub'),
                     color: AppColors.dangerRed,
                   ),
                   const SizedBox(height: 8),
@@ -857,9 +860,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ],
 
                 if (casualGames.isNotEmpty) ...[
-                  const _CategoryHeading(
-                    title: 'CASUAL & FLEXIBLE',
-                    subtitle: 'Pause or quit anytime · Safe for shorter gaps',
+                  _CategoryHeading(
+                    title: context.tr('cat_casual'),
+                    subtitle: context.tr('cat_casual_sub'),
                     color: AppColors.successGreen,
                   ),
                   const SizedBox(height: 8),
@@ -885,7 +888,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: selectedCount > 0 ? _nextPage : null,
-              child: Text(selectedCount > 0 ? 'Customize Modes ($selectedCount selected)' : 'Select at least 1 game'),
+              child: Text(
+                selectedCount > 0
+                    ? '${context.tr('btn_customize_modes')} ($selectedCount)'
+                    : context.tr('select_min_game'),
+              ),
             ),
           ),
         ],
@@ -902,11 +909,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Activities & Modes', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+          Text(
+            context.tr('onboard_modes_title'),
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 4),
-          const Text(
-            'Enable the activities you actually play. Uncheck modes you don\'t play.',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          Text(
+            context.tr('onboard_modes_subtitle'),
+            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
 
@@ -993,8 +1003,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 child: Text(
                                   mode.commitmentType ==
                                           GameCommitmentType.flexible
-                                      ? 'Flexible'
-                                      : '~${mode.estimatedMinutes}m',
+                                      ? context.tr('mode_flexible')
+                                      : '~${mode.estimatedMinutes}${context.tr('min')}',
                                   style: TextStyle(
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w600,
@@ -1023,7 +1033,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _nextPage,
-              child: const Text('Configure Protection Level'),
+              child: Text(context.tr('btn_configure_protection')),
             ),
           ),
         ],
@@ -1040,11 +1050,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           const Icon(Icons.shield_rounded, size: 40, color: AppColors.primaryCyan),
           const SizedBox(height: 10),
-          const Text('Prayer Protection', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+          Text(
+            context.tr('onboard_protection_title'),
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 4),
-          const Text(
-            'Choose how conservative the queue warning system should be.',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          Text(
+            context.tr('onboard_protection_subtitle'),
+            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 24),
 
@@ -1128,7 +1141,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _nextPage,
-              child: const Text('Choose Gaming Theme'),
+              child: Text(context.tr('step_theme_title')),
             ),
           ),
         ],
@@ -1222,7 +1235,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
                   // Heading
                   Text(
-                    'Choose Your Theme',
+                    context.tr('onboard_theme_title'),
                     style: TextStyle(
                       fontSize: isNarrow ? 22 : 26,
                       fontWeight: FontWeight.w900,
@@ -1232,7 +1245,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Select a visual aesthetic tailored for your gaming routine and prayer focus.',
+                    context.tr('onboard_theme_subtitle'),
                     style: TextStyle(
                       fontSize: 12.5,
                       color: _selectedTheme.textSecondary,
@@ -1532,9 +1545,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _completeOnboarding,
                       icon: const Icon(Icons.rocket_launch_rounded, size: 18),
-                      label: const Text(
-                        'Start Using Pray Then Play',
-                        style: TextStyle(fontWeight: FontWeight.w800),
+                      label: Text(
+                        context.tr('btn_finish_setup'),
+                        style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _selectedTheme.primaryAccent,
@@ -1771,7 +1784,13 @@ class _LocationOptionButton extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: textMuted, size: 18),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
+              color: textMuted,
+              size: 18,
+            ),
           ],
         ),
       ),
@@ -1844,8 +1863,10 @@ class _GameSelectRow extends StatelessWidget {
                     Text(game.name,
                         style: const TextStyle(
                             fontWeight: FontWeight.w700, fontSize: 14)),
-                    Text('${game.activities.length} activities & modes',
-                        style: TextStyle(fontSize: 11, color: textMuted)),
+                    Text(
+                      '${game.activities.length} ${context.tr('onboard_modes_title')}',
+                      style: TextStyle(fontSize: 11, color: textMuted),
+                    ),
                   ],
                 ),
               ),
