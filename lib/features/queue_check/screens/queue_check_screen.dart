@@ -28,14 +28,11 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
   GameProfile? _selectedGame;
   GameActivity? _selectedActivity;
   int? _desiredSessionMinutes; // null = use activity typical duration
-  int? _simulatedMinutes; // null = use live clock time
   QueueCheckResult? _result;
   Timer? _ticker;
   int _minutesUntilPrayer = 999;
   String _nextPrayerName = '';
   late AnimationController _pulseController;
-
-  int get _effectiveMinutes => _simulatedMinutes ?? _minutesUntilPrayer;
 
   @override
   void initState() {
@@ -82,7 +79,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
       _result = RiskCalculator.checkQueue(
         game: _selectedGame!,
         activity: _selectedActivity!,
-        minutesUntilPrayer: _effectiveMinutes,
+        minutesUntilPrayer: _minutesUntilPrayer,
         nextPrayerName: _nextPrayerName.isEmpty ? 'Salah' : _nextPrayerName,
         userGames: userGames,
         bufferMinutes: bufferMinutes,
@@ -96,36 +93,6 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
     _ticker?.cancel();
     _pulseController.dispose();
     super.dispose();
-  }
-
-  Widget _buildScenarioChip({
-    required String label,
-    required bool isSelected,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? color : AppColors.textMuted.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? color : AppColors.textSecondary,
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -159,7 +126,6 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
     final surfaceColor = Theme.of(context).colorScheme.surface;
     final surfaceHighlight =
         Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
-    final primaryAccent = Theme.of(context).primaryColor;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -173,203 +139,32 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Can I Queue?',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (_simulatedMinutes != null) ...[
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _simulatedMinutes = null;
-                              });
-                              _calculate();
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.warningAmber
-                                    .withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                    color: AppColors.warningAmber, width: 0.8),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.refresh_rounded,
-                                      size: 13, color: AppColors.warningAmber),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    'Reset to Live',
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.warningAmber,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                    const Text(
+                      'Can I Queue?',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(
-                          _simulatedMinutes != null
-                              ? Icons.science_outlined
-                              : Icons.access_time_rounded,
-                          size: 14,
-                          color: _simulatedMinutes != null
-                              ? AppColors.warningAmber
-                              : AppColors.textMuted,
-                        ),
+                        const Icon(Icons.access_time_rounded,
+                            size: 14, color: AppColors.textMuted),
                         const SizedBox(width: 5),
                         Expanded(
                           child: Text(
-                            _simulatedMinutes != null
-                                ? 'Simulating: $_nextPrayerName in $_effectiveMinutes min  •  ${bufferMinutes}m buffer'
-                                : '$_nextPrayerName in $_minutesUntilPrayer min  •  ${bufferMinutes}m safety buffer',
+                            '$_nextPrayerName in $_minutesUntilPrayer min  •  ${bufferMinutes}m safety buffer',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: _simulatedMinutes != null
-                                  ? AppColors.warningAmber
-                                  : AppColors.textSecondary,
-                              fontWeight: _simulatedMinutes != null
-                                  ? FontWeight.w700
-                                  : FontWeight.w400,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
                               fontSize: 12.5,
                             ),
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Interactive Time Simulation / Scenario Chips
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: surfaceColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _simulatedMinutes != null
-                              ? AppColors.warningAmber.withValues(alpha: 0.4)
-                              : surfaceHighlight,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.tune_rounded,
-                                  size: 13,
-                                  color: Theme.of(context).primaryColor),
-                              const SizedBox(width: 5),
-                              Expanded(
-                                child: Text(
-                                  'TEST SCENARIOS (TIME SIMULATOR)',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    color: Theme.of(context).primaryColor,
-                                    letterSpacing: 0.8,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                _buildScenarioChip(
-                                  label: 'Live Clock (${_minutesUntilPrayer}m)',
-                                  isSelected: _simulatedMinutes == null,
-                                  color: primaryAccent,
-                                  onTap: () {
-                                    setState(() => _simulatedMinutes = null);
-                                    _calculate();
-                                  },
-                                ),
-                                const SizedBox(width: 6),
-                                _buildScenarioChip(
-                                  label: '3m left (Imminent)',
-                                  isSelected: _simulatedMinutes == 3,
-                                  color: AppColors.dangerRed,
-                                  onTap: () {
-                                    setState(() => _simulatedMinutes = 3);
-                                    _calculate();
-                                  },
-                                ),
-                                const SizedBox(width: 6),
-                                _buildScenarioChip(
-                                  label: '8m left (Inside Buffer)',
-                                  isSelected: _simulatedMinutes == 8,
-                                  color: AppColors.dangerRed,
-                                  onTap: () {
-                                    setState(() => _simulatedMinutes = 8);
-                                    _calculate();
-                                  },
-                                ),
-                                const SizedBox(width: 6),
-                                _buildScenarioChip(
-                                  label: '20m left (Short Mode)',
-                                  isSelected: _simulatedMinutes == 20,
-                                  color: AppColors.warningAmber,
-                                  onTap: () {
-                                    setState(() => _simulatedMinutes = 20);
-                                    _calculate();
-                                  },
-                                ),
-                                const SizedBox(width: 6),
-                                _buildScenarioChip(
-                                  label: '45m left (Safe / Ranked)',
-                                  isSelected: _simulatedMinutes == 45,
-                                  color: AppColors.successGreen,
-                                  onTap: () {
-                                    setState(() => _simulatedMinutes = 45);
-                                    _calculate();
-                                  },
-                                ),
-                                const SizedBox(width: 6),
-                                _buildScenarioChip(
-                                  label: '0m (Prayer Time)',
-                                  isSelected: _simulatedMinutes == 0,
-                                  color: AppColors.dangerRed,
-                                  onTap: () {
-                                    setState(() => _simulatedMinutes = 0);
-                                    _calculate();
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ],
                 ),
