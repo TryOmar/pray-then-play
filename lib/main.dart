@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show File, Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +17,9 @@ void main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     // Set preferred orientations for mobile
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)) {
       try {
         await SystemChrome.setPreferredOrientations([
           DeviceOrientation.portraitUp,
@@ -64,9 +65,6 @@ void main() async {
     );
   }, (error, stack) {
     debugPrint('[Main] Uncaught error: $error\n$stack');
-    try {
-      File('debug_crash.log').writeAsStringSync('CRASH: $error\n$stack\n');
-    } catch (_) {}
   });
 }
 
@@ -92,7 +90,7 @@ class _PrayThenPlayAppState extends ConsumerState<PrayThenPlayApp>
       // Handle HomeWidget deep linking on Android
       if (!kIsWeb) {
         try {
-          if (Platform.isAndroid) {
+          if (defaultTargetPlatform == TargetPlatform.android) {
             HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
               if (uri != null) _handleWidgetUri(uri);
             });

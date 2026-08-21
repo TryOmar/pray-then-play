@@ -1,4 +1,3 @@
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 import '../services/prayer_service.dart';
@@ -13,14 +12,8 @@ class HomeWidgetService {
   static const String _timelineProvider = 'PtpTimelineWidgetProvider';
   static const String _recommendedProvider = 'PtpRecommendedWidgetProvider';
 
-  static bool get _isAndroidSupported {
-    if (kIsWeb) return false;
-    try {
-      return Platform.isAndroid;
-    } catch (_) {
-      return false;
-    }
-  }
+  static bool get _isAndroidSupported =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
   /// Synchronize prayer schedule and gaming safety data with Android Home Screen Widgets
   static Future<void> updateWidgets({

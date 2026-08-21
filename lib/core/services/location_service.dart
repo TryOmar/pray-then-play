@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -80,7 +79,9 @@ class LocationService {
   /// Get city name from coordinates safely across mobile and desktop
   static Future<String> getCityName(double lat, double lng) async {
     // 1. On Android/iOS use native geocoding
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS)) {
       try {
         final placemarks = await placemarkFromCoordinates(lat, lng);
         if (placemarks.isNotEmpty) {
