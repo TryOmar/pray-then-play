@@ -19,11 +19,16 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     final nextPrayer = ref.watch(nextPrayerProvider);
     final userGames = ref.watch(activeSelectedGamesProvider);
     final bufferMinutes = ref.watch(safetyBufferMinutesProvider);
+    final is24Hour = ref.watch(timeFormatIs24HourProvider);
 
     if (prayerTimes == null) return const SizedBox();
 
     final primaryColor = Theme.of(context).primaryColor;
     final surfaceHighlight = Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
+
+    final axisLabels = is24Hour
+        ? const ['00:00', '06:00', '12:00', '18:00', '23:59']
+        : const ['12 AM', '6 AM', '12 PM', '6 PM', '12 AM'];
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -116,6 +121,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                       totalMinutes: totalMinutes,
                       context: context,
                       userGames: userGames,
+                      is24Hour: is24Hour,
                     ),
 
                     // Prayer Marker Tick Beacons (Exact, Non-overlapping)
@@ -125,6 +131,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                       totalMinutes: totalMinutes,
                       context: context,
                       primaryColor: primaryColor,
+                      is24Hour: is24Hour,
                     ),
 
                     // Pulsing LIVE NOW Needle
@@ -137,16 +144,19 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
 
           const SizedBox(height: 8),
 
-          // 24H Axis Grid Markers
+          // 24H Axis Grid Markers (Dynamic 12 AM/PM or 24H format)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('00:00', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
-              Text('06:00', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
-              Text('12:00', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
-              Text('18:00', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
-              Text('23:59', style: TextStyle(fontSize: 8.5, color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted, fontWeight: FontWeight.w600)),
-            ],
+            children: axisLabels.map((lbl) {
+              return Text(
+                lbl,
+                style: TextStyle(
+                  fontSize: 8.5,
+                  color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
+                  fontWeight: FontWeight.w600,
+                ),
+              );
+            }).toList(),
           ),
 
           const SizedBox(height: 14),
@@ -158,6 +168,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
             nextPrayer: nextPrayer,
             primaryColor: primaryColor,
             surfaceHighlight: surfaceHighlight,
+            is24Hour: is24Hour,
           ),
 
           const SizedBox(height: 14),
@@ -186,6 +197,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     required MapEntry<String, DateTime>? nextPrayer,
     required Color primaryColor,
     required Color surfaceHighlight,
+    required bool is24Hour,
   }) {
     final prayers = prayerTimes.allPrayers;
     final now = DateTime.now();
@@ -267,7 +279,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    TimeUtils.formatTime(prayer.value),
+                    TimeUtils.formatTime(prayer.value, is24Hour: is24Hour),
                     style: TextStyle(
                       fontSize: 9.5,
                       fontWeight:
@@ -289,8 +301,9 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           );
 
           return GestureDetector(
-            onTap: () =>
-                _showPrayerInfoModal(context, prayer.key, prayer.value),
+            onTap: () => _showPrayerInfoModal(
+                context, prayer.key, prayer.value,
+                is24Hour: is24Hour),
             child: itemContent,
           );
         }).toList();
@@ -332,6 +345,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     required double totalMinutes,
     required BuildContext context,
     required Color primaryColor,
+    required bool is24Hour,
   }) {
     final prayers = prayerTimes.allPrayers;
     final widgets = <Widget>[];
@@ -348,8 +362,9 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           top: 2,
           bottom: 2,
           child: GestureDetector(
-            onTap: () =>
-                _showPrayerInfoModal(context, prayer.key, prayer.value),
+            onTap: () => _showPrayerInfoModal(
+                context, prayer.key, prayer.value,
+                is24Hour: is24Hour),
             child: Container(
               width: 2.0,
               decoration: BoxDecoration(
@@ -378,6 +393,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     required double totalMinutes,
     required BuildContext context,
     required List<GameProfile> userGames,
+    required bool is24Hour,
   }) {
     final widgets = <Widget>[];
     final prayers = prayerTimes.allPrayers;
@@ -400,7 +416,9 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           width: pWidth.clamp(3.0, width),
           height: 26,
           child: GestureDetector(
-            onTap: () => _showPrayerInfoModal(context, current.key, current.value),
+            onTap: () => _showPrayerInfoModal(
+                context, current.key, current.value,
+                is24Hour: is24Hour),
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.dangerRed.withValues(alpha: 0.4),
@@ -438,6 +456,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                   endTime: next.value.subtract(Duration(minutes: bufferMinutes)),
                   status: GamingStatus.safe,
                   userGames: userGames,
+                  is24Hour: is24Hour,
                 ),
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 0.5),
@@ -473,6 +492,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                   endTime: next.value,
                   status: GamingStatus.caution,
                   userGames: userGames,
+                  is24Hour: is24Hour,
                 ),
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 0.5),
@@ -492,7 +512,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     return widgets;
   }
 
-  void _showPrayerInfoModal(BuildContext context, String name, DateTime time) {
+  void _showPrayerInfoModal(BuildContext context, String name, DateTime time, {bool is24Hour = false}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -534,7 +554,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                 ),
                 const Spacer(),
                 Text(
-                  TimeUtils.formatTime(time),
+                  TimeUtils.formatTime(time, is24Hour: is24Hour),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -545,7 +565,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
             ),
             const SizedBox(height: 14),
             Text(
-              'Adhan for $name is calculated at ${TimeUtils.formatTime(time)}. Plan your gaming sessions to wrap up before this time so you can pray with peace of mind.',
+              'Adhan for $name is calculated at ${TimeUtils.formatTime(time, is24Hour: is24Hour)}. Plan your gaming sessions to wrap up before this time so you can pray with peace of mind.',
               style: TextStyle(
                 fontSize: 13,
                 color: Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.textSecondary,
@@ -566,6 +586,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     required DateTime endTime,
     required GamingStatus status,
     required List<GameProfile> userGames,
+    bool is24Hour = false,
   }) {
     // Find games that fit comfortably in this slot
     final playableGames = userGames.where((g) {
@@ -614,7 +635,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                       Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                       const SizedBox(height: 2),
                       Text(
-                        '${TimeUtils.formatTime(startTime)} – ${TimeUtils.formatTime(endTime)} ($durationMinutes min available)',
+                        '${TimeUtils.formatTime(startTime, is24Hour: is24Hour)} – ${TimeUtils.formatTime(endTime, is24Hour: is24Hour)} ($durationMinutes min available)',
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: status.color),
                       ),
                     ],
