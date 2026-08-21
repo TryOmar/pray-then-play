@@ -106,6 +106,19 @@ class StorageService {
   static Future<void> setIs24HourFormat(bool is24Hour) =>
       _prefs.setBool(AppConstants.keyIs24HourFormat, is24Hour);
 
+  // Desktop Windows Settings
+  static bool get minimizeToTrayOnClose =>
+      _prefs.getBool('desktop_minimize_to_tray') ?? true;
+
+  static Future<void> setMinimizeToTrayOnClose(bool val) =>
+      _prefs.setBool('desktop_minimize_to_tray', val);
+
+  static bool get launchOnStartup =>
+      _prefs.getBool('desktop_launch_on_startup') ?? false;
+
+  static Future<void> setLaunchOnStartup(bool val) =>
+      _prefs.setBool('desktop_launch_on_startup', val);
+
   // Gamer profile
   static GamerProfile get gamerProfile {
     final index = _prefs.getInt(AppConstants.keyGamerProfile) ?? 0;

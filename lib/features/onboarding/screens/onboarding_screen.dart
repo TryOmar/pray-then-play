@@ -101,20 +101,40 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       }
 
       final position = await LocationService.getCurrentPosition();
-      final city = await LocationService.getCityName(position.latitude, position.longitude);
-
-      setState(() {
-        _latitude = position.latitude;
-        _longitude = position.longitude;
-        _cityName = city;
-        _locationDone = true;
-        _locationLoading = false;
-      });
+      if (position != null) {
+        final city = await LocationService.getCityName(position.latitude, position.longitude);
+        setState(() {
+          _latitude = position.latitude;
+          _longitude = position.longitude;
+          _cityName = city;
+          _locationDone = true;
+          _locationLoading = false;
+        });
+      } else {
+        // Fallback to IP Geolocation on PC
+        final ipLoc = await LocationService.fetchIpLocation();
+        if (ipLoc != null) {
+          setState(() {
+            _latitude = ipLoc['latitude'] as double;
+            _longitude = ipLoc['longitude'] as double;
+            _cityName = ipLoc['city'] as String;
+            _locationDone = true;
+            _locationLoading = false;
+          });
+        } else {
+          setState(() => _locationLoading = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('GPS not detected on this device. Please choose or search your city below.')),
+            );
+          }
+        }
+      }
     } catch (e) {
       setState(() => _locationLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not get GPS: $e. You can choose your city directly.')),
+          SnackBar(content: Text('Could not get location: $e. You can choose your city directly.')),
         );
       }
     }

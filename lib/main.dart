@@ -1,4 +1,5 @@
-import 'dart:io' show Platform;
+import 'dart:async';
+import 'dart:io' show File, Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,37 +8,65 @@ import 'package:home_widget/home_widget.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
 import 'core/providers/settings_provider.dart';
+import 'core/services/desktop_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/storage_service.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Set preferred orientations
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+    // Set preferred orientations for mobile
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      try {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
 
-  // Set system UI overlay style
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF0B1020),
-      systemNavigationBarIconBrightness: Brightness.light,
-    ),
-  );
+        SystemChrome.setSystemUIOverlayStyle(
+          const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarColor: Color(0xFF0B1020),
+            systemNavigationBarIconBrightness: Brightness.light,
+          ),
+        );
+      } catch (_) {}
+    }
 
-  // Initialize core services
-  await StorageService.initialize();
-  await NotificationService.initialize();
+    // Initialize core services
+    try {
+      await StorageService.initialize();
+    } catch (e) {
+      debugPrint('[Main] StorageService init error: $e');
+    }
 
-  runApp(
-    const ProviderScope(
-      child: PrayThenPlayApp(),
-    ),
-  );
+    try {
+      await NotificationService.initialize();
+    } catch (e) {
+      debugPrint('[Main] NotificationService init error: $e');
+    }
+
+    if (DesktopService.isDesktop) {
+      try {
+        await DesktopService.instance.initialize();
+      } catch (e) {
+        debugPrint('[Main] DesktopService init error: $e');
+      }
+    }
+
+    runApp(
+      const ProviderScope(
+        child: PrayThenPlayApp(),
+      ),
+    );
+  }, (error, stack) {
+    debugPrint('[Main] Uncaught error: $error\n$stack');
+    try {
+      File('debug_crash.log').writeAsStringSync('CRASH: $error\n$stack\n');
+    } catch (_) {}
+  });
 }
 
 class PrayThenPlayApp extends ConsumerStatefulWidget {

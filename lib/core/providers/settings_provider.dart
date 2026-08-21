@@ -164,3 +164,41 @@ class TimeFormatNotifier extends StateNotifier<bool> {
   }
 }
 
+// Desktop Minimize To Tray on Close
+final desktopMinimizeToTrayProvider =
+    StateNotifierProvider<DesktopMinimizeToTrayNotifier, bool>((ref) {
+  return DesktopMinimizeToTrayNotifier();
+});
+
+class DesktopMinimizeToTrayNotifier extends StateNotifier<bool> {
+  DesktopMinimizeToTrayNotifier() : super(StorageService.minimizeToTrayOnClose);
+
+  void setMinimize(bool val) {
+    state = val;
+    StorageService.setMinimizeToTrayOnClose(val);
+  }
+
+  void toggle() {
+    setMinimize(!state);
+  }
+}
+
+// Desktop Launch on Windows Startup
+final desktopLaunchOnStartupProvider =
+    StateNotifierProvider<DesktopLaunchOnStartupNotifier, bool>((ref) {
+  return DesktopLaunchOnStartupNotifier();
+});
+
+class DesktopLaunchOnStartupNotifier extends StateNotifier<bool> {
+  DesktopLaunchOnStartupNotifier() : super(StorageService.launchOnStartup);
+
+  void setLaunch(bool val) {
+    state = val;
+    StorageService.setLaunchOnStartup(val);
+  }
+
+  void toggle() {
+    setLaunch(!state);
+  }
+}
+

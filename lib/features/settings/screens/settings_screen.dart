@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:launch_at_startup/launch_at_startup.dart';
 import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/city_data.dart';
@@ -8,6 +9,7 @@ import '../../../core/constants/prayer_constants.dart';
 import '../../../core/providers/gaming_provider.dart';
 import '../../../core/providers/prayer_heatmap_provider.dart';
 import '../../../core/providers/settings_provider.dart';
+import '../../../core/services/desktop_service.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/widgets/app_logo_widget.dart';
@@ -26,6 +28,8 @@ class SettingsScreen extends ConsumerWidget {
     final jumuahMode = ref.watch(jumuahModeProvider);
     final fajrMode = ref.watch(fajrModeProvider);
     final is24Hour = ref.watch(timeFormatIs24HourProvider);
+    final minimizeToTray = ref.watch(desktopMinimizeToTrayProvider);
+    final launchOnStartup = ref.watch(desktopLaunchOnStartupProvider);
     final userGames = ref.watch(userGamesProvider);
     final city = StorageService.cityName;
     final country = StorageService.countryName;
@@ -257,18 +261,60 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // SETUP WIZARD
+                  // WIZARD & SETUP
                   _SettingsSection(
-                    title: 'SETUP WIZARD',
+                    title: 'WIZARD & SETUP',
                     children: [
                       _SettingsTile(
-                        icon: Icons.refresh_rounded,
-                        title: 'Re-run Onboarding Setup',
+                        icon: Icons.restart_alt_rounded,
+                        title: 'Restart Setup Wizard',
                         subtitle: 'Reconfigure location, prayer rules, games and preferences',
                         onTap: () => context.go('/onboarding'),
                       ),
                     ],
                   ),
+
+                  // WINDOWS DESKTOP SETTINGS
+                  if (DesktopService.isDesktop) ...[
+                    _SettingsSection(
+                      title: 'WINDOWS DESKTOP',
+                      children: [
+                        _SettingsTile(
+                          icon: Icons.window_rounded,
+                          title: 'Minimize to System Tray on Close',
+                          subtitle: 'Keep prayer alerts running in the background when clicking X',
+                          trailing: Switch.adaptive(
+                            value: minimizeToTray,
+                            onChanged: (val) => ref
+                                .read(desktopMinimizeToTrayProvider.notifier)
+                                .setMinimize(val),
+                          ),
+                        ),
+                        const Divider(height: 1, indent: 50),
+                        _SettingsTile(
+                          icon: Icons.power_settings_new_rounded,
+                          title: 'Launch on Windows Startup',
+                          subtitle: 'Automatically start Pray Then Play minimized on PC boot',
+                          trailing: Switch.adaptive(
+                            value: launchOnStartup,
+                            onChanged: (val) async {
+                              ref
+                                  .read(desktopLaunchOnStartupProvider.notifier)
+                                  .setLaunch(val);
+                              try {
+                                if (val) {
+                                  await launchAtStartup.enable();
+                                } else {
+                                  await launchAtStartup.disable();
+                                }
+                              } catch (_) {}
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
                   // DATA MANAGEMENT
                   _SettingsSection(
                     title: 'DATA MANAGEMENT',
@@ -574,14 +620,37 @@ class SettingsScreen extends ConsumerWidget {
                   Navigator.pop(ctx);
                   try {
                     final pos = await LocationService.getCurrentPosition();
-                    final city = await LocationService.getCityName(pos.latitude, pos.longitude);
-                    await StorageService.setLocation(pos.latitude, pos.longitude, city);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Location updated: $city')));
+                    if (pos != null) {
+                      final city = await LocationService.getCityName(pos.latitude, pos.longitude);
+                      await StorageService.setLocation(pos.latitude, pos.longitude, city);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Location updated: $city')));
+                      }
+                    } else {
+                      final ipLoc = await LocationService.fetchIpLocation();
+                      if (ipLoc != null) {
+                        await StorageService.setLocation(
+                          ipLoc['latitude'] as double,
+                          ipLoc['longitude'] as double,
+                          ipLoc['city'] as String,
+                          country: ipLoc['country'] as String,
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Location updated from PC: ${ipLoc['city']}')),
+                          );
+                        }
+                      } else {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('GPS not detected. Please search your city below.')),
+                          );
+                        }
+                      }
                     }
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('GPS error: $e')));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Location error: $e')));
                     }
                   }
                 },

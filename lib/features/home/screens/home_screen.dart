@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../core/providers/prayer_provider.dart';
 import '../../../core/providers/settings_provider.dart';
+import '../../../core/services/desktop_service.dart';
 import '../../../core/services/home_widget_service.dart';
 import '../../../core/services/storage_service.dart';
+import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/app_logo_widget.dart';
 import '../widgets/next_prayer_hero_widget.dart';
 import '../widgets/prayer_gaming_timeline_widget.dart';
@@ -22,24 +24,32 @@ class HomeScreen extends ConsumerWidget {
     final nextPrayer = ref.watch(nextPrayerProvider);
     final activeTheme = Theme.of(context);
 
-    // Sync data with Android Home Screen widgets on update
+    final nextPrayerName = nextPrayer?.key ?? '';
+    final nextPrayerTime = nextPrayer?.value;
+    final minutesUntilPrayer = nextPrayerTime != null
+        ? nextPrayerTime.difference(DateTime.now()).inMinutes
+        : 999;
+    final verdict = minutesUntilPrayer > bufferMinutes ? 'Safe to Play' : 'Caution / Wrap up';
+
+    // Sync data with Android Home Screen widgets & Windows Desktop Tray on update
     ref.listen<MapEntry<String, DateTime>?>(nextPrayerProvider, (previous, next) {
       if (next != null) {
         HomeWidgetService.updateWidgets(
           nextPrayerName: next.key,
           nextPrayerTime: next.value,
         );
+        if (DesktopService.isDesktop) {
+          DesktopService.instance.updateTrayMenu(
+            nextPrayerName: next.key,
+            nextPrayerTime: TimeUtils.formatTime(next.value),
+            verdict: verdict,
+          );
+        }
       }
     });
 
     final onSurface = activeTheme.colorScheme.onSurface;
     final textSecondary = activeTheme.textTheme.bodyMedium?.color ?? AppColors.textSecondary;
-
-    final nextPrayerName = nextPrayer?.key ?? '';
-    final nextPrayerTime = nextPrayer?.value;
-    final minutesUntilPrayer = nextPrayerTime != null
-        ? nextPrayerTime.difference(DateTime.now()).inMinutes
-        : 999;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (nextPrayer != null) {
@@ -47,6 +57,13 @@ class HomeScreen extends ConsumerWidget {
           nextPrayerName: nextPrayer.key,
           nextPrayerTime: nextPrayer.value,
         );
+        if (DesktopService.isDesktop) {
+          DesktopService.instance.updateTrayMenu(
+            nextPrayerName: nextPrayer.key,
+            nextPrayerTime: TimeUtils.formatTime(nextPrayer.value),
+            verdict: verdict,
+          );
+        }
       }
     });
 
