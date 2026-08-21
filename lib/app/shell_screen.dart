@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../core/localization/localization_extension.dart';
 import '../core/providers/settings_provider.dart';
 import 'theme.dart';
 
@@ -54,42 +55,42 @@ class ShellScreen extends ConsumerWidget {
               children: [
                 _NavItem(
                   icon: Icons.home_rounded,
-                  label: 'Home',
+                  label: context.tr('nav_home'),
                   isSelected: currentIndex == 0,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/'),
                 ),
                 _NavItem(
                   icon: Icons.sports_esports_rounded,
-                  label: 'Queue',
+                  label: context.tr('nav_queue'),
                   isSelected: currentIndex == 1,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/queue-check'),
                 ),
                 _NavItem(
                   icon: Icons.auto_graph_rounded,
-                  label: 'Stats',
+                  label: context.tr('nav_heatmap'),
                   isSelected: currentIndex == 2,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/consistency'),
                 ),
                 _NavItem(
                   icon: Icons.schedule_rounded,
-                  label: 'Prayers',
+                  label: context.tr('nav_prayers'),
                   isSelected: currentIndex == 3,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/prayer-times'),
                 ),
                 _NavItem(
                   icon: Icons.videogame_asset_rounded,
-                  label: 'Games',
+                  label: context.tr('nav_profiles'),
                   isSelected: currentIndex == 4,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/games'),
                 ),
                 _NavItem(
                   icon: Icons.settings_rounded,
-                  label: 'Settings',
+                  label: context.tr('nav_settings'),
                   isSelected: currentIndex == 5,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/settings'),

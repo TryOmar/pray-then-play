@@ -5,6 +5,8 @@ import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:local_notifier/local_notifier.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
+import '../localization/app_language.dart';
+import '../localization/app_translations.dart';
 import 'storage_service.dart';
 
 class DesktopService with TrayListener, WindowListener {
@@ -78,9 +80,17 @@ class DesktopService with TrayListener, WindowListener {
   }) async {
     if (!isDesktop) return;
     try {
-      final tooltip = nextPrayerName != null
-          ? 'Pray Then Play: Next is $nextPrayerName at $nextPrayerTime ($verdict)'
-          : 'Pray Then Play - Gaming Salah Companion';
+      final lang = StorageService.appLanguage;
+      final localizedPrayer = nextPrayerName != null
+          ? AppTranslations.get('prayer_${nextPrayerName.toLowerCase()}', lang)
+          : null;
+      final appName = AppTranslations.get('app_name', lang);
+      final nextLabel = AppTranslations.get('next_prayer', lang);
+      final queueLabel = AppTranslations.get('nav_queue', lang);
+
+      final tooltip = localizedPrayer != null
+          ? '$appName: $nextLabel $localizedPrayer at $nextPrayerTime ${verdict != null ? '($verdict)' : ''}'
+          : '$appName - Gaming Salah Companion';
 
       await trayManager.setToolTip(tooltip);
 
@@ -88,19 +98,19 @@ class DesktopService with TrayListener, WindowListener {
         items: [
           MenuItem(
             key: 'status',
-            label: nextPrayerName != null
-                ? '🕌 Next: $nextPrayerName • $nextPrayerTime'
-                : '🎮 Pray Then Play',
+            label: localizedPrayer != null
+                ? '🕌 $nextLabel: $localizedPrayer • $nextPrayerTime'
+                : '🎮 $appName',
             disabled: true,
           ),
           MenuItem.separator(),
           MenuItem(
             key: 'show_app',
-            label: 'Open Pray Then Play',
+            label: 'Open $appName',
           ),
           MenuItem(
             key: 'queue_check',
-            label: '⚡ Quick Queue Check',
+            label: '⚡ $queueLabel',
           ),
           MenuItem.separator(),
           MenuItem(
