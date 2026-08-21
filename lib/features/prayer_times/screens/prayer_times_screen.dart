@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme.dart';
+import '../../../core/constants/app_constants.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/models/prayer_time.dart';
 import '../../../core/providers/prayer_provider.dart';
 import '../../../core/services/prayer_service.dart';
 import '../../../core/services/storage_service.dart';
-import '../../../core/utils/time_utils.dart';
 import '../../../core/utils/risk_calculator.dart';
-import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/time_utils.dart';
 import 'dart:async';
 
 class PrayerTimesScreen extends ConsumerStatefulWidget {
@@ -70,9 +71,9 @@ class _PrayerTimesScreenState extends ConsumerState<PrayerTimesScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Prayer Times',
-                            style: TextStyle(
+                          Text(
+                            context.tr('nav_prayers'),
+                            style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.5,
@@ -210,7 +211,7 @@ class _PrayerTimesScreenState extends ConsumerState<PrayerTimesScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          name,
+                                          context.tr('prayer_${name.toLowerCase()}'),
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w600,

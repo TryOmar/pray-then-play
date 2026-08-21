@@ -2,18 +2,18 @@ import 'app_language.dart';
 
 class AppTranslations {
   static const Map<String, Map<String, String>> _localizedValues = {
-    // ------------------------------------------------------------------------
-    // ENGLISH (Default)
-    // ------------------------------------------------------------------------
+    // ========================================================================
+    // 🇬🇧 ENGLISH
+    // ========================================================================
     'en': {
       'app_name': 'Pray Then Play',
       'tagline': 'Stay on time. Play with peace of mind.',
-      
+
       // Nav
       'nav_home': 'Home',
-      'nav_queue': 'Queue Check',
+      'nav_queue': 'Queue',
+      'nav_heatmap': 'Stats',
       'nav_prayers': 'Prayers',
-      'nav_heatmap': 'Heatmap',
       'nav_profiles': 'Games',
       'nav_settings': 'Settings',
 
@@ -29,10 +29,36 @@ class AppTranslations {
       'adhan_called': 'Adhan has commenced',
       'window_ends': 'Window ends',
 
-      // Queue Calculator
+      // Onboarding
+      'onboard_welcome_title': 'PRAY THEN PLAY',
+      'onboard_plan_salah': 'Plan your gaming around Salah.',
+      'onboard_stay_time': 'Stay on time. Play with peace of mind.',
+      'onboard_f1_title': 'Know when to play',
+      'onboard_f1_desc': 'Calculates exact uninterrupted gaming time before next prayer',
+      'onboard_f2_title': 'Queue Risk Gauge',
+      'onboard_f2_desc': 'Color-coded safety verdict for Valorant, LoL, CS2 and more',
+      'onboard_f3_title': 'Protect your Salah',
+      'onboard_f3_desc': 'Smart buffers for Wudu and Sunnah before the Adhan',
+      'btn_get_started': "Let's Get Started",
+      'btn_next': 'Next',
+      'btn_back': 'Back',
+      'btn_finish_setup': 'Enter Companion',
+      'step_location_title': 'Set Your Location',
+      'step_location_subtitle': 'Accurate prayer timings calculated for your city',
+      'btn_use_gps': 'Use Current GPS Location',
+      'btn_choose_city': 'Search Worldwide Cities',
+      'step_games_title': 'Select Your Games',
+      'step_games_subtitle': 'Pick the games you play to calculate match durations',
+      'step_buffer_title': 'Choose Safety Buffer',
+      'step_theme_title': 'Select Visual Theme',
+
+      // Queue & Hero
       'safe_to_play': 'SAFE TO PLAY',
       'caution_buffer': 'CAUTION (BUFFER RISK)',
       'too_close_to_pray': 'TOO CLOSE TO PRAY',
+      'short_match_only': 'SHORT MATCH ONLY',
+      'prayer_approaching': 'PRAYER APPROACHING',
+      'prayer_time_badge': 'PRAYER TIME',
       'safe_verdict': 'You have plenty of time. Safe for a match!',
       'caution_verdict': 'Match will overlap into your buffer. Risk of delaying Salah.',
       'danger_verdict': 'Match exceeds remaining time. Pray first!',
@@ -41,6 +67,7 @@ class AppTranslations {
       'spare_time': 'Spare Time',
       'select_game': 'Select Game',
       'time_until_prayer': 'Time Remaining',
+      'safe_session_prefix': 'Safe session available up to',
 
       // Settings
       'settings_title': 'Settings',
@@ -55,15 +82,13 @@ class AppTranslations {
       'setting_tray_minimize': 'Minimize to System Tray on Close',
       'setting_startup_launch': 'Launch on Windows Startup',
 
-      // Heatmap
+      // Heatmap & Common
       'streak_count': 'Day Streak',
       'on_time_rate': 'On-Time Rate',
       'consistency_title': 'Consistency Matrix',
       'prayed_on_time': 'On-Time',
       'prayed_late': 'Late',
       'missed_prayer': 'Missed',
-
-      // Common
       'min': 'min',
       'hours': 'hrs',
       'cancel': 'Cancel',
@@ -72,18 +97,18 @@ class AppTranslations {
       'change': 'Change',
     },
 
-    // ------------------------------------------------------------------------
-    // ARABIC (العربية) - RTL
-    // ------------------------------------------------------------------------
+    // ========================================================================
+    // 🇸🇦 ARABIC (العربية) - Full RTL
+    // ========================================================================
     'ar': {
       'app_name': 'صل ثم العب',
       'tagline': 'حافظ على صلاتك، والعب براحة بال.',
-      
+
       // Nav
       'nav_home': 'الرئيسية',
       'nav_queue': 'فحص الأمان',
-      'nav_prayers': 'الصلوات',
       'nav_heatmap': 'الالتزام',
+      'nav_prayers': 'الصلوات',
       'nav_profiles': 'الألعاب',
       'nav_settings': 'الإعدادات',
 
@@ -99,10 +124,36 @@ class AppTranslations {
       'adhan_called': 'حان وقت الأذان',
       'window_ends': 'ينتهي وقت الصلاة',
 
-      // Queue Calculator
+      // Onboarding
+      'onboard_welcome_title': 'صل ثم العب',
+      'onboard_plan_salah': 'نسّق وقت ألعابك حول صلاتك.',
+      'onboard_stay_time': 'حافظ على صلاتك، والعب براحة بال.',
+      'onboard_f1_title': 'اعرف متى تلعب',
+      'onboard_f1_desc': 'حساب دقيق للوقت المتاح للعب دون تفويت الصلاة',
+      'onboard_f2_title': 'مؤشر أمان الجولة',
+      'onboard_f2_desc': 'تقييم فوري ومباشر لألعاب فالورانت، لول، كاونتر وغيرها',
+      'onboard_f3_title': 'احمِ صلاتك',
+      'onboard_f3_desc': 'هامش أمان مخصص للوضوء وسنن الصلاة قبل الأذان',
+      'btn_get_started': 'ابدأ الآن',
+      'btn_next': 'التالي',
+      'btn_back': 'رجوع',
+      'btn_finish_setup': 'دخول التطبيق',
+      'step_location_title': 'حدد موقع الصلاة',
+      'step_location_subtitle': 'مواقيت دقيقة محسوبة لمدينتك',
+      'btn_use_gps': 'استخدام الموقع الحالي (GPS)',
+      'btn_choose_city': 'بحث في مدن العالم',
+      'step_games_title': 'اختر ألعابك المفضلة',
+      'step_games_subtitle': 'حدد الألعاب التي تلعبها لحساب مدة الجولات',
+      'step_buffer_title': 'اختر مستوى الحماية والوضوء',
+      'step_theme_title': 'اختر سمة الواجهة',
+
+      // Queue & Hero
       'safe_to_play': 'آمن للعب',
-      'caution_buffer': 'تحذير (خطر على الوقت)',
+      'caution_buffer': 'تحذير (وقت ضيق)',
       'too_close_to_pray': 'الصلاة قريبة جداً',
+      'short_match_only': 'جولة قصيرة فقط',
+      'prayer_approaching': 'الصلاة قريبة',
+      'prayer_time_badge': 'حان وقت الصلاة',
       'safe_verdict': 'لديك وقت كافٍ. يمكنك بدء الجولة بأمان!',
       'caution_verdict': 'المباراة قد تتداخل مع وقت الوضوء والسنة. قد تتأخر الصلاة.',
       'danger_verdict': 'مدة الجولة أطول من الوقت المتبقي. صلِّ أولاً!',
@@ -111,6 +162,7 @@ class AppTranslations {
       'spare_time': 'الوقت الفائض',
       'select_game': 'اختر اللعبة',
       'time_until_prayer': 'الوقت المتبقي',
+      'safe_session_prefix': 'جلسة لعب آمنة متاحة حتى',
 
       // Settings
       'settings_title': 'الإعدادات',
@@ -125,15 +177,13 @@ class AppTranslations {
       'setting_tray_minimize': 'تصغير لشريط المهام عند الإغلاق',
       'setting_startup_launch': 'تشغيل تلقائي مع بدء ويندوز',
 
-      // Heatmap
+      // Heatmap & Common
       'streak_count': 'أيام متتالية',
       'on_time_rate': 'نسبة الصلاة في وقتها',
       'consistency_title': 'سجل الالتزام',
       'prayed_on_time': 'في وقتها',
       'prayed_late': 'متأخرة',
       'missed_prayer': 'فائتة',
-
-      // Common
       'min': 'د',
       'hours': 'س',
       'cancel': 'إلغاء',
@@ -142,16 +192,16 @@ class AppTranslations {
       'change': 'تغيير',
     },
 
-    // ------------------------------------------------------------------------
-    // TURKISH (Türkçe)
-    // ------------------------------------------------------------------------
+    // ========================================================================
+    // 🇹🇷 TURKISH (Türkçe)
+    // ========================================================================
     'tr': {
       'app_name': 'Pray Then Play',
       'tagline': 'Vaktinde kıl, huzurla oyna.',
       'nav_home': 'Ana Sayfa',
-      'nav_queue': 'Sıra Kontrolü',
+      'nav_queue': 'Sıra',
+      'nav_heatmap': 'İstatistik',
       'nav_prayers': 'Vakitler',
-      'nav_heatmap': 'İstikrar',
       'nav_profiles': 'Oyunlar',
       'nav_settings': 'Ayarlar',
 
@@ -166,9 +216,34 @@ class AppTranslations {
       'adhan_called': 'Ezan okundu',
       'window_ends': 'Vakit sonu',
 
+      'onboard_welcome_title': 'PRAY THEN PLAY',
+      'onboard_plan_salah': 'Oyun programınızı namaza göre planlayın.',
+      'onboard_stay_time': 'Vaktinde kıl, huzurla oyna.',
+      'onboard_f1_title': 'Ne zaman oynayacağını bil',
+      'onboard_f1_desc': 'Sonraki namaza kadar kesintisiz oyun süresini hesaplar',
+      'onboard_f2_title': 'Sıra Risk Göstergesi',
+      'onboard_f2_desc': 'Valorant, LoL, CS2 için renk kodlu güvenlik kararı',
+      'onboard_f3_title': 'Namazını Koru',
+      'onboard_f3_desc': 'Ezan öncesi abdest ve sünnet için akıllı güvenlik payları',
+      'btn_get_started': 'Hadi Başlayalım',
+      'btn_next': 'İleri',
+      'btn_back': 'Geri',
+      'btn_finish_setup': 'Uygulamaya Gir',
+      'step_location_title': 'Konumunu Belirle',
+      'step_location_subtitle': 'Şehriniz için doğru namaz vakitleri hesaplanır',
+      'btn_use_gps': 'Mevcut GPS Konumunu Kullan',
+      'btn_choose_city': 'Dünya Şehirlerinde Ara',
+      'step_games_title': 'Oyunlarını Seç',
+      'step_games_subtitle': 'Maç sürelerini takip etmek için oyunlarınızı seçin',
+      'step_buffer_title': 'Güvenlik Payını Seç',
+      'step_theme_title': 'Görsel Temayı Seç',
+
       'safe_to_play': 'OYUNA UYGUN',
       'caution_buffer': 'DİKKAT (RİSKLİ)',
       'too_close_to_pray': 'VAKİT ÇOK YAKIN',
+      'short_match_only': 'KISA MAÇ UYGUN',
+      'prayer_approaching': 'VAKİT YAKLAŞIYOR',
+      'prayer_time_badge': 'NAMAZ VAKTİ',
       'safe_verdict': 'Yeterli vaktiniz var. Maça girmek güvenli!',
       'caution_verdict': 'Maç uzarsa namaz vaktine sarkabilir.',
       'danger_verdict': 'Maç süresi kalan süreyi aşıyor. Önce namaz kılın!',
@@ -177,6 +252,7 @@ class AppTranslations {
       'spare_time': 'Artan Zaman',
       'select_game': 'Oyun Seç',
       'time_until_prayer': 'Kalan Süre',
+      'safe_session_prefix': 'Güvenli oyun süresi:',
 
       'settings_title': 'Ayarlar',
       'settings_subtitle': 'Oyun programınızı ve namaz disiplininizi yapılandırın',
@@ -187,7 +263,7 @@ class AppTranslations {
       'setting_protection_level': 'Koruma Seviyesi',
       'setting_theme': 'Oyun Teması',
       'setting_24h_format': '24 Saat Formatı',
-      'setting_tray_minimize': 'Kapatıldığında Sistem Tepsisine Küçült',
+      'setting_tray_minimize': 'Sistem Tepsisine Küçült',
       'setting_startup_launch': 'Windows ile Otomatik Başlat',
 
       'streak_count': 'Günlük Seri',
@@ -196,7 +272,6 @@ class AppTranslations {
       'prayed_on_time': 'Vaktinde',
       'prayed_late': 'Geç',
       'missed_prayer': 'Kaçırıldı',
-
       'min': 'dk',
       'hours': 'sa',
       'cancel': 'İptal',
@@ -205,16 +280,16 @@ class AppTranslations {
       'change': 'Değiştir',
     },
 
-    // ------------------------------------------------------------------------
-    // INDONESIAN (Bahasa Indonesia)
-    // ------------------------------------------------------------------------
+    // ========================================================================
+    // 🇮🇩 INDONESIAN (Bahasa Indonesia)
+    // ========================================================================
     'id': {
       'app_name': 'Pray Then Play',
       'tagline': 'Tepat waktu, main dengan tenang.',
       'nav_home': 'Beranda',
-      'nav_queue': 'Cek Antrean',
-      'nav_prayers': 'Waktu Sholat',
-      'nav_heatmap': 'Konsistensi',
+      'nav_queue': 'Antrean',
+      'nav_heatmap': 'Statistik',
+      'nav_prayers': 'Jadwal',
       'nav_profiles': 'Game',
       'nav_settings': 'Pengaturan',
 
@@ -229,9 +304,34 @@ class AppTranslations {
       'adhan_called': 'Adzan telah berkumandang',
       'window_ends': 'Batas waktu',
 
+      'onboard_welcome_title': 'PRAY THEN PLAY',
+      'onboard_plan_salah': 'Atur waktu gaming seputar sholat.',
+      'onboard_stay_time': 'Tepat waktu, main dengan tenang.',
+      'onboard_f1_title': 'Ketahui kapan bermain',
+      'onboard_f1_desc': 'Hitung waktu main tanpa gangguan sebelum sholat tiba',
+      'onboard_f2_title': 'Indikator Risiko Match',
+      'onboard_f2_desc': 'Status aman dengan kode warna untuk game populer',
+      'onboard_f3_title': 'Jaga Sholatmu',
+      'onboard_f3_desc': 'Buffer pintar untuk wudhu & persiapan sebelum adzan',
+      'btn_get_started': 'Mulai Sekarang',
+      'btn_next': 'Lanjut',
+      'btn_back': 'Kembali',
+      'btn_finish_setup': 'Masuk Aplikasi',
+      'step_location_title': 'Tentukan Lokasi',
+      'step_location_subtitle': 'Waktu sholat akurat dihitung untuk kotamu',
+      'btn_use_gps': 'Gunakan Lokasi GPS Saat Ini',
+      'btn_choose_city': 'Cari Kota Seluruh Dunia',
+      'step_games_title': 'Pilih Game Kamu',
+      'step_games_subtitle': 'Pilih game yang sering kamu mainkan',
+      'step_buffer_title': 'Pilih Buffer Perlindungan',
+      'step_theme_title': 'Pilih Tema Visual',
+
       'safe_to_play': 'AMAN UNTUK MAIN',
       'caution_buffer': 'PERINGATAN (RISIKO)',
       'too_close_to_pray': 'WAKTU TERLALU DEKAT',
+      'short_match_only': 'MATCH PENDEK SAJA',
+      'prayer_approaching': 'SHOLAT MENDEKAT',
+      'prayer_time_badge': 'WAKTU SHOLAT',
       'safe_verdict': 'Waktu masih banyak. Aman untuk memulai match!',
       'caution_verdict': 'Match berpotensi melewati batas wudhu & sholat.',
       'danger_verdict': 'Durasi match melebihi sisa waktu. Sholat dulu!',
@@ -240,6 +340,7 @@ class AppTranslations {
       'spare_time': 'Waktu Sisa',
       'select_game': 'Pilih Game',
       'time_until_prayer': 'Sisa Waktu',
+      'safe_session_prefix': 'Waktu main aman tersedia hingga',
 
       'settings_title': 'Pengaturan',
       'settings_subtitle': 'Atur jadwal gaming dan disiplin sholat Anda',
@@ -259,7 +360,6 @@ class AppTranslations {
       'prayed_on_time': 'Tepat Waktu',
       'prayed_late': 'Terlambat',
       'missed_prayer': 'Terlewat',
-
       'min': 'menit',
       'hours': 'jam',
       'cancel': 'Batal',
@@ -268,142 +368,16 @@ class AppTranslations {
       'change': 'Ubah',
     },
 
-    // ------------------------------------------------------------------------
-    // FRENCH (Français)
-    // ------------------------------------------------------------------------
-    'fr': {
-      'app_name': 'Pray Then Play',
-      'tagline': 'À l\'heure pour la prière, serein en jeu.',
-      'nav_home': 'Accueil',
-      'nav_queue': 'Vérif. Match',
-      'nav_prayers': 'Prières',
-      'nav_heatmap': 'Régularité',
-      'nav_profiles': 'Jeux',
-      'nav_settings': 'Paramètres',
-
-      'prayer_fajr': 'Fajr',
-      'prayer_sunrise': 'Lever du soleil',
-      'prayer_dhuhr': 'Dhuhr',
-      'prayer_asr': 'Asr',
-      'prayer_maghrib': 'Maghrib',
-      'prayer_isha': 'Isha',
-      'next_prayer': 'Prochaine Prière',
-      'in_time': 'dans',
-      'adhan_called': 'L\'Adhan a commencé',
-      'window_ends': 'Fin du temps',
-
-      'safe_to_play': 'SÛR DE JOUER',
-      'caution_buffer': 'ATTENTION (RISQUÉ)',
-      'too_close_to_pray': 'TROP PROCHE DE LA PRIÈRE',
-      'safe_verdict': 'Vous avez amplement le temps pour une partie !',
-      'caution_verdict': 'La partie risque d\'empiéter sur le temps d\'ablution.',
-      'danger_verdict': 'La partie dépasse le temps restant. Priez d\'abord !',
-      'match_duration': 'Durée du match',
-      'safety_buffer': 'Marge de sécurité',
-      'spare_time': 'Temps libre',
-      'select_game': 'Choisir un jeu',
-      'time_until_prayer': 'Temps restant',
-
-      'settings_title': 'Paramètres',
-      'settings_subtitle': 'Configurez votre planning de jeu et vos prières',
-      'setting_language': 'Langue',
-      'setting_location': 'Emplacement de prière',
-      'setting_calc_method': 'Méthode de calcul',
-      'setting_asr_method': 'Méthode Asr (Juridique)',
-      'setting_protection_level': 'Niveau de protection',
-      'setting_theme': 'Thème de jeu',
-      'setting_24h_format': 'Format 24 Heures',
-      'setting_tray_minimize': 'Réduire dans la zone de notification',
-      'setting_startup_launch': 'Lancer au démarrage de Windows',
-
-      'streak_count': 'Jours consécutifs',
-      'on_time_rate': 'Taux à l\'heure',
-      'consistency_title': 'Matrice de régularité',
-      'prayed_on_time': 'À l\'heure',
-      'prayed_late': 'En retard',
-      'missed_prayer': 'Manquée',
-
-      'min': 'min',
-      'hours': 'h',
-      'cancel': 'Annuler',
-      'save': 'Enregistrer',
-      'done': 'Terminé',
-      'change': 'Modifier',
-    },
-
-    // ------------------------------------------------------------------------
-    // GERMAN (Deutsch)
-    // ------------------------------------------------------------------------
-    'de': {
-      'app_name': 'Pray Then Play',
-      'tagline': 'Pünktlich beten, sorgenfrei zocken.',
-      'nav_home': 'Start',
-      'nav_queue': 'Queue-Check',
-      'nav_prayers': 'Gebetszeiten',
-      'nav_heatmap': 'Beständigkeit',
-      'nav_profiles': 'Spiele',
-      'nav_settings': 'Einstellungen',
-
-      'prayer_fajr': 'Fadschr',
-      'prayer_sunrise': 'Sonnenaufgang',
-      'prayer_dhuhr': 'Dhuhr',
-      'prayer_asr': 'Asr',
-      'prayer_maghrib': 'Maghrib',
-      'prayer_isha': 'Ischa',
-      'next_prayer': 'Nächstes Gebet',
-      'in_time': 'in',
-      'adhan_called': 'Adhan hat begonnen',
-      'window_ends': 'Zeitfenster endet',
-
-      'safe_to_play': 'SPIELBAR',
-      'caution_buffer': 'VORSICHT (PUFFER-RISIKO)',
-      'too_close_to_pray': 'ZU KNAPP ZUM BETEN',
-      'safe_verdict': 'Genug Zeit vorhanden. Bereit für ein Match!',
-      'caution_verdict': 'Match könnte in die Wudu-Pufferzeit rutschen.',
-      'danger_verdict': 'Match-Dauer überschreitet Zeit. Zuerst beten!',
-      'match_duration': 'Match-Dauer',
-      'safety_buffer': 'Sicherheits- & Wudu-Puffer',
-      'spare_time': 'Verbleibende Zeit',
-      'select_game': 'Spiel wählen',
-      'time_until_prayer': 'Restzeit',
-
-      'settings_title': 'Einstellungen',
-      'settings_subtitle': 'Gaming-Zeitplan und Gebetsdisziplin anpassen',
-      'setting_language': 'Sprache',
-      'setting_location': 'Gebetsort',
-      'setting_calc_method': 'Berechnungsmethode',
-      'setting_asr_method': 'Asr-Methode',
-      'setting_protection_level': 'Schutzstufe',
-      'setting_theme': 'Gaming-Design',
-      'setting_24h_format': '24-Stunden-Format',
-      'setting_tray_minimize': 'Beim Schließen ins System-Tray',
-      'setting_startup_launch': 'Autostart mit Windows',
-
-      'streak_count': 'Tage-Streak',
-      'on_time_rate': 'Pünktlichkeitsrate',
-      'consistency_title': 'Disziplin-Matrix',
-      'prayed_on_time': 'Pünktlich',
-      'prayed_late': 'Verspätet',
-      'missed_prayer': 'Verpasst',
-
-      'min': 'Min',
-      'hours': 'Std',
-      'cancel': 'Abbrechen',
-      'save': 'Speichern',
-      'done': 'Fertig',
-      'change': 'Ändern',
-    },
-
-    // ------------------------------------------------------------------------
-    // URDU (اردو) - RTL
-    // ------------------------------------------------------------------------
+    // ========================================================================
+    // 🇵🇰 URDU (اردو) - Full RTL
+    // ========================================================================
     'ur': {
       'app_name': 'نماز پھر کھیل',
       'tagline': 'وقت پر نماز، سکون سے گیم۔',
       'nav_home': 'ہوم',
-      'nav_queue': 'میچ چیک',
-      'nav_prayers': 'نماز کے اوقات',
+      'nav_queue': 'میچ',
       'nav_heatmap': 'پابندی',
+      'nav_prayers': 'اوقات',
       'nav_profiles': 'گیمز',
       'nav_settings': 'ترتیبات',
 
@@ -418,9 +392,34 @@ class AppTranslations {
       'adhan_called': 'اذان کا وقت ہو گیا',
       'window_ends': 'وقت ختم',
 
+      'onboard_welcome_title': 'نماز پھر کھیل',
+      'onboard_plan_salah': 'اپنے گیم کا وقت نماز کے مطابق بنائیں۔',
+      'onboard_stay_time': 'وقت پر نماز، سکون سے گیم۔',
+      'onboard_f1_title': 'کھیل کا محفوظ وقت جانیں',
+      'onboard_f1_desc': 'نماز سے پہلے بغیر کسی رکاوٹ کے دستیاب وقت کا حساب لگائیں',
+      'onboard_f2_title': 'میچ کا خطرے کا میٹر',
+      'onboard_f2_desc': 'مقبول گیمز کے لیے فوری محفوظ یا غیر محفوظ کا فیصلہ',
+      'onboard_f3_title': 'اپنی نماز کی حفاظت کریں',
+      'onboard_f3_desc': 'اذان سے پہلے وضو اور تیاری کے لیے سمارٹ وقت',
+      'btn_get_started': 'شروع کریں',
+      'btn_next': 'اگلا',
+      'btn_back': 'پیچھے',
+      'btn_finish_setup': 'ایپ میں داخل ہوں',
+      'step_location_title': 'نماز کا مقام منتخب کریں',
+      'step_location_subtitle': 'آپ کے شہر کے لیے درست اوقات کا حساب',
+      'btn_use_gps': 'موجودہ مقام استعمال کریں',
+      'btn_choose_city': 'دنیا بھر کے شہروں میں تلاش کریں',
+      'step_games_title': 'اپنی پسندیدہ گیمز منتخب کریں',
+      'step_games_subtitle': 'میچ کے دورانیے کے لیے اپنی گیمز منتخب کریں',
+      'step_buffer_title': 'وضو اور احتیاط کا وقت منتخب کریں',
+      'step_theme_title': 'تھیم منتخب کریں',
+
       'safe_to_play': 'کھیلنا محفوظ ہے',
       'caution_buffer': 'احتیاط (وقت کم ہے)',
       'too_close_to_pray': 'نماز کا وقت قریب ہے',
+      'short_match_only': 'صرف چھوٹا میچ',
+      'prayer_approaching': 'نماز کا وقت قریب',
+      'prayer_time_badge': 'نماز کا وقت',
       'safe_verdict': 'کافی وقت باقی ہے۔ آپ نیا میچ شروع کر سکتے ہیں!',
       'caution_verdict': 'میچ وضو اور نماز کے وقت میں داخل ہو سکتا ہے۔',
       'danger_verdict': 'میچ کا وقت باقی وقت سے زیادہ ہے۔ پہلے نماز ادا کریں!',
@@ -429,6 +428,7 @@ class AppTranslations {
       'spare_time': 'اضافی وقت',
       'select_game': 'گیم منتخب کریں',
       'time_until_prayer': 'باقی وقت',
+      'safe_session_prefix': 'محفوظ گیمنگ کا وقت دستیاب ہے تا',
 
       'settings_title': 'ترتیبات',
       'settings_subtitle': 'اپنے گیمنگ شیڈول اور نماز کی پابندی کو ترتیب دیں',
@@ -448,7 +448,6 @@ class AppTranslations {
       'prayed_on_time': 'وقت پر',
       'prayed_late': 'تاخیر سے',
       'missed_prayer': 'قضا',
-
       'min': 'منٹ',
       'hours': 'گھنٹے',
       'cancel': 'منسوخ',
@@ -457,16 +456,192 @@ class AppTranslations {
       'change': 'تبدیل کریں',
     },
 
-    // ------------------------------------------------------------------------
-    // MALAY (Bahasa Melayu)
-    // ------------------------------------------------------------------------
+    // ========================================================================
+    // 🇫🇷 FRENCH (Français)
+    // ========================================================================
+    'fr': {
+      'app_name': 'Pray Then Play',
+      'tagline': 'À l\'heure pour la prière, serein en jeu.',
+      'nav_home': 'Accueil',
+      'nav_queue': 'Match',
+      'nav_heatmap': 'Stats',
+      'nav_prayers': 'Prières',
+      'nav_profiles': 'Jeux',
+      'nav_settings': 'Paramètres',
+
+      'prayer_fajr': 'Fajr',
+      'prayer_sunrise': 'Lever du soleil',
+      'prayer_dhuhr': 'Dhuhr',
+      'prayer_asr': 'Asr',
+      'prayer_maghrib': 'Maghrib',
+      'prayer_isha': 'Isha',
+      'next_prayer': 'Prochaine Prière',
+      'in_time': 'dans',
+      'adhan_called': 'L\'Adhan a commencé',
+      'window_ends': 'Fin du temps',
+
+      'onboard_welcome_title': 'PRAY THEN PLAY',
+      'onboard_plan_salah': 'Planifiez votre jeu autour de la prière.',
+      'onboard_stay_time': 'À l\'heure pour la prière, serein en jeu.',
+      'onboard_f1_title': 'Sachez quand jouer',
+      'onboard_f1_desc': 'Calculez le temps de jeu ininterrompu avant la prière',
+      'onboard_f2_title': 'Indicateur de Risque',
+      'onboard_f2_desc': 'Verdict de sécurité pour Valorant, LoL, CS2 et plus',
+      'onboard_f3_title': 'Protégez votre Salah',
+      'onboard_f3_desc': 'Marges de sécurité intelligentes pour les ablutions',
+      'btn_get_started': 'Commencer',
+      'btn_next': 'Suivant',
+      'btn_back': 'Retour',
+      'btn_finish_setup': 'Entrer dans l\'application',
+      'step_location_title': 'Définir votre position',
+      'step_location_subtitle': 'Horaires précis calculés pour votre ville',
+      'btn_use_gps': 'Utiliser la position GPS',
+      'btn_choose_city': 'Rechercher une ville',
+      'step_games_title': 'Sélectionnez vos jeux',
+      'step_games_subtitle': 'Choisissez les jeux auxquels vous jouez',
+      'step_buffer_title': 'Choisir la marge de sécurité',
+      'step_theme_title': 'Choisir le thème visuel',
+
+      'safe_to_play': 'SÛR DE JOUER',
+      'caution_buffer': 'ATTENTION (RISQUÉ)',
+      'too_close_to_pray': 'TROP PROCHE DE LA PRIÈRE',
+      'short_match_only': 'PARTIE COURTE SEULEMENT',
+      'prayer_approaching': 'PRIÈRE IMMINENTE',
+      'prayer_time_badge': 'HEURE DE PRIÈRE',
+      'safe_verdict': 'Vous avez amplement le temps pour une partie !',
+      'caution_verdict': 'La partie risque d\'empiéter sur le temps d\'ablution.',
+      'danger_verdict': 'La partie dépasse le temps restant. Priez d\'abord !',
+      'match_duration': 'Durée du match',
+      'safety_buffer': 'Marge de sécurité',
+      'spare_time': 'Temps libre',
+      'select_game': 'Choisir un jeu',
+      'time_until_prayer': 'Temps restant',
+      'safe_session_prefix': 'Session sécurisée disponible jusqu\'à',
+
+      'settings_title': 'Paramètres',
+      'settings_subtitle': 'Configurez votre planning de jeu et vos prières',
+      'setting_language': 'Langue',
+      'setting_location': 'Emplacement de prière',
+      'setting_calc_method': 'Méthode de calcul',
+      'setting_asr_method': 'Méthode Asr',
+      'setting_protection_level': 'Niveau de protection',
+      'setting_theme': 'Thème de jeu',
+      'setting_24h_format': 'Format 24 Heures',
+      'setting_tray_minimize': 'Réduire dans la zone de notification',
+      'setting_startup_launch': 'Lancer au démarrage de Windows',
+
+      'streak_count': 'Jours consécutifs',
+      'on_time_rate': 'Taux à l\'heure',
+      'consistency_title': 'Matrice de régularité',
+      'prayed_on_time': 'À l\'heure',
+      'prayed_late': 'En retard',
+      'missed_prayer': 'Manquée',
+      'min': 'min',
+      'hours': 'h',
+      'cancel': 'Annuler',
+      'save': 'Enregistrer',
+      'done': 'Terminé',
+      'change': 'Modifier',
+    },
+
+    // ========================================================================
+    // 🇩🇪 GERMAN (Deutsch)
+    // ========================================================================
+    'de': {
+      'app_name': 'Pray Then Play',
+      'tagline': 'Pünktlich beten, sorgenfrei zocken.',
+      'nav_home': 'Start',
+      'nav_queue': 'Match',
+      'nav_heatmap': 'Statistik',
+      'nav_prayers': 'Gebetszeiten',
+      'nav_profiles': 'Spiele',
+      'nav_settings': 'Einstellungen',
+
+      'prayer_fajr': 'Fadschr',
+      'prayer_sunrise': 'Sonnenaufgang',
+      'prayer_dhuhr': 'Dhuhr',
+      'prayer_asr': 'Asr',
+      'prayer_maghrib': 'Maghrib',
+      'prayer_isha': 'Ischa',
+      'next_prayer': 'Nächstes Gebet',
+      'in_time': 'in',
+      'adhan_called': 'Adhan hat begonnen',
+      'window_ends': 'Zeitfenster endet',
+
+      'onboard_welcome_title': 'PRAY THEN PLAY',
+      'onboard_plan_salah': 'Plane dein Gaming rund um das Gebet.',
+      'onboard_stay_time': 'Pünktlich beten, sorgenfrei zocken.',
+      'onboard_f1_title': 'Wisse wann du spielen kannst',
+      'onboard_f1_desc': 'Berechnet die genaue ununterbrochene Spielzeit vor dem Gebet',
+      'onboard_f2_title': 'Match-Risiko-Anzeige',
+      'onboard_f2_desc': 'Farbcodiertes Sicherheitsurteil für beliebte Spiele',
+      'onboard_f3_title': 'Schütze dein Gebet',
+      'onboard_f3_desc': 'Intelligente Puffer für Wudu und Vorbereitung vor dem Adhan',
+      'btn_get_started': 'Loslegen',
+      'btn_next': 'Weiter',
+      'btn_back': 'Zurück',
+      'btn_finish_setup': 'App starten',
+      'step_location_title': 'Gebetsort festlegen',
+      'step_location_subtitle': 'Genaue Gebetszeiten für deine Stadt berechnet',
+      'btn_use_gps': 'Aktuellen GPS-Standort nutzen',
+      'btn_choose_city': 'Weltweite Städte suchen',
+      'step_games_title': 'Spiele auswählen',
+      'step_games_subtitle': 'Wähle deine meistgespielten Games',
+      'step_buffer_title': 'Sicherheitspuffer wählen',
+      'step_theme_title': 'Design-Thema auswählen',
+
+      'safe_to_play': 'SPIELBAR',
+      'caution_buffer': 'VORSICHT (PUFFER-RISIKO)',
+      'too_close_to_pray': 'ZU KNAPP ZUM BETEN',
+      'short_match_only': 'NUR KURZES MATCH',
+      'prayer_approaching': 'GEBET NAHT',
+      'prayer_time_badge': 'GEBETSZEIT',
+      'safe_verdict': 'Genug Zeit vorhanden. Bereit für ein Match!',
+      'caution_verdict': 'Match könnte in die Wudu-Pufferzeit rutschen.',
+      'danger_verdict': 'Match-Dauer überschreitet Zeit. Zuerst beten!',
+      'match_duration': 'Match-Dauer',
+      'safety_buffer': 'Sicherheits- & Wudu-Puffer',
+      'spare_time': 'Verbleibende Zeit',
+      'select_game': 'Spiel wählen',
+      'time_until_prayer': 'Restzeit',
+      'safe_session_prefix': 'Sichere Spielzeit verfügbar bis zu',
+
+      'settings_title': 'Einstellungen',
+      'settings_subtitle': 'Gaming-Zeitplan und Gebetsdisziplin anpassen',
+      'setting_language': 'Sprache',
+      'setting_location': 'Gebetsort',
+      'setting_calc_method': 'Berechnungsmethode',
+      'setting_asr_method': 'Asr-Methode',
+      'setting_protection_level': 'Schutzstufe',
+      'setting_theme': 'Gaming-Design',
+      'setting_24h_format': '24-Stunden-Format',
+      'setting_tray_minimize': 'Beim Schließen ins System-Tray',
+      'setting_startup_launch': 'Autostart mit Windows',
+
+      'streak_count': 'Tage-Streak',
+      'on_time_rate': 'Pünktlichkeitsrate',
+      'consistency_title': 'Disziplin-Matrix',
+      'prayed_on_time': 'Pünktlich',
+      'prayed_late': 'Verspätet',
+      'missed_prayer': 'Verpasst',
+      'min': 'Min',
+      'hours': 'Std',
+      'cancel': 'Abbrechen',
+      'save': 'Speichern',
+      'done': 'Fertig',
+      'change': 'Ändern',
+    },
+
+    // ========================================================================
+    // 🇲🇾 MALAY (Bahasa Melayu)
+    // ========================================================================
     'ms': {
       'app_name': 'Pray Then Play',
       'tagline': 'Solat tepat waktu, bermain dengan tenang.',
       'nav_home': 'Utama',
-      'nav_queue': 'Semak Match',
-      'nav_prayers': 'Waktu Solat',
-      'nav_heatmap': 'Konsistensi',
+      'nav_queue': 'Match',
+      'nav_heatmap': 'Statistik',
+      'nav_prayers': 'Waktu',
       'nav_profiles': 'Permainan',
       'nav_settings': 'Tetapan',
 
@@ -481,9 +656,34 @@ class AppTranslations {
       'adhan_called': 'Azan telah berkumandang',
       'window_ends': 'Tamat waktu',
 
+      'onboard_welcome_title': 'PRAY THEN PLAY',
+      'onboard_plan_salah': 'Rancang masa gaming anda sekeliling solat.',
+      'onboard_stay_time': 'Solat tepat waktu, bermain dengan tenang.',
+      'onboard_f1_title': 'Ketahui bila bermain',
+      'onboard_f1_desc': 'Kira masa bermain tanpa gangguan sebelum waktu solat',
+      'onboard_f2_title': 'Tolok Risiko Match',
+      'onboard_f2_desc': 'Status keselamatan berkod warna untuk game popular',
+      'onboard_f3_title': 'Pelihara Solat Anda',
+      'onboard_f3_desc': 'Penampan pintar untuk wuduk dan persediaan sebelum azan',
+      'btn_get_started': 'Mula Sekarang',
+      'btn_next': 'Seterusnya',
+      'btn_back': 'Kembali',
+      'btn_finish_setup': 'Masuk Aplikasi',
+      'step_location_title': 'Tetapkan Lokasi Solat',
+      'step_location_subtitle': 'Waktu solat tepat dikira mengikut bandar anda',
+      'btn_use_gps': 'Gunakan Lokasi GPS Semasa',
+      'btn_choose_city': 'Cari Bandar Seluruh Dunia',
+      'step_games_title': 'Pilih Permainan Anda',
+      'step_games_subtitle': 'Pilih permainan yang kerap anda mainkan',
+      'step_buffer_title': 'Pilih Tahap Perlindungan',
+      'step_theme_title': 'Pilih Tema Visual',
+
       'safe_to_play': 'SELAMAT BERMAIN',
       'caution_buffer': 'AMARAN (BERISIKO)',
       'too_close_to_pray': 'MASA TERLALU DEKAT',
+      'short_match_only': 'PERLAWANAN PENDEK SAHAJA',
+      'prayer_approaching': 'SOLAT MENGHAMPIRI',
+      'prayer_time_badge': 'WAKTU SOLAT',
       'safe_verdict': 'Masa mencukupi. Selamat untuk memulakan perlawanan!',
       'caution_verdict': 'Perlawanan mungkin mengambil masa wuduk dan solat.',
       'danger_verdict': 'Masa perlawanan melebihi masa tinggal. Solat dahulu!',
@@ -492,6 +692,7 @@ class AppTranslations {
       'spare_time': 'Masa Baki',
       'select_game': 'Pilih Game',
       'time_until_prayer': 'Masa Tinggal',
+      'safe_session_prefix': 'Masa bermain selamat tersedia sehingga',
 
       'settings_title': 'Tetapan',
       'settings_subtitle': 'Urus jadual gaming dan solat anda',
@@ -511,7 +712,6 @@ class AppTranslations {
       'prayed_on_time': 'Tepat Waktu',
       'prayed_late': 'Lewat',
       'missed_prayer': 'Terlepas',
-
       'min': 'min',
       'hours': 'jam',
       'cancel': 'Batal',
@@ -520,16 +720,16 @@ class AppTranslations {
       'change': 'Ubah',
     },
 
-    // ------------------------------------------------------------------------
-    // RUSSIAN (Русский)
-    // ------------------------------------------------------------------------
+    // ========================================================================
+    // 🇷🇺 RUSSIAN (Русский)
+    // ========================================================================
     'ru': {
       'app_name': 'Pray Then Play',
       'tagline': 'Молись вовремя, играй со спокойной душой.',
       'nav_home': 'Главная',
-      'nav_queue': 'Проверка матча',
+      'nav_queue': 'Матч',
+      'nav_heatmap': 'Статистика',
       'nav_prayers': 'Намаз',
-      'nav_heatmap': 'Дисциплина',
       'nav_profiles': 'Игры',
       'nav_settings': 'Настройки',
 
@@ -544,9 +744,34 @@ class AppTranslations {
       'adhan_called': 'Азан начался',
       'window_ends': 'Конец времени',
 
+      'onboard_welcome_title': 'PRAY THEN PLAY',
+      'onboard_plan_salah': 'Планируйте игры вокруг намаза.',
+      'onboard_stay_time': 'Молись вовремя, играй со спокойной душой.',
+      'onboard_f1_title': 'Знайте, когда играть',
+      'onboard_f1_desc': 'Точный расчет доступного игрового времени до намаза',
+      'onboard_f2_title': 'Индикатор риска матча',
+      'onboard_f2_desc': 'Цветовая оценка безопасности для Valorant, CS2, LoL',
+      'onboard_f3_title': 'Берегите свой намаз',
+      'onboard_f3_desc': 'Умный запас времени для омовения и подготовки до азана',
+      'btn_get_started': 'Начать',
+      'btn_next': 'Далее',
+      'btn_back': 'Назад',
+      'btn_finish_setup': 'Войти в приложение',
+      'step_location_title': 'Укажите город',
+      'step_location_subtitle': 'Точное расписание намаза для вашего города',
+      'btn_use_gps': 'Использовать GPS координаты',
+      'btn_choose_city': 'Поиск по городам мира',
+      'step_games_title': 'Выберите ваши игры',
+      'step_games_subtitle': 'Выберите игры для расчета времени матчей',
+      'step_buffer_title': 'Выберите запас времени',
+      'step_theme_title': 'Выберите тему оформления',
+
       'safe_to_play': 'МОЖНО ИГРАТЬ',
       'caution_buffer': 'ОСТОРОЖНО (РИСК)',
       'too_close_to_pray': 'СЛИШКОМ БЛИЗКО К НАМАЗУ',
+      'short_match_only': 'ТОЛЬКО КОРОТКИЙ МАТЧ',
+      'prayer_approaching': 'НАМАЗ ПРИБЛИЖАЕТСЯ',
+      'prayer_time_badge': 'ВРЕМЯ НАМАЗА',
       'safe_verdict': 'Времени достаточно. Можно смело начинать матч!',
       'caution_verdict': 'Матч может зайти на время омовения и намаза.',
       'danger_verdict': 'Длительность матча превышает время. Сначала намаз!',
@@ -555,6 +780,7 @@ class AppTranslations {
       'spare_time': 'Остаток времени',
       'select_game': 'Выбрать игру',
       'time_until_prayer': 'Осталось времени',
+      'safe_session_prefix': 'Безопасное время для игры до',
 
       'settings_title': 'Настройки',
       'settings_subtitle': 'Настройте игровой график и расписание молитв',
@@ -565,7 +791,7 @@ class AppTranslations {
       'setting_protection_level': 'Уровень защиты',
       'setting_theme': 'Тема оформления',
       'setting_24h_format': '24-часовой формат',
-      'setting_tray_minimize': 'Сворачивать в трей при закрытии',
+      'setting_tray_minimize': 'Сворачивать в трей',
       'setting_startup_launch': 'Запуск вместе с Windows',
 
       'streak_count': 'Дней подряд',
@@ -574,7 +800,6 @@ class AppTranslations {
       'prayed_on_time': 'Вовремя',
       'prayed_late': 'Опоздал',
       'missed_prayer': 'Пропущен',
-
       'min': 'мин',
       'hours': 'ч',
       'cancel': 'Отмена',
@@ -583,16 +808,16 @@ class AppTranslations {
       'change': 'Изменить',
     },
 
-    // ------------------------------------------------------------------------
-    // SPANISH (Español)
-    // ------------------------------------------------------------------------
+    // ========================================================================
+    // 🇪🇸 SPANISH (Español)
+    // ========================================================================
     'es': {
       'app_name': 'Pray Then Play',
       'tagline': 'Reza a tiempo, juega con tranquilidad.',
       'nav_home': 'Inicio',
-      'nav_queue': 'Comprobar Partida',
+      'nav_queue': 'Partida',
+      'nav_heatmap': 'Estadísticas',
       'nav_prayers': 'Rezos',
-      'nav_heatmap': 'Constancia',
       'nav_profiles': 'Juegos',
       'nav_settings': 'Ajustes',
 
@@ -607,9 +832,34 @@ class AppTranslations {
       'adhan_called': 'El Adhan ha comenzado',
       'window_ends': 'Fin del horario',
 
+      'onboard_welcome_title': 'PRAY THEN PLAY',
+      'onboard_plan_salah': 'Planifica tus partidas en torno a la oración.',
+      'onboard_stay_time': 'Reza a tiempo, juega con tranquilidad.',
+      'onboard_f1_title': 'Sabe cuándo jugar',
+      'onboard_f1_desc': 'Calcula el tiempo ininterrumpido antes de la próxima oración',
+      'onboard_f2_title': 'Medidor de Riesgo',
+      'onboard_f2_desc': 'Veredicto por colores para Valorant, LoL, CS2 y más',
+      'onboard_f3_title': 'Protege tu Salah',
+      'onboard_f3_desc': 'Márgenes inteligentes para la ablución y preparación previa',
+      'btn_get_started': 'Comenzar',
+      'btn_next': 'Siguiente',
+      'btn_back': 'Atrás',
+      'btn_finish_setup': 'Entrar a la app',
+      'step_location_title': 'Establecer ubicación',
+      'step_location_subtitle': 'Horarios precisos calculados para tu ciudad',
+      'btn_use_gps': 'Usar ubicación GPS',
+      'btn_choose_city': 'Buscar ciudades',
+      'step_games_title': 'Selecciona tus juegos',
+      'step_games_subtitle': 'Elige los juegos que más juegas',
+      'step_buffer_title': 'Elegir margen de seguridad',
+      'step_theme_title': 'Elegir tema visual',
+
       'safe_to_play': 'SEGURO PARA JUGAR',
       'caution_buffer': 'PRECAUCIÓN (RIESGO)',
       'too_close_to_pray': 'MUY CERCA DEL REZO',
+      'short_match_only': 'SOLO PARTIDA CORTA',
+      'prayer_approaching': 'ORACIÓN PRÓXIMA',
+      'prayer_time_badge': 'HORA DE ORACIÓN',
       'safe_verdict': '¡Tienes tiempo de sobra para una partida!',
       'caution_verdict': 'La partida podría solaparse con el tiempo de ablución.',
       'danger_verdict': 'La duración supera el tiempo restante. ¡Reza primero!',
@@ -618,6 +868,7 @@ class AppTranslations {
       'spare_time': 'Tiempo sobrante',
       'select_game': 'Seleccionar juego',
       'time_until_prayer': 'Tiempo restante',
+      'safe_session_prefix': 'Sesión segura disponible hasta',
 
       'settings_title': 'Ajustes',
       'settings_subtitle': 'Configura tu horario de juego y oraciones',
@@ -628,7 +879,7 @@ class AppTranslations {
       'setting_protection_level': 'Nivel de protección',
       'setting_theme': 'Tema de interfaz',
       'setting_24h_format': 'Formato 24 Horas',
-      'setting_tray_minimize': 'Minimizar a la bandeja del sistema',
+      'setting_tray_minimize': 'Minimizar a la bandeja',
       'setting_startup_launch': 'Iniciar con Windows',
 
       'streak_count': 'Días seguidos',
@@ -637,7 +888,6 @@ class AppTranslations {
       'prayed_on_time': 'A tiempo',
       'prayed_late': 'Tarde',
       'missed_prayer': 'Perdido',
-
       'min': 'min',
       'hours': 'h',
       'cancel': 'Cancelar',

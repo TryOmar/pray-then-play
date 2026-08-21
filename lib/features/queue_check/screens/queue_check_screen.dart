@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/models/game_profile.dart';
 import '../../../core/models/game_session_record.dart';
 import '../../../core/models/gaming_window.dart';
@@ -139,9 +140,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Can I Queue?',
-                      style: TextStyle(
+                    Text(
+                      context.tr('nav_queue'),
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.5,
@@ -155,7 +156,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                         const SizedBox(width: 5),
                         Expanded(
                           child: Text(
-                            '$_nextPrayerName in $_minutesUntilPrayer min  •  ${bufferMinutes}m safety buffer',
+                            '${_nextPrayerName.isNotEmpty ? context.tr('prayer_${_nextPrayerName.toLowerCase()}') : context.tr('next_prayer')} ${context.tr('in_time')} $_minutesUntilPrayer ${context.tr('min')}  •  $bufferMinutes ${context.tr('min')} ${context.tr('safety_buffer')}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -178,9 +179,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'SELECT GAME',
-                      style: TextStyle(
+                    Text(
+                      context.tr('select_game').toUpperCase(),
+                      style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textMuted,

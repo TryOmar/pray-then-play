@@ -567,7 +567,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                'PRAY THEN PLAY',
+                context.tr('onboard_welcome_title'),
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
@@ -580,7 +580,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 8),
 
           Text(
-            'Plan your gaming around Salah.',
+            context.tr('onboard_plan_salah'),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 18,
@@ -591,7 +591,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 8),
 
           Text(
-            'Stay on time. Play with peace of mind.',
+            context.tr('onboard_stay_time'),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -603,22 +603,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
           _PhilosophyTile(
             icon: Icons.play_circle_outline_rounded,
-            title: 'Know when to play',
-            subtitle: 'Calculates exact uninterrupted gaming time before next prayer',
+            title: context.tr('onboard_f1_title'),
+            subtitle: context.tr('onboard_f1_desc'),
             color: _selectedTheme.primaryAccent,
           ),
           const SizedBox(height: 12),
           _PhilosophyTile(
-            icon: Icons.pause_circle_outline_rounded,
-            title: 'Know when to pause',
-            subtitle: 'Smart queue protection so you never get trapped in overtime matches',
+            icon: Icons.speed_rounded,
+            title: context.tr('onboard_f2_title'),
+            subtitle: context.tr('onboard_f2_desc'),
             color: _selectedTheme.primaryAccent,
           ),
           const SizedBox(height: 12),
           _PhilosophyTile(
-            icon: Icons.schedule_rounded,
-            title: 'Stay on time',
-            subtitle: 'Seamlessly balance competitive gaming with your spiritual discipline',
+            icon: Icons.shield_rounded,
+            title: context.tr('onboard_f3_title'),
+            subtitle: context.tr('onboard_f3_desc'),
             color: _selectedTheme.primaryAccent,
           ),
 
@@ -633,7 +633,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 foregroundColor: _selectedTheme.buttonTextColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: const Text('Get Started'),
+              child: Text(
+                context.tr('btn_get_started'),
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              ),
             ),
           ),
         ],
@@ -650,11 +653,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           const Icon(Icons.location_on_rounded, size: 40, color: AppColors.primaryCyan),
           const SizedBox(height: 10),
-          const Text('Prayer Location', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+          Text(
+            context.tr('step_location_title'),
+            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+          ),
           const SizedBox(height: 4),
-          const Text(
-            'Your prayer times will be calculated according to your location and preferred method.',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          Text(
+            context.tr('step_location_subtitle'),
+            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 20),
 
@@ -681,7 +687,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                   TextButton(
                     onPressed: () => setState(() => _locationDone = false),
-                    child: const Text('Change'),
+                    child: Text(context.tr('change')),
                   ),
                 ],
               ),
@@ -689,7 +695,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ] else ...[
             _LocationOptionButton(
               icon: Icons.my_location_rounded,
-              title: 'Use my current location (GPS)',
+              title: context.tr('btn_use_gps'),
               subtitle: _locationLoading ? 'Detecting coordinates...' : 'Fastest & most accurate',
               isLoading: _locationLoading,
               onTap: _getLocationGPS,
@@ -697,7 +703,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             const SizedBox(height: 10),
             _LocationOptionButton(
               icon: Icons.search_rounded,
-              title: 'Search for my city',
+              title: context.tr('btn_choose_city'),
               subtitle: 'Select from 50+ major cities without GPS',
               onTap: _showCitySearchDialog,
             ),
@@ -713,7 +719,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 24),
 
           // Calculation Method
-          const Text('CALCULATION METHOD', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted, letterSpacing: 1.2)),
+          Text(
+            context.tr('setting_calc_method').toUpperCase(),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted, letterSpacing: 1.2),
+          ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -737,7 +746,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 16),
 
           // Asr Madhhab
-          const Text('ASR CALCULATION (MADHHAB)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted, letterSpacing: 1.2)),
+          Text(
+            context.tr('setting_asr_method').toUpperCase(),
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted, letterSpacing: 1.2),
+          ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -768,7 +780,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 setState(() => _locationDone = true);
                 _nextPage();
               },
-              child: const Text('Continue to Games'),
+              child: Text(context.tr('btn_next')),
             ),
           ),
         ],

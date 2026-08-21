@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/models/prayer_record.dart';
 import '../../../core/providers/prayer_heatmap_provider.dart';
 import '../../../core/providers/prayer_provider.dart';
@@ -44,7 +45,7 @@ class PrayerStreakWidget extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "TODAY'S SALAH",
+                      context.tr('nav_prayers').toUpperCase(),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
@@ -429,7 +430,7 @@ class _PrayerCard extends StatelessWidget {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                prayerName,
+                context.tr('prayer_${prayerName.toLowerCase()}'),
                 maxLines: 1,
                 style: TextStyle(
                   fontSize: 11,

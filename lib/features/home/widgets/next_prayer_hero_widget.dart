@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/localization/localization_extension.dart';
 import '../../../core/providers/prayer_provider.dart';
 import '../../../core/utils/time_utils.dart';
 
@@ -28,13 +29,16 @@ class NextPrayerHeroWidget extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         decoration: GlassmorphicDecoration.card(context: context),
         child: const Center(
-          child: Text('Calculating next prayer time...'),
+          child: CircularProgressIndicator(),
         ),
       );
     }
 
     final now = DateTime.now();
     final remainingMinutes = prayerTime!.difference(now).inMinutes;
+    final localizedPrayerName = prayerName.isNotEmpty
+        ? context.tr('prayer_${prayerName.toLowerCase()}')
+        : context.tr('next_prayer');
 
     // Safety classification
     final GamingStatus status;
@@ -44,25 +48,25 @@ class NextPrayerHeroWidget extends ConsumerWidget {
 
     if (remainingMinutes <= 0) {
       status = GamingStatus.prayerTime;
-      statusBadge = 'PRAYER TIME';
-      statusSubtitle = '$prayerName has arrived. Step away from the screen and pray.';
+      statusBadge = context.tr('prayer_time_badge');
+      statusSubtitle = '$localizedPrayerName - ${context.tr('adhan_called')}';
       statusColor = AppColors.dangerRed;
     } else if (remainingMinutes <= bufferMinutes) {
       status = GamingStatus.dontQueue;
-      statusBadge = 'PRAYER APPROACHING';
-      statusSubtitle = '$prayerName is within your ${bufferMinutes}m safety buffer.';
+      statusBadge = context.tr('prayer_approaching');
+      statusSubtitle = '$localizedPrayerName ${context.tr('in_time')} $remainingMinutes ${context.tr('min')} (${context.tr('safety_buffer')})';
       statusColor = AppColors.dangerRed;
     } else if (remainingMinutes <= (bufferMinutes + 20)) {
       status = GamingStatus.caution;
-      statusBadge = 'SHORT MATCH ONLY';
+      statusBadge = context.tr('short_match_only');
       final safeMins = (remainingMinutes - bufferMinutes).clamp(0, 9999);
-      statusSubtitle = 'Up to ~$safeMins min available. Ideal for Swiftplay, ARAM, or casual.';
+      statusSubtitle = '${context.tr('safe_session_prefix')} ~$safeMins ${context.tr('min')}';
       statusColor = AppColors.warningAmber;
     } else {
       status = GamingStatus.safe;
       final safeMins = (remainingMinutes - bufferMinutes).clamp(0, 9999);
-      statusBadge = 'SAFE TO PLAY';
-      statusSubtitle = 'Up to ~$safeMins min safe session with a ${bufferMinutes}m buffer.';
+      statusBadge = context.tr('safe_to_play');
+      statusSubtitle = '${context.tr('safe_session_prefix')} ~$safeMins ${context.tr('min')}';
       statusColor = primaryAccent;
     }
 
@@ -112,7 +116,7 @@ class NextPrayerHeroWidget extends ConsumerWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      prayerName.isEmpty ? 'NEXT PRAYER' : prayerName.toUpperCase(),
+                      localizedPrayerName.toUpperCase(),
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w900,
@@ -174,7 +178,7 @@ class NextPrayerHeroWidget extends ConsumerWidget {
                     ),
                   ),
                   child: Text(
-                    '~$safeMinutesAvailable min safe',
+                    '~$safeMinutesAvailable ${context.tr('min')}',
                     style: TextStyle(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
