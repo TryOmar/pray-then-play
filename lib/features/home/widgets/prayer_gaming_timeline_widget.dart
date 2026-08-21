@@ -258,24 +258,69 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     required Color primaryColor,
   }) {
     final prayers = prayerTimes.allPrayers;
-    final positions = prayers.map((prayer) {
+    final exactPositions = prayers.map((prayer) {
       final minuteOfDay = prayer.value.hour * 60.0 +
           prayer.value.minute +
           prayer.value.second / 60.0;
       return (minuteOfDay / totalMinutes) * width;
     }).toList();
 
+    // Calculate anti-collision horizontally shifted positions for labels
+    final labelPositions = List<double>.from(exactPositions);
+    const minSeparation = 52.0;
+
+    // Iterative relaxation to resolve any overlap
+    for (int pass = 0; pass < 2; pass++) {
+      for (int i = 0; i < labelPositions.length - 1; i++) {
+        final diff = labelPositions[i + 1] - labelPositions[i];
+        if (diff < minSeparation) {
+          final overlap = (minSeparation - diff) / 2.0;
+          labelPositions[i] = (labelPositions[i] - overlap);
+          labelPositions[i + 1] = (labelPositions[i + 1] + overlap);
+        }
+      }
+    }
+
+    // Clamp label positions within bounds
+    for (int i = 0; i < labelPositions.length; i++) {
+      labelPositions[i] = labelPositions[i].clamp(24.0, width - 24.0);
+    }
+
     final widgets = <Widget>[];
 
     for (int i = 0; i < prayers.length; i++) {
       final prayer = prayers[i];
-      final posX = positions[i];
-      final isCloseToPrev = i > 0 && (posX - positions[i - 1]) < 48.0;
-      final isStaggered = isCloseToPrev;
+      final exactX = exactPositions[i];
+      final labelX = labelPositions[i];
+      final isShifted = (labelX - exactX).abs() > 2.0;
 
+      // 1. Exact timeline tick line on the track
       widgets.add(
         Positioned(
-          left: (posX - 24).clamp(0.0, width - 48),
+          left: (exactX - 1.0).clamp(0.0, width - 2.0),
+          top: 36,
+          height: 24,
+          child: IgnorePointer(
+            child: Container(
+              width: 2.0,
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.9),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.35),
+                    blurRadius: 2,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // 2. Interactive text label column positioned at shifted labelX
+      widgets.add(
+        Positioned(
+          left: (labelX - 24).clamp(0.0, width - 48),
           top: 0,
           bottom: 0,
           child: GestureDetector(
@@ -285,24 +330,22 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
               children: [
                 // Top Label (Prayer Name)
                 SizedBox(
-                  height: 34,
+                  height: 32,
                   child: Align(
-                    alignment: isStaggered
-                        ? Alignment.bottomCenter
-                        : Alignment.topCenter,
+                    alignment: Alignment.topCenter,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 1),
-                      decoration: isStaggered
+                          horizontal: 4, vertical: 1.5),
+                      decoration: isShifted
                           ? BoxDecoration(
                               color: Theme.of(context)
                                   .colorScheme
                                   .surface
-                                  .withValues(alpha: 0.9),
+                                  .withValues(alpha: 0.92),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: primaryColor.withValues(alpha: 0.35),
-                                width: 0.6,
+                                color: primaryColor.withValues(alpha: 0.4),
+                                width: 0.8,
                               ),
                             )
                           : null,
@@ -310,7 +353,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                         prayer.key,
                         maxLines: 1,
                         style: TextStyle(
-                          fontSize: 8.5,
+                          fontSize: 9,
                           fontWeight: FontWeight.w700,
                           color: Theme.of(context)
                                   .textTheme
@@ -323,39 +366,30 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                   ),
                 ),
 
-                // Vertical Marker Line crossing the track
-                Expanded(
-                  child: Center(
-                    child: Container(
-                      width: 1.5,
-                      color: primaryColor.withValues(alpha: 0.85),
-                    ),
-                  ),
-                ),
+                // Space for track
+                const SizedBox(height: 32),
 
                 // Bottom Label (Prayer Time)
                 SizedBox(
-                  height: 34,
+                  height: 32,
                   child: Align(
-                    alignment: isStaggered
-                        ? Alignment.bottomCenter
-                        : Alignment.topCenter,
+                    alignment: Alignment.bottomCenter,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 3, vertical: 1),
-                      decoration: isStaggered
+                          horizontal: 3.5, vertical: 1),
+                      decoration: isShifted
                           ? BoxDecoration(
                               color: Theme.of(context)
                                   .colorScheme
                                   .surface
-                                  .withValues(alpha: 0.9),
+                                  .withValues(alpha: 0.92),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
                                 color: Theme.of(context)
                                         .dividerTheme
                                         .color ??
                                     AppColors.surfaceHighlight,
-                                width: 0.6,
+                                width: 0.8,
                               ),
                             )
                           : null,
@@ -364,7 +398,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                         child: Text(
                           TimeUtils.formatTime(prayer.value),
                           style: TextStyle(
-                            fontSize: 8,
+                            fontSize: 8.5,
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context)
                                     .textTheme
