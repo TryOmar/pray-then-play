@@ -383,134 +383,145 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showLanguagePicker(BuildContext context, WidgetRef ref) {
-    final current = ref.read(appLanguageProvider);
     final theme = Theme.of(context);
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => Material(
-        color: Colors.transparent,
-        child: Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(ctx).size.height * 0.75,
-          ),
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.language_rounded, size: 22),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Select Language / اختر اللغة',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 20),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Choose your preferred language across all app features',
-                style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-              ),
-              const SizedBox(height: 14),
-              Expanded(
-                child: ListView.separated(
-                  itemCount: AppLanguage.values.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final lang = AppLanguage.values[index];
-                    final isSelected = lang == current;
-                    final primary = theme.primaryColor;
+      useRootNavigator: true,
+      barrierDismissible: true,
+      builder: (ctx) => Consumer(
+        builder: (ctx, ref, _) {
+          final activeLang = ref.watch(appLanguageProvider);
+          final primary = theme.primaryColor;
 
-                    return MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          ref.read(appLanguageProvider.notifier).setLanguage(lang);
-                          Navigator.pop(ctx);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? primary.withValues(alpha: 0.12)
-                                : theme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isSelected
-                                  ? primary
-                                  : theme.dividerTheme.color ??
-                                      AppColors.surfaceHighlight,
-                              width: isSelected ? 1.5 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                lang.flag,
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      lang.nativeName,
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
-                                        color: isSelected
-                                            ? primary
-                                            : theme.textTheme.bodyMedium?.color,
-                                      ),
-                                    ),
-                                    Text(
-                                      lang.englishName,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.textMuted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (isSelected)
-                                Icon(
-                                  Icons.check_circle_rounded,
-                                  color: primary,
-                                  size: 20,
-                                ),
-                            ],
+          return Dialog(
+            backgroundColor: theme.colorScheme.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: theme.dividerTheme.color ?? AppColors.surfaceHighlight,
+              ),
+            ),
+            child: Container(
+              width: 440,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(ctx).size.height * 0.8,
+              ),
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.language_rounded, size: 24, color: primary),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Text(
+                          'Select Language / اختر اللغة',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
-                    );
-                  },
-                ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, size: 20),
+                        onPressed: () => Navigator.of(ctx, rootNavigator: true).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Choose your preferred language across all app features',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  ),
+                  const SizedBox(height: 14),
+                  Flexible(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: AppLanguage.values.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final lang = AppLanguage.values[index];
+                        final isSelected = lang == activeLang;
+
+                        return Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () {
+                              ref.read(appLanguageProvider.notifier).setLanguage(lang);
+                              Navigator.of(ctx, rootNavigator: true).pop();
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Ink(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 11,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? primary.withValues(alpha: 0.14)
+                                    : theme.colorScheme.surface,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? primary
+                                      : theme.dividerTheme.color ??
+                                          AppColors.surfaceHighlight,
+                                  width: isSelected ? 1.8 : 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    lang.flag,
+                                    style: const TextStyle(fontSize: 22),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          lang.nativeName,
+                                          style: TextStyle(
+                                            fontSize: 14.5,
+                                            fontWeight: FontWeight.w700,
+                                            color: isSelected
+                                                ? primary
+                                                : theme.textTheme.bodyMedium?.color,
+                                          ),
+                                        ),
+                                        Text(
+                                          lang.englishName,
+                                          style: const TextStyle(
+                                            fontSize: 11.5,
+                                            color: AppColors.textMuted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    Icon(
+                                      Icons.check_circle_rounded,
+                                      color: primary,
+                                      size: 20,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

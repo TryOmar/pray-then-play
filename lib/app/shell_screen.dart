@@ -27,6 +27,7 @@ class ShellScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentIndex = _getCurrentIndex(context);
     final activeTheme = ref.watch(effectiveThemeProvider);
+    final currentLanguage = ref.watch(appLanguageProvider);
 
     return Scaffold(
       backgroundColor: activeTheme.background,

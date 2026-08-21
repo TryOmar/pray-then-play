@@ -30,7 +30,7 @@ class GameProfilesScreen extends ConsumerWidget {
                         children: [
                           FittedBox(
                             fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
+                            alignment: AlignmentDirectional.centerStart,
                             child: Text(
                               'My Games & Activities',
                               style: TextStyle(

@@ -57,7 +57,7 @@ class PrayerStreakWidget extends ConsumerWidget {
                     const SizedBox(height: 2),
                     FittedBox(
                       fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
+                      alignment: AlignmentDirectional.centerStart,
                       child: Text(
                         '$completedCount / 5 Completed · ${(dailyRecord.consistencyRate).round()}% Today',
                         style: TextStyle(
