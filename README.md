@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Pray Then Play Banner](https://raw.githubusercontent.com/your-username/pray-then-play-ecosystem/main/shared-brand-assets/banners/banner_github_hero.png)
+![Pray Then Play Banner](assets/images/banner_github_hero.png)
 
 ### *Salah first. Gaming second. Stay on time. Play with peace of mind.*
 
