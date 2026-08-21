@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gamer_salah/app/theme.dart';
-import 'package:gamer_salah/core/constants/app_constants.dart';
-import 'package:gamer_salah/core/widgets/app_logo_widget.dart';
+import 'package:pray_then_play/app/theme.dart';
+import 'package:pray_then_play/core/constants/app_constants.dart';
+import 'package:pray_then_play/core/widgets/app_logo_widget.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

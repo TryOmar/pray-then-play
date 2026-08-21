@@ -1,11 +1,11 @@
 {
-    "name": "gamer_salah",
-    "short_name": "gamer_salah",
+    "name": "Pray Then Play",
+    "short_name": "PrayThenPlay",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0B1020",
+    "theme_color": "#0B1020",
+    "description": "Pray Then Play - Islamic Prayer Times & Gaming Safety Companion",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gamer_salah/core/providers/prayer_provider.dart';
-import 'package:gamer_salah/core/services/storage_service.dart';
-import 'package:gamer_salah/features/home/screens/home_screen.dart';
-import 'package:gamer_salah/features/settings/screens/settings_screen.dart';
+import 'package:pray_then_play/core/providers/prayer_provider.dart';
+import 'package:pray_then_play/core/services/storage_service.dart';
+import 'package:pray_then_play/features/home/screens/home_screen.dart';
+import 'package:pray_then_play/features/settings/screens/settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -23,7 +23,7 @@ void main() {
     await StorageService.initialize();
   });
 
-  testWidgets('GamerSalah app launches properly', (WidgetTester tester) async {
+  testWidgets('PrayThenPlay app launches properly', (WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [

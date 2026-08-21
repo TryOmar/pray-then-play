@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gamer_salah/app/theme.dart';
-import 'package:gamer_salah/core/providers/settings_provider.dart';
+import '../../app/theme.dart';
+import '../providers/settings_provider.dart';
 
 enum AppLogoVariant {
   iconOnly,

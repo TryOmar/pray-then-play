@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gamer_salah/core/constants/app_constants.dart';
-import 'package:gamer_salah/core/constants/game_data.dart';
-import 'package:gamer_salah/core/models/game_profile.dart';
-import 'package:gamer_salah/core/models/game_session_record.dart';
-import 'package:gamer_salah/core/utils/risk_calculator.dart';
+import 'package:pray_then_play/core/constants/app_constants.dart';
+import 'package:pray_then_play/core/constants/game_data.dart';
+import 'package:pray_then_play/core/models/game_profile.dart';
+import 'package:pray_then_play/core/models/game_session_record.dart';
+import 'package:pray_then_play/core/utils/risk_calculator.dart';
 
 void main() {
   group('Activity-Based Gaming Architecture Tests', () {

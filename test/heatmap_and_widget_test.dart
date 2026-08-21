@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:gamer_salah/core/services/storage_service.dart';
-import 'package:gamer_salah/core/services/home_widget_service.dart';
-import 'package:gamer_salah/core/providers/prayer_heatmap_provider.dart';
-import 'package:gamer_salah/core/models/prayer_record.dart';
+import 'package:pray_then_play/core/services/storage_service.dart';
+import 'package:pray_then_play/core/services/home_widget_service.dart';
+import 'package:pray_then_play/core/providers/prayer_heatmap_provider.dart';
+import 'package:pray_then_play/core/models/prayer_record.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

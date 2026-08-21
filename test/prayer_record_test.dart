@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gamer_salah/core/models/prayer_record.dart';
+import 'package:pray_then_play/core/models/prayer_record.dart';
 
 void main() {
   group('PrayerRecord Domain & Classification Tests', () {

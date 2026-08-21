@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gamer_salah/core/constants/app_constants.dart';
-import 'package:gamer_salah/core/constants/prayer_constants.dart';
-import 'package:gamer_salah/core/services/prayer_service.dart';
+import 'package:pray_then_play/core/constants/app_constants.dart';
+import 'package:pray_then_play/core/constants/prayer_constants.dart';
+import 'package:pray_then_play/core/services/prayer_service.dart';
 
 void main() {
   group('PrayerService Calculation Tests', () {

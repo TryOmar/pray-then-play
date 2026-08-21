@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gamer_salah/core/constants/app_constants.dart';
-import 'package:gamer_salah/core/models/game_profile.dart';
-import 'package:gamer_salah/core/utils/risk_calculator.dart';
-import 'package:gamer_salah/core/utils/time_utils.dart';
+import 'package:pray_then_play/core/constants/app_constants.dart';
+import 'package:pray_then_play/core/models/game_profile.dart';
+import 'package:pray_then_play/core/utils/risk_calculator.dart';
+import 'package:pray_then_play/core/utils/time_utils.dart';
 
 void main() {
   group('RiskCalculator Tests with Safety Buffer', () {

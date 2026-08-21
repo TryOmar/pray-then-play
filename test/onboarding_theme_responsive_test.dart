@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gamer_salah/app/theme.dart';
-import 'package:gamer_salah/features/onboarding/screens/onboarding_screen.dart';
+import 'package:pray_then_play/app/theme.dart';
+import 'package:pray_then_play/features/onboarding/screens/onboarding_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

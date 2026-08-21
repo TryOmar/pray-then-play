@@ -3,16 +3,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:gamer_salah/app/shell_screen.dart';
-import 'package:gamer_salah/app/theme.dart';
-import 'package:gamer_salah/core/providers/prayer_provider.dart';
-import 'package:gamer_salah/core/services/storage_service.dart';
-import 'package:gamer_salah/features/game_profiles/screens/game_profiles_screen.dart';
-import 'package:gamer_salah/features/heatmap/screens/prayer_consistency_screen.dart';
-import 'package:gamer_salah/features/home/screens/home_screen.dart';
-import 'package:gamer_salah/features/prayer_times/screens/prayer_times_screen.dart';
-import 'package:gamer_salah/features/queue_check/screens/queue_check_screen.dart';
-import 'package:gamer_salah/features/settings/screens/settings_screen.dart';
+import 'package:pray_then_play/app/shell_screen.dart';
+import 'package:pray_then_play/app/theme.dart';
+import 'package:pray_then_play/core/providers/prayer_provider.dart';
+import 'package:pray_then_play/core/services/storage_service.dart';
+import 'package:pray_then_play/features/game_profiles/screens/game_profiles_screen.dart';
+import 'package:pray_then_play/features/heatmap/screens/prayer_consistency_screen.dart';
+import 'package:pray_then_play/features/home/screens/home_screen.dart';
+import 'package:pray_then_play/features/prayer_times/screens/prayer_times_screen.dart';
+import 'package:pray_then_play/features/queue_check/screens/queue_check_screen.dart';
+import 'package:pray_then_play/features/settings/screens/settings_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

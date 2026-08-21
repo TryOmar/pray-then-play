@@ -78,7 +78,7 @@ class NotificationService {
 
     // 2. Android & iOS Local Notification
     const androidDetails = AndroidNotificationDetails(
-      'gamer_salah_prayers',
+      'pray_then_play_prayers',
       'Prayer Reminders',
       channelDescription: 'Smart prayer reminders for gamers',
       importance: Importance.high,

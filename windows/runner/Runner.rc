@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.gamersalah" "\0"
-            VALUE "FileDescription", "gamer_salah" "\0"
+            VALUE "CompanyName", "com.praythenplay" "\0"
+            VALUE "FileDescription", "Pray Then Play" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "gamer_salah" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.gamersalah. All rights reserved." "\0"
-            VALUE "OriginalFilename", "gamer_salah.exe" "\0"
-            VALUE "ProductName", "gamer_salah" "\0"
+            VALUE "InternalName", "pray_then_play" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.praythenplay. All rights reserved." "\0"
+            VALUE "OriginalFilename", "pray_then_play.exe" "\0"
+            VALUE "ProductName", "Pray Then Play" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
