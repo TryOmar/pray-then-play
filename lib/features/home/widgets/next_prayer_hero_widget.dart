@@ -55,66 +55,84 @@ class NextPrayerHeroWidget extends ConsumerWidget {
     } else if (remainingMinutes <= (bufferMinutes + 20)) {
       status = GamingStatus.caution;
       statusBadge = 'SHORT MATCH ONLY';
-      final safeMins = remainingMinutes - bufferMinutes;
+      final safeMins = (remainingMinutes - bufferMinutes).clamp(0, 9999);
       statusSubtitle = 'Up to ~$safeMins min available. Ideal for Swiftplay, ARAM, or casual.';
       statusColor = AppColors.warningAmber;
     } else {
       status = GamingStatus.safe;
-      final safeMins = remainingMinutes - bufferMinutes;
+      final safeMins = (remainingMinutes - bufferMinutes).clamp(0, 9999);
       statusBadge = 'SAFE TO PLAY';
       statusSubtitle = 'Up to ~$safeMins min safe session with a ${bufferMinutes}m buffer.';
       statusColor = primaryAccent;
     }
 
+    final safeMinutesAvailable = (remainingMinutes - bufferMinutes).clamp(0, 9999);
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: GlassmorphicDecoration.neonCard(
         context: context,
         glowColor: statusColor,
-        glowIntensity: remainingMinutes <= bufferMinutes ? 0.22 : 0.1,
-        borderRadius: 18,
+        glowIntensity: remainingMinutes <= bufferMinutes ? 0.22 : 0.12,
+        borderRadius: 20,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Next Prayer Label & Time Chip
+          // Top Bar: Next Prayer Badge + Live Sync Beacon + Time Chip
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Flexible(
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                        color: statusColor.withValues(alpha: 0.4), width: 0.8),
-                  ),
-                  child: Text(
-                    prayerName.isEmpty
-                        ? 'NEXT PRAYER'
-                        : prayerName.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w900,
-                      color: statusColor,
-                      letterSpacing: 1.0,
-                    ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: statusColor.withValues(alpha: 0.4),
+                    width: 0.8,
                   ),
                 ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: statusColor.withValues(alpha: 0.6),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      prayerName.isEmpty ? 'NEXT PRAYER' : prayerName.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w900,
+                        color: statusColor,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(width: 8),
+              const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                 decoration: BoxDecoration(
                   color: surfaceColor,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                      color: statusColor.withValues(alpha: 0.35), width: 1),
+                    color: statusColor.withValues(alpha: 0.35),
+                    width: 1,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -137,28 +155,58 @@ class NextPrayerHeroWidget extends ConsumerWidget {
 
           const SizedBox(height: 14),
 
-          // Isolated Live Countdown
-          _LiveCountdownWidget(prayerTime: prayerTime!),
+          // Isolated Live Countdown + Micro Status Chips
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: _LiveCountdownWidget(prayerTime: prayerTime!),
+              ),
+              if (remainingMinutes > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: statusColor.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: Text(
+                    '~$safeMinutesAvailable min safe',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+            ],
+          ),
 
           const SizedBox(height: 14),
 
-          // Safety Evaluation Pill
+          // Safety Evaluation Pill (Modern Glassmorphic Capsule)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(11),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: statusColor.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                  color: statusColor.withValues(alpha: 0.35), width: 1),
+                color: statusColor.withValues(alpha: 0.3),
+                width: 1,
+              ),
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(5),
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
+                    color: statusColor.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     status == GamingStatus.safe
@@ -166,11 +214,11 @@ class NextPrayerHeroWidget extends ConsumerWidget {
                         : status == GamingStatus.caution
                             ? Icons.timelapse_rounded
                             : Icons.mosque_rounded,
-                    size: 15,
+                    size: 17,
                     color: statusColor,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,7 +226,7 @@ class NextPrayerHeroWidget extends ConsumerWidget {
                       Text(
                         statusBadge,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w800,
                           color: statusColor,
                           letterSpacing: 0.5,
@@ -188,7 +236,7 @@ class NextPrayerHeroWidget extends ConsumerWidget {
                       Text(
                         statusSubtitle,
                         style: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: 11,
                           color: Theme.of(context).textTheme.bodySmall?.color ??
                               AppColors.textMuted,
                           height: 1.25,
@@ -215,14 +263,17 @@ class NextPrayerHeroWidget extends ConsumerWidget {
               icon: const Icon(Icons.shield_outlined, size: 16),
               label: const FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text('Evaluate Match Queue Safety'),
+                child: Text(
+                  'Evaluate Match Queue Safety',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: statusColor,
                 foregroundColor: statusColor.computeLuminance() > 0.55
                     ? Colors.black
                     : Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
