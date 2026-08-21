@@ -216,16 +216,55 @@ jobs:
           prerelease: false
           generate_release_notes: true
           body: |
-            ## 🎮 Pray Then Play — Official Release ${{ github.ref_name }}
+            <div align="center">
 
-            ### 📦 Download Packages
-            | Platform | File | Description |
-            | :--- | :--- | :--- |
-            | **Android** | `PrayThenPlay-v2.0.0-universal.apk` | Universal APK for sideloading on Android 8.0+ |
-            | **Google Play** | `PrayThenPlay-v2.0.0-release.aab` | Google Play App Bundle for Play Store console |
-            | **Windows (Setup)** | `PrayThenPlay-Setup-v2.0.0-x64.exe` | 1-Click Windows installer with auto-startup & tray |
-            | **Windows (Portable)** | `PrayThenPlay-Portable-v2.0.0-windows-x64.zip` | Standalone portable executable |
-            | **Web App** | `pray-then-play-web-bundle.zip` | Deployable static bundle for web hosting |
+            # 🎮 Pray Then Play — Official Release ${{ github.ref_name }}
+
+            ### *Salah first. Gaming second. Stay on time. Play with peace of mind.*
+
+            [![Launch Web Companion](https://img.shields.io/badge/🌐_Launch_Live_Web_App-00E676?style=for-the-badge&logo=googlechrome&logoColor=black)](https://tryomar.github.io/pray-then-play-website/app/)
+            [![Official Showcase](https://img.shields.io/badge/🌟_Official_Showcase_Portal-070B14?style=for-the-badge&logo=safari&logoColor=white)](https://tryomar.github.io/pray-then-play-website/)
+
+            </div>
 
             ---
-            *Salah first. Gaming second. Stay on time. Play with peace of mind.*
+
+            ### 🌐 Instant Web Access (No Install Needed)
+            > **Try Pray Then Play instantly in your browser:**
+            > 👉 **[Launch Live Web Companion](https://tryomar.github.io/pray-then-play-website/app/)**
+
+            ---
+
+            ### 📦 Download Packages
+
+            | Platform | File | Target Audience & Instructions |
+            | :--- | :--- | :--- |
+            | 📱 **Android** | `PrayThenPlay-v2.0.0-universal.apk` | **For Gamers:** Direct 1-tap download & install on Android 8.0+. |
+            | 🪟 **Windows (Installer)** | `PrayThenPlay-Setup-v2.0.0-x64.exe` | **For Windows Gamers:** 1-Click setup with system tray & autostart. |
+            | 🗜️ **Windows (Portable)** | `PrayThenPlay-Portable-v2.0.0-windows-x64.zip` | Standalone portable executable. Extract & run anywhere. |
+            | ☁️ **Self-Hosted Web** | `pray-then-play-web-bundle.zip` | Complete compiled web bundle for self-hosting on Nginx/Docker. |
+            | 🏬 **Google Play Console** | `PrayThenPlay-v2.0.0-release.aab` | *(For Developers)* Google Play App Bundle for Play Console publishing. |
+
+            ---
+
+            ### ✨ What's Included in v2.0.0:
+            * 🛡️ **Queue Check Decision Engine**: Smart calculations balancing match lengths against prayer windows.
+            * 🕌 **Global Prayer Calculations**: 11 astronomical calculation methods with custom buffer protection.
+            * 🎨 **11-Theme Lighting Matrix**: Cyber Midnight, Crimson Fury, Emerald Calm, Solar Amber, and OLED Black.
+            * 🌍 **10 Supported Languages**: English, Arabic, Urdu, Turkish, French, German, Spanish, Indonesian, Malay, Russian.
+            * 🔒 **100% Offline-First Privacy**: Zero tracking, zero telemetry, local encrypted storage.
+
+            ---
+            *Made with dedication for Muslim gamers worldwide.*
+
+      - name: 🌐 Trigger Live Website Redeployment
+        env:
+          GITHUB_TOKEN: ${{ secrets.WEBSITE_DEPLOY_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Triggering live website redeployment on TryOmar/pray-then-play-website..."
+          curl -s -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            https://api.github.com/repos/TryOmar/pray-then-play-website/dispatches \
+            -d '{"event_type":"release-published"}' || true
+          echo "✅ Deployment signal dispatched."
