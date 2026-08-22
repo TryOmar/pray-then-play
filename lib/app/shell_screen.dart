@@ -51,6 +51,7 @@ class ShellScreen extends ConsumerWidget {
           ),
           child: SafeArea(
             child: Center(
+              heightFactor: 1.0,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 640),
                 child: Padding(
