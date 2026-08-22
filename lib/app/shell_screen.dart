@@ -29,7 +29,12 @@ class ShellScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: activeTheme.background,
-      body: child,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: child,
+        ),
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: activeTheme.surface,
@@ -48,39 +53,44 @@ class ShellScreen extends ConsumerWidget {
           ],
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            child: Row(
-              children: [
-                _NavItem(
-                  icon: Icons.timer_outlined,
-                  label: context.tr('nav_queue'),
-                  isSelected: currentIndex == 0,
-                  activeColor: activeTheme.primaryAccent,
-                  onTap: () => context.go('/'),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: Row(
+                  children: [
+                    _NavItem(
+                      icon: Icons.timer_outlined,
+                      label: context.tr('nav_queue'),
+                      isSelected: currentIndex == 0,
+                      activeColor: activeTheme.primaryAccent,
+                      onTap: () => context.go('/'),
+                    ),
+                    _NavItem(
+                      icon: Icons.auto_graph_rounded,
+                      label: context.tr('nav_heatmap'),
+                      isSelected: currentIndex == 1,
+                      activeColor: activeTheme.primaryAccent,
+                      onTap: () => context.go('/consistency'),
+                    ),
+                    _NavItem(
+                      icon: Icons.videogame_asset_rounded,
+                      label: context.tr('nav_profiles'),
+                      isSelected: currentIndex == 2,
+                      activeColor: activeTheme.primaryAccent,
+                      onTap: () => context.go('/games'),
+                    ),
+                    _NavItem(
+                      icon: Icons.tune_rounded,
+                      label: context.tr('nav_settings'),
+                      isSelected: currentIndex == 3,
+                      activeColor: activeTheme.primaryAccent,
+                      onTap: () => context.go('/settings'),
+                    ),
+                  ],
                 ),
-                _NavItem(
-                  icon: Icons.auto_graph_rounded,
-                  label: context.tr('nav_heatmap'),
-                  isSelected: currentIndex == 1,
-                  activeColor: activeTheme.primaryAccent,
-                  onTap: () => context.go('/consistency'),
-                ),
-                _NavItem(
-                  icon: Icons.videogame_asset_rounded,
-                  label: context.tr('nav_profiles'),
-                  isSelected: currentIndex == 2,
-                  activeColor: activeTheme.primaryAccent,
-                  onTap: () => context.go('/games'),
-                ),
-                _NavItem(
-                  icon: Icons.tune_rounded,
-                  label: context.tr('nav_settings'),
-                  isSelected: currentIndex == 3,
-                  activeColor: activeTheme.primaryAccent,
-                  onTap: () => context.go('/settings'),
-                ),
-              ],
+              ),
             ),
           ),
         ),

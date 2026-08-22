@@ -383,6 +383,7 @@ class PrayThenPlayTheme {
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: gamingTheme.surface,
         surfaceTintColor: Colors.transparent,
+        constraints: const BoxConstraints(maxWidth: 640),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),

@@ -469,94 +469,99 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Scaffold(
       backgroundColor: _selectedTheme.background,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Top Step Progress Indicator & Language Pill
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Row(
-                children: [
-                  if (_currentPage > 0)
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_rounded, size: 20),
-                      onPressed: _prevPage,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  if (_currentPage > 0) const SizedBox(width: 12),
-                  Expanded(
-                    child: Row(
-                      children: List.generate(6, (index) {
-                        final isPassed = index <= _currentPage;
-                        return Expanded(
-                          child: Container(
-                            height: 4,
-                            margin: const EdgeInsets.symmetric(horizontal: 2),
-                            decoration: BoxDecoration(
-                              color: isPassed ? _selectedTheme.primaryAccent : AppColors.surfaceHighlight,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => _showOnboardingLanguagePicker(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: _selectedTheme.surfaceElevated,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: _selectedTheme.borderColor,
-                            width: 1,
-                          ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              children: [
+                // Top Step Progress Indicator & Language Pill
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: Row(
+                    children: [
+                      if (_currentPage > 0)
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                          onPressed: _prevPage,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
+                      if (_currentPage > 0) const SizedBox(width: 12),
+                      Expanded(
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(currentLanguage.flag, style: const TextStyle(fontSize: 13)),
-                            const SizedBox(width: 5),
-                            Text(
-                              currentLanguage.nativeName,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: _selectedTheme.textPrimary,
+                          children: List.generate(6, (index) {
+                            final isPassed = index <= _currentPage;
+                            return Expanded(
+                              child: Container(
+                                height: 4,
+                                margin: const EdgeInsets.symmetric(horizontal: 2),
+                                decoration: BoxDecoration(
+                                  color: isPassed ? _selectedTheme.primaryAccent : AppColors.surfaceHighlight,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 3),
-                            Icon(Icons.arrow_drop_down_rounded, size: 16, color: _selectedTheme.textMuted),
-                          ],
+                            );
+                          }),
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 10),
+                      MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => _showOnboardingLanguagePicker(context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: _selectedTheme.surfaceElevated,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: _selectedTheme.borderColor,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(currentLanguage.flag, style: const TextStyle(fontSize: 13)),
+                                const SizedBox(width: 5),
+                                Text(
+                                  currentLanguage.nativeName,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: _selectedTheme.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(width: 3),
+                                Icon(Icons.arrow_drop_down_rounded, size: 16, color: _selectedTheme.textMuted),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            // Page View
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  _buildWelcomePage(),
-                  _buildLocationPage(),
-                  _buildGamesSelectionPage(),
-                  _buildModesCustomizationPage(),
-                  _buildProtectionPage(),
-                  _buildThemePage(),
-                ],
-              ),
+                // Page View
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _buildWelcomePage(),
+                      _buildLocationPage(),
+                      _buildGamesSelectionPage(),
+                      _buildModesCustomizationPage(),
+                      _buildProtectionPage(),
+                      _buildThemePage(),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
