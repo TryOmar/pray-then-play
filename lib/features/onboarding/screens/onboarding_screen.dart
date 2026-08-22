@@ -667,6 +667,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             title: context.tr('onboard_f1_title'),
             subtitle: context.tr('onboard_f1_desc'),
             color: _selectedTheme.primaryAccent,
+            gamingTheme: _selectedTheme,
           ),
           const SizedBox(height: 12),
           _PhilosophyTile(
@@ -674,6 +675,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             title: context.tr('onboard_f2_title'),
             subtitle: context.tr('onboard_f2_desc'),
             color: _selectedTheme.primaryAccent,
+            gamingTheme: _selectedTheme,
           ),
           const SizedBox(height: 12),
           _PhilosophyTile(
@@ -681,6 +683,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             title: context.tr('onboard_f3_title'),
             subtitle: context.tr('onboard_f3_desc'),
             color: _selectedTheme.primaryAccent,
+            gamingTheme: _selectedTheme,
           ),
 
           const SizedBox(height: 36),
@@ -763,6 +766,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               title: context.tr('btn_use_gps'),
               subtitle: _locationLoading ? context.tr('gps_detecting') : context.tr('gps_fastest'),
               isLoading: _locationLoading,
+              gamingTheme: _selectedTheme,
               onTap: _getLocationGPS,
             ),
             const SizedBox(height: 10),
@@ -770,6 +774,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               icon: Icons.search_rounded,
               title: context.tr('btn_choose_city'),
               subtitle: context.tr('city_select_sub'),
+              gamingTheme: _selectedTheme,
               onTap: _showCitySearchDialog,
             ),
             const SizedBox(height: 10),
@@ -777,6 +782,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               icon: Icons.edit_location_alt_rounded,
               title: context.tr('enter_location_manual'),
               subtitle: context.tr('enter_coords_sub'),
+              gamingTheme: _selectedTheme,
               onTap: _showManualCoordinatesDialog,
             ),
           ],
@@ -909,10 +915,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     title: context.tr('cat_competitive'),
                     subtitle: context.tr('cat_competitive_sub'),
                     color: _selectedTheme.tokens.semanticDanger,
+                    gamingTheme: _selectedTheme,
                   ),
                   const SizedBox(height: 8),
                   ...competitiveGames.map((game) => _GameSelectRow(
                         game: game,
+                        gamingTheme: _selectedTheme,
                         onToggle: () {
                           setState(() {
                             final idx = _catalogGames.indexWhere((g) => g.id == game.id);
@@ -930,10 +938,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     title: context.tr('cat_casual'),
                     subtitle: context.tr('cat_casual_sub'),
                     color: _selectedTheme.tokens.semanticSuccess,
+                    gamingTheme: _selectedTheme,
                   ),
                   const SizedBox(height: 8),
                   ...casualGames.map((game) => _GameSelectRow(
                         game: game,
+                        gamingTheme: _selectedTheme,
                         onToggle: () {
                           setState(() {
                             final idx = _catalogGames.indexWhere((g) => g.id == game.id);
@@ -1756,19 +1766,25 @@ class _PhilosophyTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final Color color;
+  final AppGamingTheme gamingTheme;
 
-  const _PhilosophyTile({required this.icon, required this.title, required this.subtitle, required this.color});
+  const _PhilosophyTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.gamingTheme,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: gamingTheme.surfaceElevated,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: theme.dividerColor,
+          color: gamingTheme.borderColor,
           width: 1,
         ),
       ),
@@ -1787,13 +1803,20 @@ class _PhilosophyTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: gamingTheme.textPrimary,
+                  ),
+                ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: TextStyle(
                     fontSize: 11,
-                    color: theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: gamingTheme.textSecondary,
                   ),
                 ),
               ],
@@ -1811,6 +1834,7 @@ class _LocationOptionButton extends StatelessWidget {
   final String subtitle;
   final VoidCallback onTap;
   final bool isLoading;
+  final AppGamingTheme gamingTheme;
 
   const _LocationOptionButton({
     required this.icon,
@@ -1818,31 +1842,26 @@ class _LocationOptionButton extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
     this.isLoading = false,
+    required this.gamingTheme,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.primaryColor;
-    final surfaceColor = theme.colorScheme.surface;
-    final borderColor = theme.dividerColor;
-    final textMuted = theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurface.withValues(alpha: 0.6);
-
     return GestureDetector(
       onTap: isLoading ? null : onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: surfaceColor,
+          color: gamingTheme.surfaceElevated,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderColor),
+          border: Border.all(color: gamingTheme.borderColor),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha: 0.12),
+                color: gamingTheme.primaryAccent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: isLoading
@@ -1850,19 +1869,29 @@ class _LocationOptionButton extends StatelessWidget {
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          strokeWidth: 2, color: primaryColor))
-                  : Icon(icon, color: primaryColor, size: 20),
+                          strokeWidth: 2, color: gamingTheme.primaryAccent))
+                  : Icon(icon, color: gamingTheme.primaryAccent, size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 13)),
-                  Text(subtitle,
-                      style: TextStyle(fontSize: 11, color: textMuted)),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: gamingTheme.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: gamingTheme.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -1870,7 +1899,7 @@ class _LocationOptionButton extends StatelessWidget {
               Directionality.of(context) == TextDirection.rtl
                   ? Icons.chevron_left_rounded
                   : Icons.chevron_right_rounded,
-              color: textMuted,
+              color: gamingTheme.textMuted,
               size: 18,
             ),
           ],
@@ -1884,20 +1913,24 @@ class _CategoryHeading extends StatelessWidget {
   final String title;
   final String subtitle;
   final Color color;
+  final AppGamingTheme gamingTheme;
 
-  const _CategoryHeading({required this.title, required this.subtitle, required this.color});
+  const _CategoryHeading({
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.gamingTheme,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textMuted = theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurface.withValues(alpha: 0.6);
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: color, letterSpacing: 1.2)),
-          Text(subtitle, style: TextStyle(fontSize: 10, color: textMuted)),
+          Text(subtitle, style: TextStyle(fontSize: 10, color: gamingTheme.textMuted)),
         ],
       ),
     );
@@ -1907,16 +1940,16 @@ class _CategoryHeading extends StatelessWidget {
 class _GameSelectRow extends StatelessWidget {
   final GameProfile game;
   final VoidCallback onToggle;
+  final AppGamingTheme gamingTheme;
 
-  const _GameSelectRow({required this.game, required this.onToggle});
+  const _GameSelectRow({
+    required this.game,
+    required this.onToggle,
+    required this.gamingTheme,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final surfaceColor = theme.colorScheme.surface;
-    final borderColor = theme.dividerColor;
-    final textMuted = theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurface.withValues(alpha: 0.6);
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: GestureDetector(
@@ -1927,10 +1960,10 @@ class _GameSelectRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: game.isSelected
                 ? Color(game.color).withValues(alpha: 0.15)
-                : surfaceColor,
+                : gamingTheme.surfaceElevated,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: game.isSelected ? Color(game.color) : borderColor,
+              color: game.isSelected ? Color(game.color) : gamingTheme.borderColor,
               width: game.isSelected ? 1.5 : 1,
             ),
           ),
@@ -1943,12 +1976,17 @@ class _GameSelectRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(game.name,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 14)),
+                    Text(
+                      game.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: gamingTheme.textPrimary,
+                      ),
+                    ),
                     Text(
                       '${game.activities.length} ${context.tr('onboard_modes_title')}',
-                      style: TextStyle(fontSize: 11, color: textMuted),
+                      style: TextStyle(fontSize: 11, color: gamingTheme.textSecondary),
                     ),
                   ],
                 ),
@@ -1957,7 +1995,7 @@ class _GameSelectRow extends StatelessWidget {
                 game.isSelected
                     ? Icons.check_box_rounded
                     : Icons.check_box_outline_blank_rounded,
-                color: game.isSelected ? Color(game.color) : textMuted,
+                color: game.isSelected ? Color(game.color) : gamingTheme.textMuted,
                 size: 22,
               ),
             ],

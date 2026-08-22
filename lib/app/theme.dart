@@ -329,6 +329,8 @@ class PrayThenPlayTheme {
       brightness: isLight ? Brightness.light : Brightness.dark,
       primaryColor: gamingTheme.primaryAccent,
       scaffoldBackgroundColor: gamingTheme.background,
+      canvasColor: gamingTheme.background,
+      dividerColor: gamingTheme.borderColor,
       colorScheme: ColorScheme(
         brightness: isLight ? Brightness.light : Brightness.dark,
         primary: gamingTheme.primaryAccent,
