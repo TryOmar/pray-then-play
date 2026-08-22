@@ -13,12 +13,10 @@ class ShellScreen extends ConsumerWidget {
   int _getCurrentIndex(BuildContext context) {
     try {
       final location = GoRouterState.of(context).uri.toString();
-      if (location == '/') return 0;
-      if (location == '/queue-check') return 1;
-      if (location == '/consistency') return 2;
-      if (location == '/prayer-times') return 3;
-      if (location == '/games') return 4;
-      if (location == '/settings') return 5;
+      if (location == '/' || location == '/queue-check') return 0;
+      if (location == '/consistency') return 1;
+      if (location == '/games') return 2;
+      if (location == '/settings') return 3;
     } catch (_) {}
     return 0;
   }
@@ -51,48 +49,34 @@ class ShellScreen extends ConsumerWidget {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: Row(
               children: [
                 _NavItem(
-                  icon: Icons.home_rounded,
-                  label: context.tr('nav_home'),
+                  icon: Icons.timer_outlined,
+                  label: context.tr('nav_queue'),
                   isSelected: currentIndex == 0,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/'),
                 ),
                 _NavItem(
-                  icon: Icons.sports_esports_rounded,
-                  label: context.tr('nav_queue'),
-                  isSelected: currentIndex == 1,
-                  activeColor: activeTheme.primaryAccent,
-                  onTap: () => context.go('/queue-check'),
-                ),
-                _NavItem(
                   icon: Icons.auto_graph_rounded,
                   label: context.tr('nav_heatmap'),
-                  isSelected: currentIndex == 2,
+                  isSelected: currentIndex == 1,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/consistency'),
                 ),
                 _NavItem(
-                  icon: Icons.schedule_rounded,
-                  label: context.tr('nav_prayers'),
-                  isSelected: currentIndex == 3,
-                  activeColor: activeTheme.primaryAccent,
-                  onTap: () => context.go('/prayer-times'),
-                ),
-                _NavItem(
                   icon: Icons.videogame_asset_rounded,
                   label: context.tr('nav_profiles'),
-                  isSelected: currentIndex == 4,
+                  isSelected: currentIndex == 2,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/games'),
                 ),
                 _NavItem(
-                  icon: Icons.settings_rounded,
+                  icon: Icons.tune_rounded,
                   label: context.tr('nav_settings'),
-                  isSelected: currentIndex == 5,
+                  isSelected: currentIndex == 3,
                   activeColor: activeTheme.primaryAccent,
                   onTap: () => context.go('/settings'),
                 ),
