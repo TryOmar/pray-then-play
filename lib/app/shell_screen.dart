@@ -27,68 +27,75 @@ class ShellScreen extends ConsumerWidget {
     final activeTheme = ref.watch(effectiveThemeProvider);
     ref.watch(appLanguageProvider); // ensure rebuild on locale change
 
-    return Scaffold(
-      backgroundColor: activeTheme.background,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 960),
-          child: child,
-        ),
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: activeTheme.surface,
-          border: Border(
-            top: BorderSide(
-              color: activeTheme.surfaceHighlight.withValues(alpha: 0.6),
-              width: 1,
-            ),
+    return Theme(
+      data: PrayThenPlayTheme.buildTheme(activeTheme),
+      child: Scaffold(
+        backgroundColor: activeTheme.background,
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 960),
+            child: child,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: activeTheme.primaryAccent.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
-            ),
-          ],
         ),
-        child: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 640),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: Row(
-                  children: [
-                    _NavItem(
-                      icon: Icons.timer_outlined,
-                      label: context.tr('nav_queue'),
-                      isSelected: currentIndex == 0,
-                      activeColor: activeTheme.primaryAccent,
-                      onTap: () => context.go('/'),
-                    ),
-                    _NavItem(
-                      icon: Icons.auto_graph_rounded,
-                      label: context.tr('nav_heatmap'),
-                      isSelected: currentIndex == 1,
-                      activeColor: activeTheme.primaryAccent,
-                      onTap: () => context.go('/consistency'),
-                    ),
-                    _NavItem(
-                      icon: Icons.videogame_asset_rounded,
-                      label: context.tr('nav_profiles'),
-                      isSelected: currentIndex == 2,
-                      activeColor: activeTheme.primaryAccent,
-                      onTap: () => context.go('/games'),
-                    ),
-                    _NavItem(
-                      icon: Icons.tune_rounded,
-                      label: context.tr('nav_settings'),
-                      isSelected: currentIndex == 3,
-                      activeColor: activeTheme.primaryAccent,
-                      onTap: () => context.go('/settings'),
-                    ),
-                  ],
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: activeTheme.surface,
+            border: Border(
+              top: BorderSide(
+                color: activeTheme.surfaceHighlight.withValues(alpha: 0.6),
+                width: 1,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: activeTheme.primaryAccent.withValues(alpha: 0.08),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 640),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Row(
+                    children: [
+                      _NavItem(
+                        icon: Icons.timer_outlined,
+                        label: context.tr('nav_queue'),
+                        isSelected: currentIndex == 0,
+                        activeColor: activeTheme.primaryAccent,
+                        unselectedColor: activeTheme.textMuted,
+                        onTap: () => context.go('/'),
+                      ),
+                      _NavItem(
+                        icon: Icons.auto_graph_rounded,
+                        label: context.tr('nav_heatmap'),
+                        isSelected: currentIndex == 1,
+                        activeColor: activeTheme.primaryAccent,
+                        unselectedColor: activeTheme.textMuted,
+                        onTap: () => context.go('/consistency'),
+                      ),
+                      _NavItem(
+                        icon: Icons.videogame_asset_rounded,
+                        label: context.tr('nav_profiles'),
+                        isSelected: currentIndex == 2,
+                        activeColor: activeTheme.primaryAccent,
+                        unselectedColor: activeTheme.textMuted,
+                        onTap: () => context.go('/games'),
+                      ),
+                      _NavItem(
+                        icon: Icons.tune_rounded,
+                        label: context.tr('nav_settings'),
+                        isSelected: currentIndex == 3,
+                        activeColor: activeTheme.primaryAccent,
+                        unselectedColor: activeTheme.textMuted,
+                        onTap: () => context.go('/settings'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -104,6 +111,7 @@ class _NavItem extends StatelessWidget {
   final String label;
   final bool isSelected;
   final Color activeColor;
+  final Color unselectedColor;
   final VoidCallback onTap;
 
   const _NavItem({
@@ -111,14 +119,12 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.activeColor,
+    required this.unselectedColor,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final unselectedColor =
-        Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
-
     return Expanded(
       child: GestureDetector(
         onTap: onTap,

@@ -465,101 +465,140 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final currentLanguage = ref.watch(appLanguageProvider);
+    final isWide = MediaQuery.of(context).size.width >= 680;
 
-    return Scaffold(
-      backgroundColor: _selectedTheme.background,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Column(
-              children: [
-                // Top Step Progress Indicator & Language Pill
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                  child: Row(
+    return Theme(
+      data: PrayThenPlayTheme.buildTheme(_selectedTheme),
+      child: Scaffold(
+        backgroundColor: _selectedTheme.background,
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 580),
+              child: Container(
+                margin: isWide
+                    ? const EdgeInsets.symmetric(vertical: 20, horizontal: 16)
+                    : EdgeInsets.zero,
+                decoration: isWide
+                    ? BoxDecoration(
+                        color: _selectedTheme.surface,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: _selectedTheme.borderColor,
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: _selectedTheme.primaryAccent
+                                .withValues(alpha: 0.1),
+                            blurRadius: 30,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      )
+                    : null,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(isWide ? 24 : 0),
+                  child: Column(
                     children: [
-                      if (_currentPage > 0)
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back_rounded, size: 20),
-                          onPressed: _prevPage,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      if (_currentPage > 0) const SizedBox(width: 12),
-                      Expanded(
+                      // Top Step Progress Indicator & Language Pill
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                         child: Row(
-                          children: List.generate(6, (index) {
-                            final isPassed = index <= _currentPage;
-                            return Expanded(
-                              child: Container(
-                                height: 4,
-                                margin: const EdgeInsets.symmetric(horizontal: 2),
-                                decoration: BoxDecoration(
-                                  color: isPassed ? _selectedTheme.primaryAccent : AppColors.surfaceHighlight,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
+                          children: [
+                            if (_currentPage > 0)
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back_rounded,
+                                    size: 20),
+                                onPressed: _prevPage,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
                               ),
-                            );
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => _showOnboardingLanguagePicker(context),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: _selectedTheme.surfaceElevated,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: _selectedTheme.borderColor,
-                                width: 1,
+                            if (_currentPage > 0) const SizedBox(width: 12),
+                            Expanded(
+                              child: Row(
+                                children: List.generate(6, (index) {
+                                  final isPassed = index <= _currentPage;
+                                  return Expanded(
+                                    child: Container(
+                                      height: 4,
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 2),
+                                      decoration: BoxDecoration(
+                                        color: isPassed
+                                            ? _selectedTheme.primaryAccent
+                                            : _selectedTheme.surfaceHighlight,
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                    ),
+                                  );
+                                }),
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(currentLanguage.flag, style: const TextStyle(fontSize: 13)),
-                                const SizedBox(width: 5),
-                                Text(
-                                  currentLanguage.nativeName,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: _selectedTheme.textPrimary,
+                            const SizedBox(width: 10),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () =>
+                                    _showOnboardingLanguagePicker(context),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: _selectedTheme.surfaceElevated,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: _selectedTheme.borderColor,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(currentLanguage.flag,
+                                          style: const TextStyle(fontSize: 13)),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        currentLanguage.nativeName,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: _selectedTheme.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Icon(Icons.arrow_drop_down_rounded,
+                                          size: 16,
+                                          color: _selectedTheme.textMuted),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(width: 3),
-                                Icon(Icons.arrow_drop_down_rounded, size: 16, color: _selectedTheme.textMuted),
-                              ],
+                              ),
                             ),
-                          ),
+                          ],
+                        ),
+                      ),
+
+                      // Page View
+                      Expanded(
+                        child: PageView(
+                          controller: _pageController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            _buildWelcomePage(),
+                            _buildLocationPage(),
+                            _buildGamesSelectionPage(),
+                            _buildModesCustomizationPage(),
+                            _buildProtectionPage(),
+                            _buildThemePage(),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-
-                // Page View
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      _buildWelcomePage(),
-                      _buildLocationPage(),
-                      _buildGamesSelectionPage(),
-                      _buildModesCustomizationPage(),
-                      _buildProtectionPage(),
-                      _buildThemePage(),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -673,7 +712,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.location_on_rounded, size: 40, color: AppColors.primaryCyan),
+          Icon(Icons.location_on_rounded, size: 40, color: _selectedTheme.primaryAccent),
           const SizedBox(height: 10),
           Text(
             context.tr('step_location_title'),
@@ -682,7 +721,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 4),
           Text(
             context.tr('step_location_subtitle'),
-            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: _selectedTheme.textSecondary),
           ),
           const SizedBox(height: 20),
 
@@ -690,20 +729,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           if (_locationDone) ...[
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: GlassmorphicDecoration.neonCard(
-                glowColor: AppColors.successGreen,
-                glowIntensity: 0.15,
+              decoration: BoxDecoration(
+                color: _selectedTheme.tokens.semanticSuccess.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _selectedTheme.tokens.semanticSuccess.withValues(alpha: 0.5),
+                  width: 1,
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle_rounded, color: AppColors.successGreen, size: 28),
+                  Icon(Icons.check_circle_rounded, color: _selectedTheme.tokens.semanticSuccess, size: 28),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(context.tr('location_selected'), style: const TextStyle(fontWeight: FontWeight.w700)),
-                        Text('$_cityName, $_countryName', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                        Text('$_cityName, $_countryName', style: TextStyle(color: _selectedTheme.textSecondary, fontSize: 13)),
                       ],
                     ),
                   ),
@@ -743,21 +786,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           // Calculation Method
           Text(
             context.tr('setting_calc_method').toUpperCase(),
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted, letterSpacing: 1.2),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: _selectedTheme.textMuted, letterSpacing: 1.2),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: AppColors.surfaceElevated,
+              color: _selectedTheme.surfaceElevated,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _selectedTheme.borderColor),
             ),
             child: DropdownButton<CalculationMethodType>(
               value: _calcMethod,
               isExpanded: true,
-              dropdownColor: Theme.of(context).colorScheme.surface,
+              dropdownColor: _selectedTheme.surface,
               underline: const SizedBox(),
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 13),
+              style: TextStyle(color: _selectedTheme.textPrimary, fontSize: 13),
               items: CalculationMethodType.values.map((m) => DropdownMenuItem(value: m, child: Text(m.getLocalizedName(context), overflow: TextOverflow.ellipsis))).toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _calcMethod = v);
@@ -770,21 +814,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           // Asr Madhhab
           Text(
             context.tr('setting_asr_method').toUpperCase(),
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textMuted, letterSpacing: 1.2),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: _selectedTheme.textMuted, letterSpacing: 1.2),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
-              color: Theme.of(context).inputDecorationTheme.fillColor ?? AppColors.surfaceElevated,
+              color: _selectedTheme.surfaceElevated,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _selectedTheme.borderColor),
             ),
             child: DropdownButton<AsrMethodType>(
               value: _asrMethod,
               isExpanded: true,
-              dropdownColor: Theme.of(context).colorScheme.surface,
+              dropdownColor: _selectedTheme.surface,
               underline: const SizedBox(),
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 13),
+              style: TextStyle(color: _selectedTheme.textPrimary, fontSize: 13),
               items: AsrMethodType.values.map((m) => DropdownMenuItem(value: m, child: Text(m.getLocalizedName(context), overflow: TextOverflow.ellipsis))).toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _asrMethod = v);
@@ -802,7 +847,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 setState(() => _locationDone = true);
                 _nextPage();
               },
-              child: Text(context.tr('btn_next')),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _selectedTheme.primaryAccent,
+                foregroundColor: _selectedTheme.buttonTextColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Text(context.tr('btn_next'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
             ),
           ),
         ],
@@ -836,7 +886,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 4),
           Text(
             context.tr('onboard_games_subtitle'),
-            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: _selectedTheme.textSecondary),
           ),
           const SizedBox(height: 16),
 
@@ -858,7 +908,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _CategoryHeading(
                     title: context.tr('cat_competitive'),
                     subtitle: context.tr('cat_competitive_sub'),
-                    color: AppColors.dangerRed,
+                    color: _selectedTheme.tokens.semanticDanger,
                   ),
                   const SizedBox(height: 8),
                   ...competitiveGames.map((game) => _GameSelectRow(
@@ -879,7 +929,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _CategoryHeading(
                     title: context.tr('cat_casual'),
                     subtitle: context.tr('cat_casual_sub'),
-                    color: AppColors.successGreen,
+                    color: _selectedTheme.tokens.semanticSuccess,
                   ),
                   const SizedBox(height: 8),
                   ...casualGames.map((game) => _GameSelectRow(
@@ -904,10 +954,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: selectedCount > 0 ? _nextPage : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _selectedTheme.primaryAccent,
+                foregroundColor: _selectedTheme.buttonTextColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
               child: Text(
                 selectedCount > 0
                     ? '${context.tr('btn_customize_modes')} ($selectedCount)'
                     : context.tr('select_min_game'),
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
               ),
             ),
           ),
@@ -932,7 +988,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 4),
           Text(
             context.tr('onboard_modes_subtitle'),
-            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: _selectedTheme.textSecondary),
           ),
           const SizedBox(height: 16),
 
@@ -945,9 +1001,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   margin: const EdgeInsets.only(bottom: 14),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: _selectedTheme.surface,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.surfaceHighlight),
+                    border: Border.all(color: _selectedTheme.borderColor),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1001,8 +1057,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                     fontSize: 13,
                                     fontWeight: mode.isEnabled ? FontWeight.w600 : FontWeight.w400,
                                     color: mode.isEnabled
-                                        ? Theme.of(context).colorScheme.onSurface
-                                        : (Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted),
+                                        ? _selectedTheme.textPrimary
+                                        : _selectedTheme.textMuted,
                                   ),
                                 ),
                               ),
@@ -1010,11 +1066,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                          .inputDecorationTheme
-                                          .fillColor ??
-                                      AppColors.surfaceElevated,
+                                  color: _selectedTheme.surfaceElevated,
                                   borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: _selectedTheme.borderColor),
                                 ),
                                 child: Text(
                                   mode.commitmentType ==
@@ -1024,11 +1078,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   style: TextStyle(
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w600,
-                                    color: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.color ??
-                                        AppColors.textMuted,
+                                    color: _selectedTheme.textMuted,
                                   ),
                                 ),
                               ),
@@ -1049,7 +1099,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _nextPage,
-              child: Text(context.tr('btn_configure_protection')),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _selectedTheme.primaryAccent,
+                foregroundColor: _selectedTheme.buttonTextColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Text(context.tr('btn_configure_protection'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
             ),
           ),
         ],
@@ -1064,7 +1119,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.shield_rounded, size: 40, color: AppColors.primaryCyan),
+          Icon(Icons.shield_rounded, size: 40, color: _selectedTheme.primaryAccent),
           const SizedBox(height: 10),
           Text(
             context.tr('onboard_protection_title'),
@@ -1073,7 +1128,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 4),
           Text(
             context.tr('onboard_protection_subtitle'),
-            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 13, color: _selectedTheme.textSecondary),
           ),
           const SizedBox(height: 24),
 
@@ -1087,10 +1142,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: isSelected ? _selectedTheme.primaryAccent.withValues(alpha: 0.1) : AppColors.surface,
+                    color: isSelected ? _selectedTheme.primaryAccent.withValues(alpha: 0.1) : _selectedTheme.surface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isSelected ? _selectedTheme.primaryAccent : AppColors.surfaceHighlight,
+                      color: isSelected ? _selectedTheme.primaryAccent : _selectedTheme.borderColor,
                       width: isSelected ? 1.5 : 1,
                     ),
                   ),
@@ -1099,7 +1154,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     children: [
                       Icon(
                         isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                        color: isSelected ? _selectedTheme.primaryAccent : AppColors.textMuted,
+                        color: isSelected ? _selectedTheme.primaryAccent : _selectedTheme.textMuted,
                         size: 22,
                       ),
                       const SizedBox(width: 14),
@@ -1138,9 +1193,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                             const SizedBox(height: 6),
                             Text(level.getLocalizedDesc(context),
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: 13,
-                                    color: AppColors.textSecondary)),
+                                    color: _selectedTheme.textSecondary)),
                           ],
                         ),
                       ),
@@ -1157,7 +1212,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _nextPage,
-              child: Text(context.tr('step_theme_title')),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _selectedTheme.primaryAccent,
+                foregroundColor: _selectedTheme.buttonTextColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: Text(context.tr('step_theme_title'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
             ),
           ),
         ],
@@ -1701,9 +1761,17 @@ class _PhilosophyTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: GlassmorphicDecoration.card(context: context),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: theme.dividerColor,
+          width: 1,
+        ),
+      ),
       child: Row(
         children: [
           Container(
@@ -1725,8 +1793,7 @@ class _PhilosophyTile extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Theme.of(context).textTheme.bodySmall?.color ??
-                        AppColors.textMuted,
+                    color: theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -1755,12 +1822,11 @@ class _LocationOptionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).primaryColor;
-    final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor =
-        Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
-    final textMuted =
-        Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
+    final theme = Theme.of(context);
+    final primaryColor = theme.primaryColor;
+    final surfaceColor = theme.colorScheme.surface;
+    final borderColor = theme.dividerColor;
+    final textMuted = theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
     return GestureDetector(
       onTap: isLoading ? null : onTap,
@@ -1823,13 +1889,15 @@ class _CategoryHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textMuted = theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurface.withValues(alpha: 0.6);
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: color, letterSpacing: 1.2)),
-          Text(subtitle, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+          Text(subtitle, style: TextStyle(fontSize: 10, color: textMuted)),
         ],
       ),
     );
@@ -1844,11 +1912,10 @@ class _GameSelectRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final surfaceColor = Theme.of(context).colorScheme.surface;
-    final borderColor =
-        Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
-    final textMuted =
-        Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted;
+    final theme = Theme.of(context);
+    final surfaceColor = theme.colorScheme.surface;
+    final borderColor = theme.dividerColor;
+    final textMuted = theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),

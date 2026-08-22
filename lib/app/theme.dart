@@ -318,6 +318,8 @@ class AppColors {
 }
 
 class PrayThenPlayTheme {
+  static ThemeData buildTheme(AppGamingTheme gamingTheme) => getTheme(gamingTheme);
+
   static ThemeData getTheme(AppGamingTheme gamingTheme) {
     final isLight = gamingTheme.isLight;
     final isOled = gamingTheme == AppGamingTheme.oled;
