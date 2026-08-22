@@ -51,9 +51,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void initState() {
     super.initState();
     _catalogGames = GameData.defaultCatalog.map((g) {
-      // By default select top 3 games
-      final isDefault = g.id == 'valorant' || g.id == 'league_of_legends' || g.id == 'minecraft';
-      return g.copyWith(isSelected: isDefault);
+      return g.copyWith(isSelected: false);
     }).toList();
   }
 

@@ -21,10 +21,17 @@ class GameProfilesScreen extends ConsumerWidget {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                padding: const EdgeInsets.fromLTRB(16, 16, 20, 0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    if (Navigator.of(context).canPop()) ...[
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded),
+                        onPressed: () => Navigator.of(context).maybePop(),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -691,106 +698,139 @@ class _GameCardState extends ConsumerState<_GameCard> {
   @override
   Widget build(BuildContext context) {
     final game = widget.game;
-    final gameColor = Color(game.color);
-
-    return AnimatedContainer(
+    final gameColor = Color(game.color);    return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: game.isSelected
-              ? gameColor.withValues(alpha: 0.45)
+              ? gameColor.withValues(alpha: 0.6)
               : (Theme.of(context).dividerTheme.color ??
                   AppColors.surfaceHighlight),
-          width: game.isSelected ? 1.5 : 1,
+          width: game.isSelected ? 1.6 : 1,
         ),
+        boxShadow: game.isSelected
+            ? [
+                BoxShadow(
+                  color: gameColor.withValues(alpha: 0.12),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
-            child: Row(
-              children: [
-                GameIconWidget(
-                    iconName: game.iconName,
-                    size: 36,
-                    fallbackColor: game.color),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _expanded = !_expanded),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                game.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w700),
-                              ),
-                            ),
-                            if (game.isCustom) ...[
-                              const SizedBox(width: 5),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 5, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryCyan
-                                      .withValues(alpha: 0.18),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'Custom',
+          InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () {
+              ref.read(userGamesProvider.notifier).toggleGameSelected(game.id);
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+              child: Row(
+                children: [
+                  Opacity(
+                    opacity: game.isSelected ? 1.0 : 0.5,
+                    child: GameIconWidget(
+                      iconName: game.iconName,
+                      size: 36,
+                      fallbackColor: game.color,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Opacity(
+                      opacity: game.isSelected ? 1.0 : 0.6,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  game.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 9,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.primaryCyan,
+                                    color: game.isSelected
+                                        ? Theme.of(context).colorScheme.onSurface
+                                        : AppColors.textMuted,
                                   ),
                                 ),
                               ),
+                              if (game.isCustom) ...[
+                                const SizedBox(width: 5),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 5, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryCyan
+                                        .withValues(alpha: 0.18),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    'Custom',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.primaryCyan,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${game.enabledActivities.length}/${game.activities.length} activities • ${game.category.label}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 11, color: AppColors.textMuted),
-                        ),
-                      ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${game.enabledActivities.length}/${game.activities.length} activities • ${game.category.label}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 11, color: AppColors.textMuted),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Checkbox(
-                  value: game.isSelected,
-                  activeColor: gameColor,
-                  visualDensity: VisualDensity.compact,
-                  onChanged: (_) {
-                    ref
-                        .read(userGamesProvider.notifier)
-                        .toggleGameSelected(game.id);
-                  },
-                ),
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                  icon: AnimatedRotation(
-                    turns: _expanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: const Icon(Icons.expand_more_rounded,
-                        color: AppColors.textMuted, size: 20),
+                  Transform.scale(
+                    scale: 0.82,
+                    child: Switch(
+                      value: game.isSelected,
+                      activeThumbColor: gameColor,
+                      activeTrackColor: gameColor.withValues(alpha: 0.35),
+                      inactiveThumbColor:
+                          AppColors.textMuted.withValues(alpha: 0.6),
+                      inactiveTrackColor:
+                          (Theme.of(context).dividerTheme.color ??
+                                  AppColors.surfaceHighlight)
+                              .withValues(alpha: 0.3),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onChanged: (_) {
+                        ref
+                            .read(userGamesProvider.notifier)
+                            .toggleGameSelected(game.id);
+                      },
+                    ),
                   ),
-                  onPressed: () => setState(() => _expanded = !_expanded),
-                ),
-              ],
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints:
+                        const BoxConstraints(minWidth: 28, minHeight: 28),
+                    icon: AnimatedRotation(
+                      turns: _expanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: const Icon(Icons.expand_more_rounded,
+                          color: AppColors.textMuted, size: 20),
+                    ),
+                    onPressed: () => setState(() => _expanded = !_expanded),
+                  ),
+                ],
+              ),
             ),
           ),
           AnimatedCrossFade(

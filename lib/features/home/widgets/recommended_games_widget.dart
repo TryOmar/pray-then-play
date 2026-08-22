@@ -7,6 +7,7 @@ import '../../../core/models/game_profile.dart';
 import '../../../core/providers/gaming_provider.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/utils/risk_calculator.dart';
+import '../../../core/utils/time_utils.dart';
 import '../../../core/widgets/game_icon_widget.dart';
 
 class RecommendedGamesWidget extends ConsumerWidget {
@@ -214,7 +215,7 @@ class _GameModeCard extends StatelessWidget {
                 Text(
                   isFlexible
                       ? context.tr('can_pause_safely')
-                      : '${item.mode.estimatedMinutes} ${context.tr('min')} (${item.mode.minMinutes}–${item.mode.maxMinutes} ${context.tr('min')})',
+                      : '${TimeUtils.formatMinutes(item.mode.estimatedMinutes)} (${TimeUtils.formatMinutes(item.mode.minMinutes)}–${TimeUtils.formatMinutes(item.mode.maxMinutes)})',
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).textTheme.bodySmall?.color ?? AppColors.textMuted,
@@ -230,7 +231,7 @@ class _GameModeCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              isFlexible ? context.tr('pauseable_badge') : '${item.mode.estimatedMinutes} ${context.tr('min')}',
+              isFlexible ? context.tr('pauseable_badge') : TimeUtils.formatMinutes(item.mode.estimatedMinutes),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,

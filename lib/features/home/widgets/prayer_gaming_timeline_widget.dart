@@ -4,8 +4,10 @@ import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/localization/localization_extension.dart';
 import '../../../core/models/game_profile.dart';
+import '../../../core/models/prayer_record.dart';
 import '../../../core/models/prayer_time.dart';
 import '../../../core/providers/gaming_provider.dart';
+import '../../../core/providers/prayer_heatmap_provider.dart';
 import '../../../core/providers/prayer_provider.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/utils/time_utils.dart';
@@ -118,13 +120,14 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                         ),
                       ),
 
-                      // Dynamic Slot Segments (Safe Green, Caution Amber, Prayer Break Red)
+                      // Mathematical Window Segments (Green Safe, Amber Buffer, Red Prayer)
                       ..._buildMathematicalSegments(
                         prayerTimes: prayerTimes,
                         bufferMinutes: bufferMinutes,
                         width: width,
                         totalMinutes: totalMinutes,
                         context: context,
+                        ref: ref,
                         userGames: userGames,
                         is24Hour: is24Hour,
                       ),
@@ -135,6 +138,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                         width: width,
                         totalMinutes: totalMinutes,
                         context: context,
+                        ref: ref,
                         primaryColor: primaryColor,
                         is24Hour: is24Hour,
                       ),
@@ -175,6 +179,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
             textDirection: TextDirection.ltr,
             child: _buildPrayerScheduleStrip(
               context: context,
+              ref: ref,
               prayerTimes: prayerTimes,
               nextPrayer: nextPrayer,
               primaryColor: primaryColor,
@@ -205,6 +210,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
 
   Widget _buildPrayerScheduleStrip({
     required BuildContext context,
+    required WidgetRef ref,
     required DailyPrayerTimes prayerTimes,
     required MapEntry<String, DateTime>? nextPrayer,
     required Color primaryColor,
@@ -213,6 +219,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
   }) {
     final prayers = prayerTimes.allPrayers;
     final now = DateTime.now();
+    final record = ref.watch(todayPrayerRecordProvider);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -222,23 +229,33 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           final isNext = nextPrayer?.key == prayer.key;
           final isPast =
               now.isAfter(prayer.value.add(const Duration(minutes: 15)));
+          final loggedStatus =
+              record.prayers[prayer.key] ?? PrayerStatus.notRecorded;
+          final isRecorded = loggedStatus == PrayerStatus.onTime ||
+              loggedStatus == PrayerStatus.late ||
+              loggedStatus == PrayerStatus.missed;
+
+          final cardColor = isRecorded
+              ? loggedStatus.color.withValues(alpha: 0.12)
+              : (isNext
+                  ? primaryColor.withValues(alpha: 0.1)
+                  : surfaceHighlight.withValues(alpha: 0.18));
+
+          final borderColor = isRecorded
+              ? loggedStatus.color.withValues(alpha: 0.55)
+              : (isNext
+                  ? primaryColor.withValues(alpha: 0.6)
+                  : surfaceHighlight.withValues(alpha: 0.35));
 
           final itemContent = Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
             decoration: BoxDecoration(
-              color: isNext
-                  ? primaryColor.withValues(alpha: 0.1)
-                  : surfaceHighlight.withValues(alpha: 0.18),
+              color: cardColor,
               borderRadius: BorderRadius.circular(8),
-              border: isNext
-                  ? Border.all(
-                      color: primaryColor.withValues(alpha: 0.6),
-                      width: 1,
-                    )
-                  : Border.all(
-                      color: surfaceHighlight.withValues(alpha: 0.35),
-                      width: 0.6,
-                    ),
+              border: Border.all(
+                color: borderColor,
+                width: (isNext || isRecorded) ? 1 : 0.6,
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -250,7 +267,11 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (isNext) ...[
+                      if (isRecorded) ...[
+                        Icon(loggedStatus.icon,
+                            size: 10.5, color: loggedStatus.color),
+                        const SizedBox(width: 3),
+                      ] else if (isNext) ...[
                         Container(
                           width: 4.5,
                           height: 4.5,
@@ -272,16 +293,18 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight:
-                              isNext ? FontWeight.w800 : FontWeight.w600,
-                          color: isNext
-                              ? primaryColor
-                              : (isPast
-                                  ? AppColors.textMuted
-                                  : Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.color ??
-                                      AppColors.textSecondary),
+                              (isNext || isRecorded) ? FontWeight.w800 : FontWeight.w600,
+                          color: isRecorded
+                              ? loggedStatus.color
+                              : (isNext
+                                  ? primaryColor
+                                  : (isPast
+                                      ? AppColors.textMuted
+                                      : Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.color ??
+                                          AppColors.textSecondary)),
                         ),
                       ),
                     ],
@@ -291,20 +314,24 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    TimeUtils.formatTime(prayer.value, is24Hour: is24Hour),
+                    isRecorded
+                        ? loggedStatus.getLocalizedLabel(context)
+                        : TimeUtils.formatTime(prayer.value, is24Hour: is24Hour),
                     style: TextStyle(
                       fontSize: 9.5,
                       fontWeight:
-                          isNext ? FontWeight.w700 : FontWeight.w500,
-                      color: isNext
-                          ? primaryColor
-                          : (isPast
-                              ? AppColors.textMuted.withValues(alpha: 0.7)
-                              : Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.color ??
-                                  AppColors.textMuted),
+                          (isNext || isRecorded) ? FontWeight.w700 : FontWeight.w500,
+                      color: isRecorded
+                          ? loggedStatus.color
+                          : (isNext
+                              ? primaryColor
+                              : (isPast
+                                  ? AppColors.textMuted.withValues(alpha: 0.7)
+                                  : Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.color ??
+                                      AppColors.textMuted)),
                     ),
                   ),
                 ),
@@ -314,7 +341,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
 
           return GestureDetector(
             onTap: () => _showPrayerInfoModal(
-                context, prayer.key, prayer.value,
+                context, ref, prayer.key, prayer.value,
                 is24Hour: is24Hour),
             child: itemContent,
           );
@@ -356,17 +383,25 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     required double width,
     required double totalMinutes,
     required BuildContext context,
+    required WidgetRef ref,
     required Color primaryColor,
     required bool is24Hour,
   }) {
     final prayers = prayerTimes.allPrayers;
     final widgets = <Widget>[];
+    final record = ref.watch(todayPrayerRecordProvider);
 
     for (final prayer in prayers) {
       final minuteOfDay = prayer.value.hour * 60.0 +
           prayer.value.minute +
           prayer.value.second / 60.0;
       final exactX = (minuteOfDay / totalMinutes) * width;
+      final loggedStatus =
+          record.prayers[prayer.key] ?? PrayerStatus.notRecorded;
+      final isRecorded = loggedStatus == PrayerStatus.onTime ||
+          loggedStatus == PrayerStatus.late ||
+          loggedStatus == PrayerStatus.missed;
+      final tickColor = isRecorded ? loggedStatus.color : primaryColor;
 
       widgets.add(
         Positioned(
@@ -375,17 +410,17 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           bottom: 2,
           child: GestureDetector(
             onTap: () => _showPrayerInfoModal(
-                context, prayer.key, prayer.value,
+                context, ref, prayer.key, prayer.value,
                 is24Hour: is24Hour),
             child: Container(
-              width: 2.0,
+              width: isRecorded ? 2.5 : 2.0,
               decoration: BoxDecoration(
-                color: primaryColor,
+                color: tickColor,
                 borderRadius: BorderRadius.circular(1),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryColor.withValues(alpha: 0.6),
-                    blurRadius: 3,
+                    color: tickColor.withValues(alpha: 0.7),
+                    blurRadius: isRecorded ? 4 : 3,
                   ),
                 ],
               ),
@@ -404,6 +439,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     required double width,
     required double totalMinutes,
     required BuildContext context,
+    required WidgetRef ref,
     required List<GameProfile> userGames,
     required bool is24Hour,
   }) {
@@ -429,7 +465,7 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
           height: 26,
           child: GestureDetector(
             onTap: () => _showPrayerInfoModal(
-                context, current.key, current.value,
+                context, ref, current.key, current.value,
                 is24Hour: is24Hour),
             child: Container(
               decoration: BoxDecoration(
@@ -524,67 +560,297 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
     return widgets;
   }
 
-  void _showPrayerInfoModal(BuildContext context, String name, DateTime time, {bool is24Hour = false}) {
+  void _showPrayerInfoModal(
+    BuildContext context,
+    WidgetRef ref,
+    String name,
+    DateTime time, {
+    bool is24Hour = false,
+  }) {
+    final activeTheme = Theme.of(context);
+    final primaryColor = activeTheme.primaryColor;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: activeTheme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceHighlight,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-            Row(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          final liveRecord =
+              ref.read(prayerConsistencyProvider.notifier).getRecord(DateTime.now());
+          final activeStatus = liveRecord.prayers[name] ?? PrayerStatus.notRecorded;
+          final isFuture = time.isAfter(DateTime.now());
+
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceHighlight,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                  child: Icon(Icons.mosque_rounded, color: Theme.of(context).primaryColor, size: 22),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  '$name Prayer',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.mosque_rounded, color: primaryColor, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.tr('prayer_${name.toLowerCase()}'),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            context.tr('adhan_time_label').replaceAll(
+                                '{time}',
+                                TimeUtils.formatTime(time,
+                                    is24Hour: is24Hour)),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: activeStatus.color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: activeStatus.color.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(activeStatus.icon, size: 14, color: activeStatus.color),
+                          const SizedBox(width: 4),
+                          Text(
+                            activeStatus.getLocalizedLabel(context),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: activeStatus.color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                Text(
-                  TimeUtils.formatTime(time, is24Hour: is24Hour),
+                const SizedBox(height: 16),
+                if (isFuture) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.primaryCyan.withValues(alpha: 0.35),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.schedule_rounded,
+                            size: 16, color: AppColors.primaryCyan),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            context.tr('future_prayer_notice'),
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              height: 1.35,
+                              color: AppColors.primaryCyan,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                const Text(
+                  'MARK PRAYER STATUS TODAY',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(context).primaryColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textMuted,
+                    letterSpacing: 1.0,
                   ),
                 ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _buildStatusLogOption(
+                      ctx: ctx,
+                      ref: ref,
+                      name: name,
+                      targetStatus: PrayerStatus.onTime,
+                      label: PrayerStatus.onTime.getLocalizedLabel(context),
+                      icon: Icons.check_circle_rounded,
+                      color: AppColors.successGreen,
+                      isSelected: activeStatus == PrayerStatus.onTime,
+                      setModalState: setModalState,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildStatusLogOption(
+                      ctx: ctx,
+                      ref: ref,
+                      name: name,
+                      targetStatus: PrayerStatus.late,
+                      label: PrayerStatus.late.getLocalizedLabel(context),
+                      icon: Icons.access_time_rounded,
+                      color: AppColors.warningAmber,
+                      isSelected: activeStatus == PrayerStatus.late,
+                      setModalState: setModalState,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildStatusLogOption(
+                      ctx: ctx,
+                      ref: ref,
+                      name: name,
+                      targetStatus: PrayerStatus.missed,
+                      label: PrayerStatus.missed.getLocalizedLabel(context),
+                      icon: Icons.cancel_rounded,
+                      color: AppColors.dangerRed,
+                      isSelected: activeStatus == PrayerStatus.missed,
+                      setModalState: setModalState,
+                    ),
+                  ],
+                ),
+                if (activeStatus != PrayerStatus.notRecorded) ...[
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        ref.read(prayerConsistencyProvider.notifier).updatePrayerStatus(
+                              DateTime.now(),
+                              name,
+                              PrayerStatus.notRecorded,
+                            );
+                        ref.read(todayPrayerRecordProvider.notifier).markCompleted(
+                              name,
+                              status: PrayerStatus.notRecorded,
+                            );
+                        setModalState(() {});
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(
+                            content: Text('$name ${context.tr('clear_prayer_status').toLowerCase()}'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.refresh_rounded, size: 16, color: AppColors.textMuted),
+                      label: Text(
+                        context.tr('clear_prayer_status'),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
-            const SizedBox(height: 14),
-            Text(
-              'Adhan for $name is calculated at ${TimeUtils.formatTime(time, is24Hour: is24Hour)}. Plan your gaming sessions to wrap up before this time so you can pray with peace of mind.',
-              style: TextStyle(
-                fontSize: 13,
-                color: Theme.of(context).textTheme.bodyMedium?.color ?? AppColors.textSecondary,
-                height: 1.4,
-              ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildStatusLogOption({
+    required BuildContext ctx,
+    required WidgetRef ref,
+    required String name,
+    required PrayerStatus targetStatus,
+    required String label,
+    required IconData icon,
+    required Color color,
+    required bool isSelected,
+    required StateSetter setModalState,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          final newStatus = isSelected ? PrayerStatus.notRecorded : targetStatus;
+          ref.read(prayerConsistencyProvider.notifier).updatePrayerStatus(
+                DateTime.now(),
+                name,
+                newStatus,
+              );
+          ref.read(todayPrayerRecordProvider.notifier).markCompleted(
+                name,
+                status: newStatus,
+              );
+          setModalState(() {});
+          Navigator.pop(ctx);
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(
+              content: Text(isSelected
+                  ? '$name ${ctx.tr('clear_prayer_status').toLowerCase()}'
+                  : '$name marked as $label'),
+              duration: const Duration(seconds: 2),
+              backgroundColor: isSelected ? AppColors.surfaceHighlight : color,
             ),
-          ],
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.2)
+                : Theme.of(ctx).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? color : AppColors.surfaceHighlight,
+              width: isSelected ? 1.8 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 20, color: color),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  color: isSelected ? color : Theme.of(ctx).colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -647,8 +913,11 @@ class PrayerGamingTimelineWidget extends ConsumerWidget {
                       Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                       const SizedBox(height: 2),
                       Text(
-                        '${TimeUtils.formatTime(startTime, is24Hour: is24Hour)} – ${TimeUtils.formatTime(endTime, is24Hour: is24Hour)} ($durationMinutes min available)',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: status.color),
+                        '${TimeUtils.formatTime(startTime, is24Hour: is24Hour)} – ${TimeUtils.formatTime(endTime, is24Hour: is24Hour)} (${TimeUtils.formatMinutes(durationMinutes)} available)',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: status.color),
                       ),
                     ],
                   ),

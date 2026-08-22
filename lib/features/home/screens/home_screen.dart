@@ -339,19 +339,19 @@ class HomeScreen extends ConsumerWidget {
         const SizedBox(width: 10),
         Expanded(
           child: _QuickActionButton(
-            icon: Icons.play_circle_outline_rounded,
-            label: context.tr('in_a_match'),
-            color: AppColors.warningAmber,
-            onTap: () => context.push('/in-match'),
+            icon: Icons.auto_graph_rounded,
+            label: context.tr('nav_heatmap'),
+            color: AppColors.successGreen,
+            onTap: () => context.go('/consistency'),
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: _QuickActionButton(
-            icon: Icons.event_note_rounded,
-            label: context.tr('planner_label'),
-            color: AppColors.successGreen,
-            onTap: () => context.push('/session-planner'),
+            icon: Icons.sports_esports_rounded,
+            label: context.tr('nav_profiles'),
+            color: AppColors.warningAmber,
+            onTap: () => context.go('/games'),
           ),
         ),
       ],

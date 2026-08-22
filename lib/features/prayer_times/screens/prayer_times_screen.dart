@@ -249,7 +249,7 @@ class _PrayerTimesScreenState extends ConsumerState<PrayerTimesScreen> {
                                       ),
                                       if (isNext)
                                         Text(
-                                          '${context.tr('in_time')} $minutesUntil ${context.tr('min')}',
+                                          '${context.tr('in_time')} ${TimeUtils.formatMinutes(minutesUntil)}',
                                           style: TextStyle(
                                             fontSize: 11,
                                             color: statusColor,

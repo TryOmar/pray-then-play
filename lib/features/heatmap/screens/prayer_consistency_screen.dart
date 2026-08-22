@@ -16,7 +16,8 @@ class PrayerConsistencyScreen extends ConsumerStatefulWidget {
 
 class _PrayerConsistencyScreenState
     extends ConsumerState<PrayerConsistencyScreen> {
-  int _viewTab = 0; // 0: GitHub Contribution Graph, 1: 5-Prayer Breakdown, 2: Gaming Decisions
+  int _mainTab = 0; // 0: Prayer Consistency & Heatmap, 1: Decisions & Badges
+  int _heatmapSubTab = 0; // 0: Contribution Heatmap, 1: 5-Prayer Matrix
   DailyPrayerRecord? _hoveredOrSelectedRecord;
 
   @override
@@ -40,7 +41,7 @@ class _PrayerConsistencyScreenState
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         title: Text(
-          'Prayer Consistency',
+          context.tr('consistency_nav'),
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 18,
@@ -56,122 +57,219 @@ class _PrayerConsistencyScreenState
       ),
       body: CustomScrollView(
         slivers: [
-          // Top Overall Metric Hero
+          // Top Core Hub Selector: [ 📊 Consistency & Heatmap ] vs [ 🏆 Decisions & Badges ]
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-              child: _buildHeroConsistencyCard(
-                context,
-                monthlySummary: monthlySummary,
-                streak: streak,
-                protectedCount: state.protectedPrayers,
-              ),
-            ),
-          ),
-
-          // Section 1: Today's 5-Prayer Checklist
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: _buildTodaySection(context, ref),
-            ),
-          ),
-
-          // Starter Guide Banner for Fresh Installs
-          if (!notifier.hasAnyRecordedPrayers)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: _buildStarterGuideBanner(context, theme),
-              ),
-            ),
-
-          // View Selector Tabs
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
               child: Row(
                 children: [
-                  _buildTabButton(context.tr('tab_contribution_heatmap'), 0),
-                  const SizedBox(width: 8),
-                  _buildTabButton(context.tr('tab_5prayer_matrix'), 1),
-                  const SizedBox(width: 8),
-                  _buildTabButton(context.tr('tab_gaming_decisions'), 2),
+                  _buildMainTabButton(
+                    icon: Icons.auto_graph_rounded,
+                    label: context.tr('consistency_nav'),
+                    index: 0,
+                  ),
+                  const SizedBox(width: 10),
+                  _buildMainTabButton(
+                    icon: Icons.emoji_events_rounded,
+                    label: context.tr('tab_decisions_and_badges'),
+                    index: 1,
+                  ),
                 ],
               ),
             ),
           ),
 
-          // Main Interactive Visualization
-          if (_viewTab == 0) ...[
-            // GitHub-Style Standard Contribution Heatmap Card
+          if (_mainTab == 0) ...[
+            // TAB 0: PRAYER CONSISTENCY & HEATMAP
+            // 1. Overall Metric Hero
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildGitHubContributionCard(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                child: _buildHeroConsistencyCard(
                   context,
-                  weeks: contributionWeeks,
-                  isLight: isLight,
+                  monthlySummary: monthlySummary,
+                  streak: streak,
+                  protectedCount: state.protectedPrayers,
                 ),
               ),
             ),
-          ] else if (_viewTab == 1) ...[
-            // 5-Prayer Breakdown Matrix
+
+            // 2. Today's 5-Prayer Checklist
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildFivePrayerDetailedMatrix(context, monthlySummary),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: _buildTodaySection(context, ref),
               ),
             ),
-          ] else ...[
-            // Gaming & Salah Reflection Section
+
+            // 3. Starter Guide Banner for Fresh Installs
+            if (!notifier.hasAnyRecordedPrayers)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: _buildStarterGuideBanner(context, theme),
+                ),
+              ),
+
+            // 4. Heatmap Sub-view Toggle
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildGamingReflectionSection(context, reflection, state),
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+                child: Row(
+                  children: [
+                    _buildSubTabButton(
+                        context.tr('tab_contribution_heatmap'), 0),
+                    const SizedBox(width: 8),
+                    _buildSubTabButton(context.tr('tab_5prayer_matrix'), 1),
+                  ],
+                ),
+              ),
+            ),
+
+            // 5. Main Interactive Visualization
+            if (_heatmapSubTab == 0)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  child: _buildGitHubContributionCard(
+                    context,
+                    weeks: contributionWeeks,
+                    isLight: isLight,
+                  ),
+                ),
+              )
+            else
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  child:
+                      _buildFivePrayerDetailedMatrix(context, monthlySummary),
+                ),
+              ),
+          ] else ...[
+            // TAB 1: GAMING DECISIONS & BADGES
+            // 1. Gaming Decisions Counter
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
+                child:
+                    _buildGamingReflectionSection(context, reflection, state),
+              ),
+            ),
+
+            // 2. Weekly Habit Reflection & Behavioral Insights Card
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: _buildBehavioralInsightCard(context, reflection),
+              ),
+            ),
+
+            // 3. Habit & Discipline Achievements & Badges Grid
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                child: _buildAchievementsSection(context, achievements),
               ),
             ),
           ],
-
-          // Behavioral Insights Card
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-              child: _buildBehavioralInsightCard(context, reflection),
-            ),
-          ),
-
-          // Habit & Discipline Achievements
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
-              child: _buildAchievementsSection(context, achievements),
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildTabButton(String label, int index) {
-    final isSelected = _viewTab == index;
+  Widget _buildMainTabButton({
+    required IconData icon,
+    required String label,
+    required int index,
+  }) {
+    final isSelected = _mainTab == index;
+    final primary = Theme.of(context).primaryColor;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _mainTab = index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? primary.withValues(alpha: isDark ? 0.22 : 0.12)
+                : Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? primary
+                  : Theme.of(context).dividerTheme.color ??
+                      AppColors.surfaceHighlight,
+              width: isSelected ? 1.4 : 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: primary.withValues(alpha: isDark ? 0.25 : 0.12),
+                      blurRadius: 6,
+                      offset: const Offset(0, 1),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? primary : AppColors.textMuted,
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight:
+                          isSelected ? FontWeight.w800 : FontWeight.w600,
+                      color: isSelected
+                          ? primary
+                          : Theme.of(context).textTheme.bodySmall?.color ??
+                              AppColors.textMuted,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubTabButton(String label, int index) {
+    final isSelected = _heatmapSubTab == index;
     final primary = Theme.of(context).primaryColor;
 
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _viewTab = index),
+        onTap: () => setState(() => _heatmapSubTab = index),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 7),
           decoration: BoxDecoration(
             color: isSelected
                 ? primary.withValues(alpha: 0.15)
                 : Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(9),
             border: Border.all(
               color: isSelected
                   ? primary
-                  : Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight,
+                  : Theme.of(context).dividerTheme.color ??
+                      AppColors.surfaceHighlight,
+              width: isSelected ? 1.2 : 1,
             ),
           ),
           child: Center(

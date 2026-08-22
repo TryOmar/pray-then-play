@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/localization/localization_extension.dart';
@@ -54,19 +53,19 @@ class NextPrayerHeroWidget extends ConsumerWidget {
     } else if (remainingMinutes <= bufferMinutes) {
       status = GamingStatus.dontQueue;
       statusBadge = context.tr('prayer_approaching');
-      statusSubtitle = '$localizedPrayerName ${context.tr('in_time')} $remainingMinutes ${context.tr('min')} (${context.tr('safety_buffer')})';
+      statusSubtitle = '$localizedPrayerName ${context.tr('in_time')} ${TimeUtils.formatMinutes(remainingMinutes)} (${context.tr('safety_buffer')})';
       statusColor = AppColors.dangerRed;
     } else if (remainingMinutes <= (bufferMinutes + 20)) {
       status = GamingStatus.caution;
       statusBadge = context.tr('short_match_only');
       final safeMins = (remainingMinutes - bufferMinutes).clamp(0, 9999);
-      statusSubtitle = '${context.tr('safe_session_prefix')} ~$safeMins ${context.tr('min')}';
+      statusSubtitle = '${context.tr('safe_session_prefix')} ~${TimeUtils.formatMinutes(safeMins)}';
       statusColor = AppColors.warningAmber;
     } else {
       status = GamingStatus.safe;
       final safeMins = (remainingMinutes - bufferMinutes).clamp(0, 9999);
       statusBadge = context.tr('safe_to_play');
-      statusSubtitle = '${context.tr('safe_session_prefix')} ~$safeMins ${context.tr('min')}';
+      statusSubtitle = '${context.tr('safe_session_prefix')} ~${TimeUtils.formatMinutes(safeMins)}';
       statusColor = primaryAccent;
     }
 
@@ -178,7 +177,7 @@ class NextPrayerHeroWidget extends ConsumerWidget {
                     ),
                   ),
                   child: Text(
-                    '~$safeMinutesAvailable ${context.tr('min')}',
+                    '~${TimeUtils.formatMinutes(safeMinutesAvailable)}',
                     style: TextStyle(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
@@ -250,39 +249,6 @@ class NextPrayerHeroWidget extends ConsumerWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          // Action Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                try {
-                  context.go('/queue-check');
-                } catch (_) {}
-              },
-              icon: const Icon(Icons.shield_outlined, size: 16),
-              label: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  context.tr('evaluate_match_queue_btn'),
-                  style: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: statusColor,
-                foregroundColor: statusColor.computeLuminance() > 0.55
-                    ? Colors.black
-                    : Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
             ),
           ),
         ],

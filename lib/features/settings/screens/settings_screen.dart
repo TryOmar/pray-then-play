@@ -83,6 +83,21 @@ class SettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  // GAMES & ACTIVITIES
+                  _SettingsSection(
+                    title: ref.tr('my_games_title'),
+                    children: [
+                      _SettingsTile(
+                        icon: Icons.sports_esports_rounded,
+                        title: ref.tr('setting_configure_games'),
+                        subtitle: ref.tr('setting_configure_games_sub'),
+                        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                        onTap: () => context.go('/games'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
                   // LANGUAGE
                   _SettingsSection(
                     title: ref.tr('section_language'),
@@ -149,7 +164,18 @@ class SettingsScreen extends ConsumerWidget {
                             : ref.tr('time_format_12'),
                         trailing: Switch.adaptive(
                           value: is24Hour,
-                          activeTrackColor: Theme.of(context).primaryColor,
+                          activeThumbColor: currentTheme.buttonTextColor,
+                          activeTrackColor: currentTheme.primaryAccent,
+                          inactiveTrackColor: currentTheme.surfaceHighlight
+                              .withValues(alpha: 0.6),
+                          inactiveThumbColor: currentTheme.textMuted,
+                          trackOutlineColor:
+                              WidgetStateProperty.resolveWith((states) =>
+                                  states.contains(WidgetState.selected)
+                                      ? Colors.transparent
+                                      : currentTheme.borderColor
+                                          .withValues(alpha: 0.5)),
+                          trackOutlineWidth: WidgetStateProperty.all(1.0),
                           onChanged: (val) {
                             ref
                                 .read(timeFormatIs24HourProvider.notifier)
@@ -302,6 +328,18 @@ class SettingsScreen extends ConsumerWidget {
                           subtitle: ref.tr('setting_minimize_tray_sub'),
                           trailing: Switch.adaptive(
                             value: minimizeToTray,
+                            activeThumbColor: currentTheme.buttonTextColor,
+                            activeTrackColor: currentTheme.primaryAccent,
+                            inactiveTrackColor: currentTheme.surfaceHighlight
+                                .withValues(alpha: 0.6),
+                            inactiveThumbColor: currentTheme.textMuted,
+                            trackOutlineColor:
+                                WidgetStateProperty.resolveWith((states) =>
+                                    states.contains(WidgetState.selected)
+                                        ? Colors.transparent
+                                        : currentTheme.borderColor
+                                            .withValues(alpha: 0.5)),
+                            trackOutlineWidth: WidgetStateProperty.all(1.0),
                             onChanged: (val) => ref
                                 .read(desktopMinimizeToTrayProvider.notifier)
                                 .setMinimize(val),
@@ -314,6 +352,18 @@ class SettingsScreen extends ConsumerWidget {
                           subtitle: ref.tr('setting_launch_startup_sub'),
                           trailing: Switch.adaptive(
                             value: launchOnStartup,
+                            activeThumbColor: currentTheme.buttonTextColor,
+                            activeTrackColor: currentTheme.primaryAccent,
+                            inactiveTrackColor: currentTheme.surfaceHighlight
+                                .withValues(alpha: 0.6),
+                            inactiveThumbColor: currentTheme.textMuted,
+                            trackOutlineColor:
+                                WidgetStateProperty.resolveWith((states) =>
+                                    states.contains(WidgetState.selected)
+                                        ? Colors.transparent
+                                        : currentTheme.borderColor
+                                            .withValues(alpha: 0.5)),
+                            trackOutlineWidth: WidgetStateProperty.all(1.0),
                             onChanged: (val) async {
                               ref
                                   .read(desktopLaunchOnStartupProvider.notifier)
