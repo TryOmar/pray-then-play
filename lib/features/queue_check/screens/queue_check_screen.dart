@@ -1090,7 +1090,8 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                     .withValues(alpha: 0.45),
                               ),
                             ),
-                            Center(
+                            Align(
+                              alignment: Alignment.topCenter,
                               child: _buildMilestoneNode(
                                 label: '$prayerNameTranslated Break',
                                 time: timeFormat.format(seg.startTime),
@@ -1136,28 +1137,27 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                       .withValues(alpha: 0.45),
                                 ),
                               ),
-                              Positioned.fill(
+                              Positioned(
+                                left: 24.0,
+                                right: 24.0,
+                                top: 1.0,
                                 child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 30),
-                                    child: _buildTimelineBadge(
-                                      color: AppColors.successGreen,
+                                  child: _buildTimelineBadge(
+                                    color: AppColors.successGreen,
+                                    durationMinutes: seg.duration,
+                                    customLabel:
+                                        context.tr('timeline_resume'),
+                                    onTap: () =>
+                                        _showWindowInspectionModal(
+                                      context: context,
+                                      title:
+                                          '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
                                       durationMinutes: seg.duration,
-                                      customLabel:
-                                          context.tr('timeline_resume'),
-                                      onTap: () =>
-                                          _showWindowInspectionModal(
-                                        context: context,
-                                        title:
-                                            '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
-                                        durationMinutes: seg.duration,
-                                        startTime: seg.startTime,
-                                        endTime: seg.endTime,
-                                        status: GamingStatus.safe,
-                                        userGames: userGames,
-                                        is24Hour: is24Hour,
-                                      ),
+                                      startTime: seg.startTime,
+                                      endTime: seg.endTime,
+                                      status: GamingStatus.safe,
+                                      userGames: userGames,
+                                      is24Hour: is24Hour,
                                     ),
                                   ),
                                 ),
@@ -1234,28 +1234,27 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                       .withValues(alpha: 0.45),
                                 ),
                               ),
-                              Positioned.fill(
+                              Positioned(
+                                left: 24.0,
+                                right: 0,
+                                top: 1.0,
                                 child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 28, right: 6),
-                                    child: _buildTimelineBadge(
-                                      color: AppColors.primaryCyan,
+                                  child: _buildTimelineBadge(
+                                    color: AppColors.primaryCyan,
+                                    durationMinutes: seg.duration,
+                                    customLabel:
+                                        context.tr('timeline_resume'),
+                                    onTap: () =>
+                                        _showWindowInspectionModal(
+                                      context: context,
+                                      title:
+                                          '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
                                       durationMinutes: seg.duration,
-                                      customLabel:
-                                          context.tr('timeline_resume'),
-                                      onTap: () =>
-                                          _showWindowInspectionModal(
-                                        context: context,
-                                        title:
-                                            '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
-                                        durationMinutes: seg.duration,
-                                        startTime: seg.startTime,
-                                        endTime: seg.endTime,
-                                        status: GamingStatus.safe,
-                                        userGames: userGames,
-                                        is24Hour: is24Hour,
-                                      ),
+                                      startTime: seg.startTime,
+                                      endTime: seg.endTime,
+                                      status: GamingStatus.safe,
+                                      userGames: userGames,
+                                      is24Hour: is24Hour,
                                     ),
                                   ),
                                 ),
@@ -1308,28 +1307,27 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                       .withValues(alpha: 0.45),
                                 ),
                               ),
-                              Positioned.fill(
+                              Positioned(
+                                left: 0,
+                                right: 24.0,
+                                top: 1.0,
                                 child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 6, right: 28),
-                                    child: _buildTimelineBadge(
-                                      color: AppColors.primaryCyan,
+                                  child: _buildTimelineBadge(
+                                    color: AppColors.primaryCyan,
+                                    durationMinutes: seg.duration,
+                                    customLabel:
+                                        context.tr('timeline_resume'),
+                                    onTap: () =>
+                                        _showWindowInspectionModal(
+                                      context: context,
+                                      title:
+                                          '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
                                       durationMinutes: seg.duration,
-                                      customLabel:
-                                          context.tr('timeline_resume'),
-                                      onTap: () =>
-                                          _showWindowInspectionModal(
-                                        context: context,
-                                        title:
-                                            '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
-                                        durationMinutes: seg.duration,
-                                        startTime: seg.startTime,
-                                        endTime: seg.endTime,
-                                        status: GamingStatus.safe,
-                                        userGames: userGames,
-                                        is24Hour: is24Hour,
-                                      ),
+                                      startTime: seg.startTime,
+                                      endTime: seg.endTime,
+                                      status: GamingStatus.safe,
+                                      userGames: userGames,
+                                      is24Hour: is24Hour,
                                     ),
                                   ),
                                 ),
@@ -1382,7 +1380,10 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                       .withValues(alpha: 0.45),
                                 ),
                               ),
-                              Positioned.fill(
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                top: 1.0,
                                 child: Center(
                                   child: _buildTimelineBadge(
                                     color: AppColors.primaryCyan,
