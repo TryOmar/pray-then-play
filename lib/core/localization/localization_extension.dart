@@ -48,8 +48,17 @@ extension ProtectionLevelLocalization on ProtectionLevel {
 }
 
 extension AsrMethodLocalization on AsrMethodType {
-  String getLocalizedName(BuildContext context) => context.tr('asr_${name}_name');
-  String getLocalizedDesc(BuildContext context) => context.tr('asr_${name}_desc');
+  String getLocalizedName(BuildContext context) {
+    final key = 'asr_${name}_name';
+    final val = context.tr(key);
+    return val != key ? val : displayName;
+  }
+
+  String getLocalizedDesc(BuildContext context) {
+    final key = 'asr_${name}_desc';
+    final val = context.tr(key);
+    return val != key ? val : description;
+  }
 }
 
 extension CalculationMethodLocalization on CalculationMethodType {
