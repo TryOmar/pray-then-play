@@ -1,21 +1,25 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/localization/localization_extension.dart';
 import '../../../core/models/game_profile.dart';
-import '../../../core/models/game_session_record.dart';
-import '../../../core/models/gaming_window.dart';
 import '../../../core/models/prayer_record.dart';
 import '../../../core/providers/gaming_provider.dart';
-import '../../../core/providers/settings_provider.dart';
 import '../../../core/providers/prayer_heatmap_provider.dart';
-import '../../../core/services/prayer_service.dart';
+import '../../../core/providers/prayer_provider.dart';
+import '../../../core/providers/settings_provider.dart';
+import '../../../core/services/desktop_service.dart';
+import '../../../core/services/home_widget_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/risk_calculator.dart';
+import '../../../core/utils/time_utils.dart';
+import '../../../core/widgets/app_logo_widget.dart';
 import '../../../core/widgets/game_icon_widget.dart';
+import '../../home/widgets/next_prayer_hero_widget.dart';
+import '../../home/widgets/prayer_gaming_timeline_widget.dart';
 
 class QueueCheckScreen extends ConsumerStatefulWidget {
   const QueueCheckScreen({super.key});
@@ -24,147 +28,262 @@ class QueueCheckScreen extends ConsumerStatefulWidget {
   ConsumerState<QueueCheckScreen> createState() => _QueueCheckScreenState();
 }
 
-class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
-    with SingleTickerProviderStateMixin {
-  GameProfile? _selectedGame;
-  GameActivity? _selectedActivity;
-  int? _desiredSessionMinutes; // null = use activity typical duration
-  QueueCheckResult? _result;
+class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
+  int? _desiredSessionMinutes; // Default null = Open session (until next prayer)
+  String _selectedGameFilter = 'all';
   Timer? _ticker;
-  int _minutesUntilPrayer = 999;
-  String _nextPrayerName = '';
-  late AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1400),
-    )..repeat(reverse: true);
-    _updateTime();
-    _ticker =
-        Timer.periodic(const Duration(seconds: 15), (_) => _updateTime());
-  }
-
-  void _updateTime() {
-    final lat = StorageService.latitude;
-    final lng = StorageService.longitude;
-    if (lat == null || lng == null) return;
-
-    final next = PrayerService.getNextPrayer(
-      latitude: lat,
-      longitude: lng,
-      method: StorageService.calculationMethod,
-      asrMethod: StorageService.asrMethod,
-    );
-
-    if (next != null && mounted) {
-      setState(() {
-        _minutesUntilPrayer = next.value.difference(DateTime.now()).inMinutes;
-        _nextPrayerName = next.key;
-      });
-      if (_selectedGame != null && _selectedActivity != null) {
-        _calculate();
-      }
-    }
-  }
-
-  void _calculate() {
-    if (_selectedGame == null || _selectedActivity == null) return;
-
-    final userGames = ref.read(activeSelectedGamesProvider);
-    final bufferMinutes = ref.read(safetyBufferMinutesProvider);
-
-    setState(() {
-      _result = RiskCalculator.checkQueue(
-        game: _selectedGame!,
-        activity: _selectedActivity!,
-        minutesUntilPrayer: _minutesUntilPrayer,
-        nextPrayerName: _nextPrayerName.isEmpty ? 'Salah' : _nextPrayerName,
-        userGames: userGames,
-        bufferMinutes: bufferMinutes,
-        desiredSessionMinutes: _desiredSessionMinutes,
-      );
+    _ticker = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) setState(() {});
     });
   }
 
   @override
   void dispose() {
     _ticker?.cancel();
-    _pulseController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final userGames = ref.watch(activeSelectedGamesProvider);
+    final city = StorageService.cityName;
     final bufferMinutes = ref.watch(safetyBufferMinutesProvider);
+    final nextPrayer = ref.watch(nextPrayerProvider);
+    final userGames = ref.watch(activeSelectedGamesProvider);
+    final activeTheme = Theme.of(context);
+    final primaryColor = activeTheme.primaryColor;
 
-    // Auto-select first game if none selected
-    if (_selectedGame == null && userGames.isNotEmpty) {
-      _selectedGame = userGames.first;
-      if (_selectedGame!.enabledActivities.isNotEmpty) {
-        _selectedActivity = _selectedGame!.enabledActivities.first;
-        _calculate();
-      }
-    } else if (_selectedGame != null) {
-      // Keep game state fresh in case activities changed
-      final match =
-          userGames.where((g) => g.id == _selectedGame!.id).firstOrNull;
-      if (match != null) {
-        _selectedGame = match;
-        if (_selectedActivity != null &&
-            !match.activities.any((a) => a.id == _selectedActivity!.id)) {
-          _selectedActivity = match.enabledActivities.isNotEmpty
-              ? match.enabledActivities.first
-              : null;
-          _calculate();
+    final nextPrayerName = nextPrayer?.key ?? '';
+    final nextPrayerTime = nextPrayer?.value;
+    final minutesUntilPrayer = nextPrayerTime != null
+        ? nextPrayerTime.difference(DateTime.now()).inMinutes
+        : 999;
+    final verdict = minutesUntilPrayer > bufferMinutes
+        ? ref.tr('safe_to_play_short')
+        : ref.tr('caution_wrap_up');
+
+    // Sync data with widgets & tray
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (nextPrayer != null) {
+        HomeWidgetService.updateWidgets(
+          nextPrayerName: nextPrayer.key,
+          nextPrayerTime: nextPrayer.value,
+        );
+        if (DesktopService.isDesktop) {
+          DesktopService.instance.updateTrayMenu(
+            nextPrayerName: nextPrayer.key,
+            nextPrayerTime: TimeUtils.formatTime(nextPrayer.value),
+            verdict: verdict,
+          );
         }
       }
-    }
-
-    final surfaceColor = Theme.of(context).colorScheme.surface;
-    final surfaceHighlight =
-        Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
+    });
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: activeTheme.scaffoldBackgroundColor,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // Header
+            // Top Header Bar
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: Row(
+                  children: [
+                    const AppLogoWidget(
+                      variant: AppLogoVariant.iconOnly,
+                      size: 32,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Text(
+                              AppConstants.appName,
+                              style: TextStyle(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_rounded,
+                                  size: 12, color: AppColors.textMuted),
+                              const SizedBox(width: 3),
+                              Expanded(
+                                child: Text(
+                                  city.isNotEmpty
+                                      ? city
+                                      : context.tr('location_configured'),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 11.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: primaryColor.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.shield_rounded,
+                              size: 12, color: primaryColor),
+                          const SizedBox(width: 3),
+                          Text(
+                            TimeUtils.formatMinutes(bufferMinutes),
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Hero Next Prayer Card
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                child: NextPrayerHeroWidget(
+                  prayerName: nextPrayerName,
+                  prayerTime: nextPrayerTime,
+                  bufferMinutes: bufferMinutes,
+                ),
+              ),
+            ),
+
+            // 24H Salah Timeline ("Where Are We Now?")
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 18, 20, 0),
+                child: PrayerGamingTimelineWidget(),
+              ),
+            ),
+
+            // Session Duration Selector ("How long do you want to play?")
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      context.tr('nav_queue'),
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.access_time_rounded,
-                            size: 14, color: AppColors.textMuted),
-                        const SizedBox(width: 5),
+                        const Icon(Icons.timer_outlined,
+                            size: 16, color: AppColors.primaryCyan),
+                        const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            '${_nextPrayerName.isNotEmpty ? context.tr('prayer_${_nextPrayerName.toLowerCase()}') : context.tr('next_prayer')} ${context.tr('in_time')} $_minutesUntilPrayer ${context.tr('min')}  •  $bufferMinutes ${context.tr('min')} ${context.tr('safety_buffer')}',
+                            context.tr('how_long_play').toUpperCase(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 12.5,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textMuted,
+                              letterSpacing: 1.2,
                             ),
                           ),
                         ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 2.5),
+                            decoration: BoxDecoration(
+                              color: primaryColor.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              _desiredSessionMinutes == null
+                                  ? (nextPrayerName.isNotEmpty &&
+                                          minutesUntilPrayer > 0
+                                      ? '${context.tr('duration_open')} (${context.tr('prayer_${nextPrayerName.toLowerCase()}')} • ${TimeUtils.formatMinutes(minutesUntilPrayer)})'
+                                      : context.tr('duration_open'))
+                                  : TimeUtils.formatMinutes(
+                                      _desiredSessionMinutes!),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                                color: primaryColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _buildOpenChip(
+                          openMinutes: minutesUntilPrayer > 0
+                              ? minutesUntilPrayer
+                              : null,
+                          nextPrayerName: nextPrayerName,
+                        ),
+                        _buildPresetChip(
+                          label: TimeUtils.formatMinutes(30),
+                          minutes: 30,
+                        ),
+                        _buildPresetChip(
+                          label: TimeUtils.formatMinutes(60),
+                          minutes: 60,
+                        ),
+                        _buildPresetChip(
+                          label: TimeUtils.formatMinutes(120),
+                          minutes: 120,
+                        ),
+                        _buildPresetChip(
+                          label: TimeUtils.formatMinutes(180),
+                          minutes: 180,
+                        ),
+                        _buildPresetChip(
+                          label: TimeUtils.formatMinutes(240),
+                          minutes: 240,
+                        ),
+                        _buildPresetChip(
+                          label: TimeUtils.formatMinutes(360),
+                          minutes: 360,
+                        ),
+                        _buildPresetChip(
+                          label: TimeUtils.formatMinutes(480),
+                          minutes: 480,
+                        ),
+                        _buildCustomChip(),
                       ],
                     ),
                   ],
@@ -172,871 +291,200 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
               ),
             ),
 
-            // Game Selection (User's Games Only)
+            // Active Dynamic Session Timeline (Updates based on chosen duration)
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.tr('select_game').toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textMuted,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    if (userGames.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration:
-                            GlassmorphicDecoration.card(context: context),
-                        child: Text(
-                          context.tr('no_games_selected_sub'),
-                          style: const TextStyle(
-                              color: AppColors.textMuted, fontSize: 13),
-                        ),
-                      )
-                    else
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: userGames.map((game) {
-                            final isSelected = _selectedGame?.id == game.id;
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedGame = game;
-                                    _selectedActivity =
-                                        game.enabledActivities.isNotEmpty
-                                            ? game.enabledActivities.first
-                                            : null;
-                                  });
-                                  _calculate();
-                                },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 180),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 14, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? Color(game.color)
-                                            .withValues(alpha: 0.18)
-                                        : surfaceColor,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? Color(game.color)
-                                          : surfaceHighlight,
-                                      width: isSelected ? 1.5 : 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      GameIconWidget(
-                                        iconName: game.iconName,
-                                        size: 22,
-                                        fallbackColor: game.color,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        game.name,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: isSelected
-                                              ? Color(game.color)
-                                              : AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                  ],
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: _buildDynamicSessionTimeline(
+                  bufferMinutes: bufferMinutes,
+                  nextPrayerName: nextPrayerName,
+                  nextPrayerTime: nextPrayerTime,
                 ),
               ),
             ),
 
-            // Activity Selection ("What are you planning to play?")
-            if (_selectedGame != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              context.tr('what_planning_play'),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textMuted,
-                                letterSpacing: 1.0,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () => _showAddActivityQuickDialog(
-                                context, _selectedGame!),
-                            child: Text(
-                              context.tr('add_activity_btn'),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      if (_selectedGame!.enabledActivities.isEmpty)
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration:
-                              GlassmorphicDecoration.card(context: context),
-                          child: Text(
-                            context.tr('no_activities_for_game'),
-                            style: const TextStyle(
-                                color: AppColors.textMuted, fontSize: 13),
-                          ),
-                        )
-                      else
-                        ...(_selectedGame!.enabledActivities.map((activity) {
-                          final isSelected =
-                              _selectedActivity?.id == activity.id;
-                          final risk = RiskCalculator.calculateRisk(
-                            activity,
-                            _minutesUntilPrayer,
-                            bufferMinutes: bufferMinutes,
-                            desiredSessionMinutes: _desiredSessionMinutes,
-                          );
-
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() => _selectedActivity = activity);
-                                _calculate();
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? risk.color.withValues(alpha: 0.12)
-                                      : surfaceColor,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? risk.color
-                                        : surfaceHighlight,
-                                    width: isSelected ? 1.6 : 1,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Wrap(
-                                            crossAxisAlignment:
-                                                WrapCrossAlignment.center,
-                                            spacing: 6,
-                                            runSpacing: 2,
-                                            children: [
-                                              Text(
-                                                activity.name,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              if (activity.isCustom)
-                                                Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 5,
-                                                      vertical: 1.5),
-                                                  decoration: BoxDecoration(
-                                                    color: Theme.of(context)
-                                                        .primaryColor
-                                                        .withValues(alpha: 0.2),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            4),
-                                                  ),
-                                                  child: Text(
-                                                    context.tr('custom_badge'),
-                                                    style: TextStyle(
-                                                      fontSize: 8.5,
-                                                      fontWeight:
-                                                          FontWeight.w700,
-                                                      color: Theme.of(context)
-                                                          .primaryColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Wrap(
-                                            crossAxisAlignment:
-                                                WrapCrossAlignment.center,
-                                            spacing: 4,
-                                            runSpacing: 2,
-                                            children: [
-                                              if (activity.canPause &&
-                                                  !activity
-                                                      .requiresCompletion) ...[
-                                                const Icon(
-                                                    Icons.pause_circle_outline,
-                                                    size: 13,
-                                                    color:
-                                                        AppColors.successGreen),
-                                                const SizedBox(width: 2),
-                                                Text(
-                                                  context.tr('pauseable_badge'),
-                                                  style: const TextStyle(
-                                                      color: AppColors
-                                                          .successGreen,
-                                                      fontSize: 10.5,
-                                                      fontWeight:
-                                                          FontWeight.w600),
-                                                ),
-                                              ],
-                                              Text(
-                                                '${activity.typicalDuration} ${context.tr('min')} (${activity.minMinutes}–${activity.maxMinutes} ${context.tr('min')})',
-                                                style: const TextStyle(
-                                                  color: AppColors.textMuted,
-                                                  fontSize: 10.5,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            risk.color.withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: ConstrainedBox(
-                                        constraints: const BoxConstraints(
-                                            maxWidth: 80),
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: Text(
-                                            RiskCalculator.getRiskLabel(risk),
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w800,
-                                              color: risk.color,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        })),
-                    ],
-                  ),
+            // Categorized Games (Recommended, Caution, Not Recommended)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+                child: _buildCategorizedGames(
+                  userGames: userGames,
+                  minutesUntilPrayer: minutesUntilPrayer,
+                  bufferMinutes: bufferMinutes,
                 ),
               ),
-
-            // Session Duration Selector ("How long do you want to play?")
-            if (_selectedActivity != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.tr('how_long_play'),
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textMuted,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildDurationChip(
-                              label: context.trFormat('duration_typical', {'duration': _selectedActivity!.typicalDuration}),
-                              isSelected: _desiredSessionMinutes == null,
-                              onTap: () {
-                                setState(() => _desiredSessionMinutes = null);
-                                _calculate();
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            _buildDurationChip(
-                              label: '15 ${context.tr('min')}',
-                              isSelected: _desiredSessionMinutes == 15,
-                              onTap: () {
-                                setState(() => _desiredSessionMinutes = 15);
-                                _calculate();
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            _buildDurationChip(
-                              label: '30 ${context.tr('min')}',
-                              isSelected: _desiredSessionMinutes == 30,
-                              onTap: () {
-                                setState(() => _desiredSessionMinutes = 30);
-                                _calculate();
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            _buildDurationChip(
-                              label: '45 ${context.tr('min')}',
-                              isSelected: _desiredSessionMinutes == 45,
-                              onTap: () {
-                                setState(() => _desiredSessionMinutes = 45);
-                                _calculate();
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            _buildDurationChip(
-                              label: '60 ${context.tr('min')}',
-                              isSelected: _desiredSessionMinutes == 60,
-                              onTap: () {
-                                setState(() => _desiredSessionMinutes = 60);
-                                _calculate();
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            _buildDurationChip(
-                              label: _desiredSessionMinutes != null &&
-                                      ![15, 30, 45, 60]
-                                          .contains(_desiredSessionMinutes)
-                                  ? context.trFormat('duration_custom_active', {'duration': _desiredSessionMinutes})
-                                  : context.tr('duration_custom'),
-                              isSelected: _desiredSessionMinutes != null &&
-                                  ![15, 30, 45, 60]
-                                      .contains(_desiredSessionMinutes),
-                              onTap: () => _showCustomDurationDialog(context),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-            // Live Verdict Card
-            if (_result != null && _selectedActivity != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
-                  child: _buildVerdictCard(bufferMinutes),
-                ),
-              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDurationChip({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    final surfaceColor = Theme.of(context).colorScheme.surface;
+  Widget _buildOpenChip({int? openMinutes, String? nextPrayerName}) {
+    final isSelected = _desiredSessionMinutes == null;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = theme.primaryColor;
+    final surfaceColor = theme.colorScheme.surface;
     final surfaceHighlight =
-        Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
+        theme.dividerTheme.color ?? (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0));
+
+    final prayerLabel = (nextPrayerName != null && nextPrayerName.isNotEmpty)
+        ? context.tr('prayer_${nextPrayerName.toLowerCase()}')
+        : null;
+    final untilText = prayerLabel != null && openMinutes != null
+        ? '${context.tr('duration_open')} ($prayerLabel • ${TimeUtils.formatMinutes(openMinutes)})'
+        : context.tr('duration_open');
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => setState(() => _desiredSessionMinutes = null),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).primaryColor.withValues(alpha: 0.18)
+              ? primaryColor.withValues(alpha: isDark ? 0.20 : 0.12)
               : surfaceColor,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected
-                ? Theme.of(context).primaryColor
-                : surfaceHighlight,
-            width: isSelected ? 1.5 : 1,
+            color: isSelected ? primaryColor : surfaceHighlight,
+            width: isSelected ? 1.4 : 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                    blurRadius: 5,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.all_inclusive_rounded,
+              size: 13,
+              color: isSelected ? primaryColor : AppColors.textMuted,
+            ),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                untilText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  color:
+                      isSelected ? primaryColor : theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPresetChip({required String label, required int minutes}) {
+    final isSelected = _desiredSessionMinutes == minutes;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = theme.primaryColor;
+    final surfaceColor = theme.colorScheme.surface;
+    final surfaceHighlight =
+        theme.dividerTheme.color ?? (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0));
+
+    return GestureDetector(
+      onTap: () => setState(() => _desiredSessionMinutes = minutes),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? primaryColor.withValues(alpha: isDark ? 0.20 : 0.12)
+              : surfaceColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? primaryColor : surfaceHighlight,
+            width: isSelected ? 1.4 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                    blurRadius: 5,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected
-                ? Theme.of(context).primaryColor
-                : AppColors.textSecondary,
+            fontSize: 11.5,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            color: isSelected ? primaryColor : theme.colorScheme.onSurface,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildVerdictCard(int bufferMinutes) {
-    final result = _result!;
-    final color = result.riskLevel.color;
-    final effectiveBuffer = _selectedActivity?.safetyBuffer ?? bufferMinutes;
-    final plannedDuration =
-        _desiredSessionMinutes ?? _selectedActivity!.typicalDuration;
+  Widget _buildCustomChip() {
+    final isPreset = [30, 60, 120, 180, 240, 360, 480].contains(_desiredSessionMinutes);
+    final isCustom = _desiredSessionMinutes != null && !isPreset;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = theme.primaryColor;
+    final surfaceColor = theme.colorScheme.surface;
+    final surfaceHighlight =
+        theme.dividerTheme.color ?? (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0));
 
-    final String localizedVerdictTitle;
-    final String localizedMessage;
-    final String localizedRecommendation;
-    final localizedPrayer = _nextPrayerName.isNotEmpty
-        ? context.tr('prayer_${_nextPrayerName.toLowerCase()}')
-        : context.tr('next_prayer');
-
-    if (_selectedActivity!.canPause && !_selectedActivity!.requiresCompletion) {
-      if (_minutesUntilPrayer <= effectiveBuffer) {
-        localizedVerdictTitle = context.tr('verdict_prayer_imminent');
-        localizedMessage = context.trFormat('msg_prayer_imminent', {
-          'prayer': localizedPrayer,
-          'mins': _minutesUntilPrayer,
-          'buffer': effectiveBuffer,
-        });
-        localizedRecommendation = context.trFormat('rec_prayer_imminent', {
-          'game': _selectedGame!.name,
-          'activity': _selectedActivity!.name,
-        });
-      } else {
-        localizedVerdictTitle = context.tr('verdict_pauseable_session');
-        localizedMessage = context.trFormat('msg_pauseable_safe', {
-          'game': _selectedGame!.name,
-          'activity': _selectedActivity!.name,
-        });
-        localizedRecommendation = context.trFormat('rec_pauseable_safe', {
-          'prayer': localizedPrayer,
-          'mins': _minutesUntilPrayer,
-          'safe': result.availableSafeMinutes,
-        });
-      }
-    } else {
-      if (result.riskLevel == RiskLevel.low) {
-        localizedVerdictTitle = context.tr('verdict_safe_start');
-        localizedMessage = context.trFormat('msg_safe_start', {
-          'duration': plannedDuration,
-          'safe': result.availableSafeMinutes,
-          'buffer': effectiveBuffer,
-        });
-        localizedRecommendation = context.trFormat('rec_safe_start', {
-          'prayer': localizedPrayer,
-          'mins': _minutesUntilPrayer,
-        });
-      } else if (result.riskLevel == RiskLevel.medium) {
-        localizedVerdictTitle = context.tr('verdict_overtime_risk');
-        localizedMessage = context.trFormat('msg_overtime_risk', {
-          'duration': _selectedActivity!.typicalDuration,
-          'max': _selectedActivity!.maxMinutes,
-          'buffer': effectiveBuffer,
-        });
-        localizedRecommendation = context.tr('rec_overtime_risk');
-      } else {
-        localizedVerdictTitle = context.tr('verdict_not_recommended');
-        localizedMessage = context.trFormat('msg_not_rec', {
-          'duration': _selectedActivity!.typicalDuration,
-          'safe': result.availableSafeMinutes,
-        });
-        localizedRecommendation = context.trFormat('rec_not_rec', {
-          'prayer': localizedPrayer,
-        });
-      }
-    }
-
-    // Fetch personal history statistics for this activity
-    final stats = StorageService.getActivitySessionStats(
-      _selectedGame!.id,
-      _selectedActivity!.id,
-    );
-
-    return AnimatedBuilder(
-      animation: _pulseController,
-      builder: (context, child) {
-        final glowIntensity = result.riskLevel == RiskLevel.high
-            ? 0.16 + (_pulseController.value * 0.12)
-            : 0.08;
-
-        return Container(
-          padding: const EdgeInsets.all(22),
-          decoration: GlassmorphicDecoration.neonCard(
-            context: context,
-            glowColor: color,
-            glowIntensity: glowIntensity,
+    return GestureDetector(
+      onTap: () => _showCustomDurationBottomSheet(),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+        decoration: BoxDecoration(
+          color: isCustom
+              ? primaryColor.withValues(alpha: isDark ? 0.20 : 0.12)
+              : surfaceColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isCustom ? primaryColor : surfaceHighlight,
+            width: isCustom ? 1.4 : 1,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Verdict Badge Header
-              Center(
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: color, width: 1.2),
-                      ),
-                      child: Text(
-                        localizedVerdictTitle,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: color,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      localizedMessage,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      localizedRecommendation,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: color,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-              const Divider(height: 1, color: AppColors.surfaceHighlight),
-              const SizedBox(height: 16),
-
-              // Breakdown Data Rows
-              _buildBreakdownRow(
-                icon: Icons.mosque_rounded,
-                title: context.tr('next_salah_label'),
-                value:
-                    '${_nextPrayerName.isNotEmpty ? context.tr('prayer_${_nextPrayerName.toLowerCase()}') : context.tr('next_prayer')} ${context.tr('in_time')} $_minutesUntilPrayer ${context.tr('min')}',
-                valueColor: Theme.of(context).primaryColor,
-              ),
-              const SizedBox(height: 10),
-              _buildBreakdownRow(
-                icon: Icons.shield_rounded,
-                title: context.tr('safe_available_window'),
-                value:
-                    '${result.availableSafeMinutes} ${context.tr('min')} (${context.trFormat('in_prayer_buffer_sub', {'buffer': effectiveBuffer})})',
-                valueColor: AppColors.successGreen,
-              ),
-              const SizedBox(height: 10),
-              _buildBreakdownRow(
-                icon: Icons.timer_rounded,
-                title: context.tr('planned_session_label'),
-                value:
-                    '${_selectedActivity!.name} ($plannedDuration ${context.tr('min')})',
-                valueColor: Theme.of(context).colorScheme.onSurface,
-              ),
-              const SizedBox(height: 10),
-              _buildBreakdownRow(
-                icon: _selectedActivity!.canPause
-                    ? Icons.check_circle_outline_rounded
-                    : Icons.lock_clock_rounded,
-                title: context.tr('pauseability_label'),
-                value: _selectedActivity!.canPause
-                    ? context.tr('can_pause_safely')
-                    : context.tr('cannot_pause_safely'),
-                valueColor: _selectedActivity!.canPause
-                    ? AppColors.successGreen
-                    : AppColors.warningAmber,
-              ),
-
-              // Personal Stats Box if history exists
-              if (stats.sessionCount > 0) ...[
-                const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.25),
-                    ),
+          boxShadow: isCustom
+              ? [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                    blurRadius: 5,
+                    offset: const Offset(0, 1),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.analytics_rounded,
-                          size: 18, color: Theme.of(context).primaryColor),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'PERSONAL SESSION HISTORY',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: Theme.of(context).primaryColor,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Global estimate: ${_selectedActivity!.minMinutes}–${_selectedActivity!.maxMinutes}m  •  Your average: ~${stats.averageDurationMinutes}m (${stats.sessionCount} sessions logged)',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Theme.of(context).textTheme.bodyMedium?.color ??
-                                    AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-
-              const SizedBox(height: 18),
-
-              // Time Comparison Bar
-              _TimeComparisonBar(
-                matchDuration: plannedDuration,
-                minutesUntilPrayer: result.minutesUntilPrayer,
-                bufferMinutes: effectiveBuffer,
-                color: color,
-              ),
-
-              const SizedBox(height: 22),
-
-              // Action buttons & Alternatives
-              if (result.riskLevel == RiskLevel.high) ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      ref
-                          .read(prayerConsistencyProvider.notifier)
-                          .logGamingDecision(
-                              GamingDecisionType.avoidedRiskyQueue);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'Prayer Protected! Chose Salah before match queue.'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      context.go('/consistency');
-                    },
-                    icon: const Icon(Icons.mosque_rounded, size: 18),
-                    label: Text(context.tr('pray_first_btn')),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: color,
-                      foregroundColor: color.computeLuminance() > 0.55
-                          ? Colors.black
-                          : Colors.white,
-                    ),
-                  ),
-                ),
-                if (result.suggestedAlternatives.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  const Text(
-                    'SAFE ALTERNATIVES FROM YOUR LIBRARY',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textMuted,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  ...result.suggestedAlternatives.take(3).map((alt) => Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                    .inputDecorationTheme
-                                    .fillColor ??
-                                AppColors.surfaceElevated,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.check_circle_outline_rounded,
-                                  size: 16, color: AppColors.successGreen),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  alt,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )),
-                ],
-              ] else ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => _startSessionTracker(
-                            context, _selectedGame!, _selectedActivity!, plannedDuration),
-                        icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                        label: Text(context.tr('start_track_session_btn')),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: color,
-                          foregroundColor: color.computeLuminance() > 0.55
-                              ? Colors.black
-                              : Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildBreakdownRow({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color valueColor,
-  }) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: AppColors.textMuted),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textMuted,
-            fontWeight: FontWeight.w500,
-          ),
+                ]
+              : null,
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.tune_rounded,
+              size: 12,
+              color: isCustom ? primaryColor : AppColors.textMuted,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              isCustom
+                  ? TimeUtils.formatMinutes(_desiredSessionMinutes!)
+                  : context.tr('duration_custom'),
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: valueColor,
+                fontSize: 11.5,
+                fontWeight: isCustom ? FontWeight.w800 : FontWeight.w600,
+                color: isCustom ? primaryColor : theme.colorScheme.onSurface,
               ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showCustomDurationDialog(BuildContext context) {
-    int minutes = _desiredSessionMinutes ?? _selectedActivity!.typicalDuration;
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          title: Text(context.tr('set_session_duration_title'),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '$minutes minutes',
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.primaryCyan,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Slider(
-                value: minutes.toDouble(),
-                min: 5,
-                max: 180,
-                divisions: 35,
-                label: '$minutes min',
-                onChanged: (val) =>
-                    setDialogState(() => minutes = val.round()),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(context.tr('cancel_btn')),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() => _desiredSessionMinutes = minutes);
-                _calculate();
-                Navigator.pop(ctx);
-              },
-              child: Text(context.tr('set_duration_btn')),
             ),
           ],
         ),
@@ -1044,11 +492,1005 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
     );
   }
 
-  void _showAddActivityQuickDialog(BuildContext context, GameProfile game) {
-    final nameCtrl = TextEditingController();
-    final durCtrl = TextEditingController(text: '30');
-    bool canPause = false;
-    bool isCompetitive = true;
+  void _showCustomDurationBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final primaryColor = Theme.of(context).primaryColor;
+          final surfaceColor = Theme.of(context).colorScheme.surface;
+
+          double currentMinutes =
+              (_desiredSessionMinutes ?? 60).toDouble().clamp(15, 720);
+
+          final quickSteps = [15, 60, 120, 180, 240, 360, 480, 720];
+
+          return Container(
+            padding: const EdgeInsets.fromLTRB(18, 10, 18, 16),
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+              border: Border.all(
+                color: Theme.of(context).dividerTheme.color ??
+                    (isDark
+                        ? const Color(0xFF1E293B)
+                        : const Color(0xFFE2E8F0)),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, -3),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Minimal handle bar
+                  Center(
+                    child: Container(
+                      width: 32,
+                      height: 3.5,
+                      decoration: BoxDecoration(
+                        color: AppColors.textMuted.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Compact Header
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.tr('custom_duration_title'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: primaryColor.withValues(alpha: 0.35),
+                            width: 0.9,
+                          ),
+                        ),
+                        child: Text(
+                          TimeUtils.formatMinutes(currentMinutes.round()),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Compact Slider
+                  SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: primaryColor,
+                      inactiveTrackColor: primaryColor.withValues(alpha: 0.15),
+                      thumbColor: primaryColor,
+                      overlayColor: primaryColor.withValues(alpha: 0.12),
+                      trackHeight: 3.5,
+                      thumbShape:
+                          const RoundSliderThumbShape(enabledThumbRadius: 7),
+                    ),
+                    child: Slider(
+                      value: currentMinutes,
+                      min: 15,
+                      max: 720,
+                      divisions: 47,
+                      onChanged: (val) {
+                        final rounded = (val / 15).round() * 15;
+                        setSheetState(() => currentMinutes = rounded.toDouble());
+                        setState(() => _desiredSessionMinutes = rounded);
+                      },
+                    ),
+                  ),
+
+                  // Quick Step Pills Row
+                  SizedBox(
+                    height: 26,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: quickSteps.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 6),
+                      itemBuilder: (context, idx) {
+                        final mins = quickSteps[idx];
+                        final isAct = currentMinutes.round() == mins;
+                        return GestureDetector(
+                          onTap: () {
+                            setSheetState(() => currentMinutes = mins.toDouble());
+                            setState(() => _desiredSessionMinutes = mins);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 9, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: isAct
+                                  ? primaryColor.withValues(alpha: 0.18)
+                                  : (isDark
+                                      ? const Color(0xFF1E293B)
+                                      : const Color(0xFFF1F5F9)),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: isAct
+                                    ? primaryColor
+                                    : (isDark
+                                        ? const Color(0xFF334155)
+                                        : const Color(0xFFE2E8F0)),
+                                width: isAct ? 1.2 : 0.8,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                TimeUtils.formatMinutes(mins),
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight:
+                                      isAct ? FontWeight.w800 : FontWeight.w600,
+                                  color: isAct
+                                      ? primaryColor
+                                      : Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Compact Set Duration Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 38,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(ctx),
+                      child: Text(
+                        context.tr('set_duration_btn'),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDynamicSessionTimeline({
+    required int bufferMinutes,
+    required String nextPrayerName,
+    required DateTime? nextPrayerTime,
+  }) {
+    final now = DateTime.now();
+    final isOpenSession = _desiredSessionMinutes == null;
+    final plannedDuration = _desiredSessionMinutes ??
+        (nextPrayerTime != null
+            ? (nextPrayerTime.difference(now).inMinutes - bufferMinutes)
+                .clamp(1, 1440)
+            : 60);
+    final sessionEndTime =
+        _desiredSessionMinutes == null && nextPrayerTime != null
+            ? nextPrayerTime.subtract(Duration(minutes: bufferMinutes))
+            : now.add(Duration(minutes: plannedDuration));
+
+    final is24Hour = StorageService.is24HourFormat;
+    final timeFormat = DateFormat(is24Hour ? 'HH:mm' : 'h:mm a');
+    final userGames = ref.watch(userGamesProvider);
+
+    // Retrieve today's prayer times
+    final prayerTimes = ref.watch(dailyPrayerTimesProvider);
+    final upcomingPrayersInSession = <MapEntry<String, DateTime>>[];
+
+    if (prayerTimes != null) {
+      for (final entry in prayerTimes.allPrayers) {
+        if (entry.key.toLowerCase() == 'sunrise') continue;
+        if (entry.value.isAfter(now) && entry.value.isBefore(sessionEndTime)) {
+          upcomingPrayersInSession.add(entry);
+        }
+      }
+    }
+
+    final hasPrayerBreak = upcomingPrayersInSession.isNotEmpty;
+    final isOverrunningNext = nextPrayerTime != null &&
+        sessionEndTime.isAfter(
+            nextPrayerTime.subtract(Duration(minutes: bufferMinutes)));
+
+    final statusColor = hasPrayerBreak || isOverrunningNext
+        ? AppColors.primaryCyan
+        : AppColors.successGreen;
+
+    // Build Proportional Visual Duration Segments (Gaming vs Prayer Breaks)
+    final sessionSegments = <({
+      String type,
+      int duration,
+      DateTime startTime,
+      DateTime endTime,
+      String label,
+      Color color,
+      IconData icon,
+      String? prayerName,
+    })>[];
+    DateTime cursorTime = now;
+
+    if (upcomingPrayersInSession.isNotEmpty) {
+      for (final prayer in upcomingPrayersInSession) {
+        final playMinutes = prayer.value.difference(cursorTime).inMinutes;
+        if (playMinutes > 0) {
+          sessionSegments.add((
+            type: 'play',
+            duration: playMinutes,
+            startTime: cursorTime,
+            endTime: prayer.value,
+            label: TimeUtils.formatMinutes(playMinutes),
+            color: AppColors.primaryCyan,
+            icon: Icons.sports_esports_rounded,
+            prayerName: null,
+          ));
+        }
+
+        const prayerBreakMinutes = 15;
+        final prayerLabel = context.tr('prayer_${prayer.key.toLowerCase()}');
+        final breakEndTime =
+            prayer.value.add(const Duration(minutes: prayerBreakMinutes));
+        sessionSegments.add((
+          type: 'prayer',
+          duration: prayerBreakMinutes,
+          startTime: prayer.value,
+          endTime: breakEndTime,
+          label: '$prayerLabel (15m)',
+          color: AppColors.warningAmber,
+          icon: Icons.mosque_rounded,
+          prayerName: prayer.key,
+        ));
+
+        cursorTime = breakEndTime;
+      }
+
+      final remainingPlay = sessionEndTime.difference(cursorTime).inMinutes;
+      if (remainingPlay > 0) {
+        sessionSegments.add((
+          type: 'play',
+          duration: remainingPlay,
+          startTime: cursorTime,
+          endTime: sessionEndTime,
+          label: TimeUtils.formatMinutes(remainingPlay),
+          color: AppColors.primaryCyan,
+          icon: Icons.sports_esports_rounded,
+          prayerName: null,
+        ));
+      }
+    } else if (isOpenSession &&
+        nextPrayerTime != null &&
+        nextPrayerName.isNotEmpty) {
+      sessionSegments.add((
+        type: 'play',
+        duration: plannedDuration,
+        startTime: now,
+        endTime: sessionEndTime,
+        label: '${TimeUtils.formatMinutes(plannedDuration)} Play',
+        color: AppColors.primaryCyan,
+        icon: Icons.sports_esports_rounded,
+        prayerName: null,
+      ));
+
+      const prayerBreakMinutes = 15;
+      final prayerLabel = context.tr('prayer_${nextPrayerName.toLowerCase()}');
+      sessionSegments.add((
+        type: 'prayer',
+        duration: prayerBreakMinutes,
+        startTime: nextPrayerTime,
+        endTime: nextPrayerTime.add(const Duration(minutes: prayerBreakMinutes)),
+        label: '$prayerLabel (15m)',
+        color: AppColors.warningAmber,
+        icon: Icons.mosque_rounded,
+        prayerName: nextPrayerName,
+      ));
+    } else {
+      sessionSegments.add((
+        type: 'play',
+        duration: plannedDuration,
+        startTime: now,
+        endTime: sessionEndTime,
+        label: '${TimeUtils.formatMinutes(plannedDuration)} Play',
+        color: AppColors.successGreen,
+        icon: Icons.sports_esports_rounded,
+        prayerName: null,
+      ));
+    }
+
+    final totalSegMinutes =
+        sessionSegments.fold<int>(0, (sum, s) => sum + s.duration);
+    final totalGamingMinutes = sessionSegments
+        .where((s) => s.type == 'play')
+        .fold<int>(0, (sum, s) => sum + s.duration);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: statusColor.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.timeline_rounded, size: 15, color: statusColor),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  context.tr('timeline_title').toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: statusColor,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    isOpenSession
+                        ? (nextPrayerName.isNotEmpty
+                            ? 'Until ${context.tr('prayer_${nextPrayerName.toLowerCase()}')} (${TimeUtils.formatMinutes(plannedDuration)})'
+                            : context.tr('duration_open'))
+                        : '${TimeUtils.formatMinutes(plannedDuration)} Planned',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // 1. Proportional Duration Visualizer Bar (Interactive Tappable Segments)
+          Container(
+            height: 34,
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surfaceContainerHighest
+                  .withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.surfaceHighlight.withValues(alpha: 0.6),
+                width: 0.8,
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Row(
+              children: sessionSegments.map((seg) {
+                final pct = totalSegMinutes > 0
+                    ? (seg.duration / totalSegMinutes * 100).round()
+                    : 100;
+                final flex = seg.type == 'prayer'
+                    ? seg.duration.clamp(35, 99999)
+                    : seg.duration.clamp(25, 99999);
+
+                return Expanded(
+                  flex: flex,
+                  child: InkWell(
+                    onTap: () {
+                      if (seg.type == 'prayer') {
+                        _showPrayerInfoModal(
+                          context: context,
+                          ref: ref,
+                          name: seg.prayerName ?? 'Prayer',
+                          time: seg.startTime,
+                          breakMinutes: seg.duration,
+                          is24Hour: is24Hour,
+                        );
+                      } else {
+                        _showWindowInspectionModal(
+                          context: context,
+                          title:
+                              '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
+                          durationMinutes: seg.duration,
+                          startTime: seg.startTime,
+                          endTime: seg.endTime,
+                          status: GamingStatus.safe,
+                          userGames: userGames,
+                          is24Hour: is24Hour,
+                        );
+                      }
+                    },
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final w = constraints.maxWidth;
+                        Widget inner;
+                        if (w >= 75) {
+                          inner = FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(seg.icon, size: 11, color: seg.color),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    seg.type == 'prayer'
+                                        ? seg.label
+                                        : '${seg.label} ($pct%)',
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: seg.color,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        } else if (w >= 36) {
+                          inner = FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 2),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(seg.icon, size: 10, color: seg.color),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    '$pct%',
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: seg.color,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        } else if (w >= 14) {
+                          inner = FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 1),
+                              child: Icon(seg.icon,
+                                  size: 10, color: seg.color),
+                            ),
+                          );
+                        } else {
+                          inner = const SizedBox.shrink();
+                        }
+
+                        return Container(
+                          height: double.infinity,
+                          decoration: BoxDecoration(
+                            color: seg.color.withValues(
+                                alpha: seg.type == 'prayer' ? 0.22 : 0.14),
+                            border: Border(
+                              left: BorderSide(
+                                  color: seg.color.withValues(alpha: 0.7),
+                                  width: 1.0),
+                              right: BorderSide(
+                                  color: seg.color.withValues(alpha: 0.7),
+                                  width: 1.0),
+                            ),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: Tooltip(
+                            message:
+                                '${seg.label} • $pct% (Tap for details)',
+                            child: Center(child: inner),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // 2. Synchronized Proportional Multi-Milestone Flow (Seamless Node-to-Node Connectors & 100% Contained Circles)
+          Builder(
+            builder: (context) {
+              final segmentWidgets = <Widget>[];
+              final prayerSegments = sessionSegments
+                  .where((s) => s.type == 'prayer')
+                  .toList();
+              final playSegments = sessionSegments
+                  .where((s) => s.type == 'play')
+                  .toList();
+
+              if (prayerSegments.isEmpty) {
+                // Single uninterrupted play session (Now -> Session Ends)
+                final playSeg = playSegments.isNotEmpty
+                    ? playSegments.first
+                    : null;
+                final duration = playSeg?.duration ?? plannedDuration;
+
+                segmentWidgets.addAll([
+                  _buildMilestoneNode(
+                    label: context.tr('timeline_now'),
+                    time: timeFormat.format(now),
+                    color: AppColors.primaryCyan,
+                    icon: Icons.sports_esports_rounded,
+                    alignment: CrossAxisAlignment.start,
+                    textAlign: TextAlign.start,
+                    maxWidth: 54.0,
+                    onTap: () => _showSessionSummaryModal(
+                      context: context,
+                      startTime: now,
+                      endTime: sessionEndTime,
+                      plannedDuration: plannedDuration,
+                      isOpenSession: isOpenSession,
+                      gamingMinutes: totalGamingMinutes,
+                      prayerCount: 0,
+                      is24Hour: is24Hour,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildTimelineConnector(
+                      color: AppColors.successGreen,
+                      durationMinutes: duration,
+                      customLabel: context.tr('timeline_resume'),
+                      onTap: () => _showWindowInspectionModal(
+                        context: context,
+                        title:
+                            '${timeFormat.format(now)} ➔ ${timeFormat.format(sessionEndTime)} Gaming Window',
+                        durationMinutes: duration,
+                        startTime: now,
+                        endTime: sessionEndTime,
+                        status: GamingStatus.safe,
+                        userGames: userGames,
+                        is24Hour: is24Hour,
+                      ),
+                    ),
+                  ),
+                  _buildMilestoneNode(
+                    label: context.tr('timeline_session_end'),
+                    time: timeFormat.format(sessionEndTime),
+                    color: AppColors.successGreen,
+                    icon: Icons.check_circle_rounded,
+                    alignment: CrossAxisAlignment.end,
+                    textAlign: TextAlign.end,
+                    maxWidth: 58.0,
+                    onTap: () => _showSessionSummaryModal(
+                      context: context,
+                      startTime: now,
+                      endTime: sessionEndTime,
+                      plannedDuration: plannedDuration,
+                      isOpenSession: isOpenSession,
+                      gamingMinutes: totalGamingMinutes,
+                      prayerCount: 0,
+                      is24Hour: is24Hour,
+                    ),
+                  ),
+                ]);
+              } else {
+                // Multi-prayer session: Alternating [Now Node] -> [Play Connector 0] -> [Prayer Node 0] -> [Play Connector 1] ... -> [Session End Node]
+                // 1. First Node: Now
+                segmentWidgets.add(
+                  _buildMilestoneNode(
+                    label: context.tr('timeline_now'),
+                    time: timeFormat.format(now),
+                    color: AppColors.primaryCyan,
+                    icon: Icons.sports_esports_rounded,
+                    alignment: CrossAxisAlignment.start,
+                    textAlign: TextAlign.start,
+                    maxWidth: 54.0,
+                    onTap: () => _showSessionSummaryModal(
+                      context: context,
+                      startTime: now,
+                      endTime: sessionEndTime,
+                      plannedDuration: plannedDuration,
+                      isOpenSession: isOpenSession,
+                      gamingMinutes: totalGamingMinutes,
+                      prayerCount: upcomingPrayersInSession.length,
+                      is24Hour: is24Hour,
+                    ),
+                  ),
+                );
+
+                // 2. Interleave: [Play Connector i] -> [Prayer Node i]
+                for (int i = 0; i < prayerSegments.length; i++) {
+                  final prayerSeg = prayerSegments[i];
+                  final playBefore = (i < playSegments.length)
+                      ? playSegments[i]
+                      : null;
+                  final playDuration = playBefore?.duration ?? 0;
+                  final flex = playDuration.clamp(20, 99999);
+
+                  // Connector between previous milestone and this prayer
+                  segmentWidgets.add(
+                    Expanded(
+                      flex: flex,
+                      child: _buildTimelineConnector(
+                        color: AppColors.primaryCyan,
+                        durationMinutes: playDuration,
+                        customLabel: context.tr('timeline_resume'),
+                        onTap: playBefore != null
+                            ? () => _showWindowInspectionModal(
+                                  context: context,
+                                  title:
+                                      '${timeFormat.format(playBefore.startTime)} ➔ ${timeFormat.format(playBefore.endTime)} Gaming Window',
+                                  durationMinutes: playBefore.duration,
+                                  startTime: playBefore.startTime,
+                                  endTime: playBefore.endTime,
+                                  status: GamingStatus.safe,
+                                  userGames: userGames,
+                                  is24Hour: is24Hour,
+                                )
+                            : null,
+                      ),
+                    ),
+                  );
+
+                  // Prayer Milestone Node
+                  final prayerNameTranslated = prayerSeg.prayerName != null
+                      ? context.tr('prayer_${prayerSeg.prayerName!.toLowerCase()}')
+                      : 'Prayer';
+
+                  segmentWidgets.add(
+                    _buildMilestoneNode(
+                      label: '$prayerNameTranslated Break',
+                      time: timeFormat.format(prayerSeg.startTime),
+                      sublabel: '${prayerSeg.duration}m break',
+                      color: AppColors.warningAmber,
+                      icon: Icons.mosque_rounded,
+                      alignment: CrossAxisAlignment.center,
+                      textAlign: TextAlign.center,
+                      maxWidth: 64.0,
+                      onTap: () => _showPrayerInfoModal(
+                        context: context,
+                        ref: ref,
+                        name: prayerSeg.prayerName ?? 'Prayer',
+                        time: prayerSeg.startTime,
+                        breakMinutes: prayerSeg.duration,
+                        is24Hour: is24Hour,
+                      ),
+                    ),
+                  );
+                }
+
+                // 3. Final Play Connector after last prayer (if any play window left)
+                final finalPlay = playSegments.length > prayerSegments.length
+                    ? playSegments.last
+                    : null;
+                final finalPlayDuration = finalPlay?.duration ?? 0;
+                final finalFlex = finalPlayDuration.clamp(20, 99999);
+
+                segmentWidgets.add(
+                  Expanded(
+                    flex: finalFlex,
+                    child: _buildTimelineConnector(
+                      color: AppColors.primaryCyan,
+                      durationMinutes: finalPlayDuration,
+                      customLabel: context.tr('timeline_resume'),
+                      onTap: finalPlay != null
+                          ? () => _showWindowInspectionModal(
+                                context: context,
+                                title:
+                                    '${timeFormat.format(finalPlay.startTime)} ➔ ${timeFormat.format(finalPlay.endTime)} Gaming Window',
+                                durationMinutes: finalPlay.duration,
+                                startTime: finalPlay.startTime,
+                                endTime: finalPlay.endTime,
+                                status: GamingStatus.safe,
+                                userGames: userGames,
+                                is24Hour: is24Hour,
+                              )
+                          : null,
+                    ),
+                  ),
+                );
+
+                // 4. Final Node: Session Ends
+                segmentWidgets.add(
+                  _buildMilestoneNode(
+                    label: context.tr('timeline_session_end'),
+                    time: timeFormat.format(sessionEndTime),
+                    color: AppColors.primaryCyan,
+                    icon: Icons.sports_esports_rounded,
+                    alignment: CrossAxisAlignment.end,
+                    textAlign: TextAlign.end,
+                    maxWidth: 58.0,
+                    onTap: () => _showSessionSummaryModal(
+                      context: context,
+                      startTime: now,
+                      endTime: sessionEndTime,
+                      plannedDuration: plannedDuration,
+                      isOpenSession: isOpenSession,
+                      gamingMinutes: totalGamingMinutes,
+                      prayerCount: upcomingPrayersInSession.length,
+                      is24Hour: is24Hour,
+                    ),
+                  ),
+                );
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: segmentWidgets,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMilestoneNode({
+    required String label,
+    required String time,
+    String? sublabel,
+    required Color color,
+    required IconData icon,
+    VoidCallback? onTap,
+    CrossAxisAlignment alignment = CrossAxisAlignment.center,
+    TextAlign textAlign = TextAlign.center,
+    double? maxWidth,
+  }) {
+    final nodeContent = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth ?? 64.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: alignment,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.16),
+              shape: BoxShape.circle,
+              border: Border.all(color: color, width: 1.2),
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.22),
+                  blurRadius: 3,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Icon(
+              icon,
+              size: 11,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 3),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              time,
+              maxLines: 1,
+              textAlign: textAlign,
+              style: TextStyle(
+                fontSize: 9.5,
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              textAlign: textAlign,
+              style: const TextStyle(
+                fontSize: 8.0,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textMuted,
+              ),
+            ),
+          ),
+          if (sublabel != null)
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                sublabel,
+                maxLines: 1,
+                textAlign: textAlign,
+                style: TextStyle(
+                  fontSize: 7.0,
+                  fontWeight: FontWeight.w700,
+                  color: color.withValues(alpha: 0.9),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+
+    if (onTap != null) {
+      return GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: nodeContent,
+      );
+    }
+    return nodeContent;
+  }
+
+  Widget _buildTimelineConnector({
+    required Color color,
+    int? durationMinutes,
+    String? customLabel,
+    VoidCallback? onTap,
+  }) {
+    final connectorContent = Padding(
+      padding: const EdgeInsets.only(top: 10.0),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          Widget? badge;
+
+          if (durationMinutes != null && durationMinutes > 0 && w >= 18) {
+            final formatted = TimeUtils.formatMinutes(durationMinutes);
+            String text;
+            if (w >= 75) {
+              text = customLabel != null
+                  ? '$formatted • $customLabel'
+                  : formatted;
+            } else {
+              text = formatted;
+            }
+
+            badge = Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: color.withValues(alpha: 0.5),
+                  width: 0.8,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: (w - 4).clamp(10.0, 9999.0),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (w >= 44) ...[
+                        Icon(
+                          Icons.sports_esports_rounded,
+                          size: 9,
+                          color: color,
+                        ),
+                        const SizedBox(width: 2.5),
+                      ],
+                      Text(
+                        text,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 7.5,
+                          fontWeight: FontWeight.w800,
+                          color: color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                height: 2.0,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.45),
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+              if (badge != null) badge,
+            ],
+          );
+        },
+      ),
+    );
+
+    if (onTap != null) {
+      return GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: connectorContent,
+      );
+    }
+    return connectorContent;
+  }
+
+  void _showWindowInspectionModal({
+    required BuildContext context,
+    required String title,
+    required int durationMinutes,
+    required DateTime startTime,
+    required DateTime endTime,
+    required GamingStatus status,
+    required List<GameProfile> userGames,
+    bool is24Hour = false,
+  }) {
+    final playableGames = userGames.where((g) {
+      return g.enabledModes.any((m) => m.minMinutes <= durationMinutes);
+    }).toList();
 
     showModalBottomSheet(
       context: context,
@@ -1057,86 +1499,414 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-              20, 20, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '${context.tr('add_activity_quick_title')} (${game.name})',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w700),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceHighlight,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: nameCtrl,
-                decoration: InputDecoration(
-                  labelText: context.tr('activity_name_hint'),
-                  border: const OutlineInputBorder(),
-                  isDense: true,
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: status.color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(Icons.sports_esports_rounded,
+                      color: status.color, size: 22),
                 ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${TimeUtils.formatTime(startTime, is24Hour: is24Hour)} – ${TimeUtils.formatTime(endTime, is24Hour: is24Hour)} (${TimeUtils.formatMinutes(durationMinutes)} available)',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: status.color),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Text(
+              status == GamingStatus.safe
+                  ? 'Safe for full ranked matches, competitive queues, and standard gaming sessions.'
+                  : 'Safe only for quick arcade modes (Swiftplay, ARAM, Casual) or pauseable titles.',
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(context).textTheme.bodyMedium?.color ??
+                    AppColors.textSecondary,
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: durCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: context.tr('duration_selector_title'),
-                  suffixText: context.tr('min'),
-                  border: const OutlineInputBorder(),
-                  isDense: true,
-                ),
+            ),
+            const SizedBox(height: 16),
+            if (playableGames.isNotEmpty) ...[
+              const Text(
+                'PLAYABLE FROM YOUR LIBRARY',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textMuted,
+                    letterSpacing: 1),
               ),
               const SizedBox(height: 10),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(context.tr('can_pause_safely')),
-                value: canPause,
-                onChanged: (val) => setModalState(() => canPause = val),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: playableGames.take(6).map((game) {
+                  return Chip(
+                    avatar: GameIconWidget(
+                        iconName: game.iconName,
+                        size: 20,
+                        fallbackColor: game.color),
+                    label: Text(game.name,
+                        style: const TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w600)),
+                    backgroundColor:
+                        Theme.of(context).inputDecorationTheme.fillColor ??
+                            AppColors.surfaceElevated,
+                    side: BorderSide(
+                        color: Theme.of(context).dividerTheme.color ??
+                            AppColors.surfaceHighlight,
+                        width: 0.8),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                  );
+                }).toList(),
               ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(context.tr('cannot_pause_safely')),
-                value: isCompetitive,
-                onChanged: (val) => setModalState(() => isCompetitive = val),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final name = nameCtrl.text.trim();
-                    if (name.isEmpty) return;
-                    final dur = int.tryParse(durCtrl.text.trim()) ?? 30;
-                    final newAct = GameActivity(
-                      id: '${game.id}_${DateTime.now().millisecondsSinceEpoch}',
-                      gameId: game.id,
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPrayerInfoModal({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String name,
+    required DateTime time,
+    int breakMinutes = 15,
+    bool is24Hour = false,
+  }) {
+    final activeTheme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: activeTheme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) {
+          final liveRecord = ref
+              .read(prayerConsistencyProvider.notifier)
+              .getRecord(DateTime.now());
+          final activeStatus =
+              liveRecord.prayers[name] ?? PrayerStatus.notRecorded;
+          final isFuture = time.isAfter(DateTime.now());
+
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceHighlight,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.warningAmber.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.mosque_rounded,
+                          color: AppColors.warningAmber, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${context.tr('prayer_${name.toLowerCase()}')} Break',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            '${TimeUtils.formatTime(time, is24Hour: is24Hour)} – ${TimeUtils.formatTime(time.add(Duration(minutes: breakMinutes)), is24Hour: is24Hour)} ($breakMinutes min buffer)',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: activeStatus.color.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: activeStatus.color.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(activeStatus.icon,
+                              size: 14, color: activeStatus.color),
+                          const SizedBox(width: 4),
+                          Text(
+                            activeStatus.getLocalizedLabel(context),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: activeStatus.color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (isFuture) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.primaryCyan.withValues(alpha: 0.35),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.schedule_rounded,
+                            size: 16, color: AppColors.primaryCyan),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            context.tr('future_prayer_notice'),
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              height: 1.35,
+                              color: AppColors.primaryCyan,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
+                Text(
+                  'Pause your games, make wudhu, and perform ${context.tr('prayer_${name.toLowerCase()}')} on time.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).textTheme.bodyMedium?.color ??
+                        AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'MARK PRAYER STATUS TODAY',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textMuted,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _buildPrayerLogButton(
+                      ctx: ctx,
+                      ref: ref,
                       name: name,
-                      typicalDuration: dur,
-                      minMinutes: dur > 10 ? dur - 5 : dur,
-                      maxMinutes: dur > 10 ? dur + 10 : dur + 5,
-                      canPause: canPause,
-                      requiresCompletion: !canPause,
-                      isCompetitive: isCompetitive,
-                      isCustom: true,
-                    );
-                    ref
-                        .read(userGamesProvider.notifier)
-                        .addCustomActivity(game.id, newAct);
-                    Navigator.pop(ctx);
-                    setState(() {
-                      _selectedActivity = newAct;
-                    });
-                    _calculate();
-                  },
-                  child: Text(context.tr('save_btn')),
+                      targetStatus: PrayerStatus.onTime,
+                      label: PrayerStatus.onTime.getLocalizedLabel(context),
+                      icon: Icons.check_circle_rounded,
+                      color: AppColors.successGreen,
+                      isSelected: activeStatus == PrayerStatus.onTime,
+                      setModalState: setModalState,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildPrayerLogButton(
+                      ctx: ctx,
+                      ref: ref,
+                      name: name,
+                      targetStatus: PrayerStatus.late,
+                      label: PrayerStatus.late.getLocalizedLabel(context),
+                      icon: Icons.access_time_rounded,
+                      color: AppColors.warningAmber,
+                      isSelected: activeStatus == PrayerStatus.late,
+                      setModalState: setModalState,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildPrayerLogButton(
+                      ctx: ctx,
+                      ref: ref,
+                      name: name,
+                      targetStatus: PrayerStatus.missed,
+                      label: PrayerStatus.missed.getLocalizedLabel(context),
+                      icon: Icons.cancel_rounded,
+                      color: AppColors.dangerRed,
+                      isSelected: activeStatus == PrayerStatus.missed,
+                      setModalState: setModalState,
+                    ),
+                  ],
+                ),
+                if (activeStatus != PrayerStatus.notRecorded) ...[
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        ref
+                            .read(prayerConsistencyProvider.notifier)
+                            .updatePrayerStatus(
+                              DateTime.now(),
+                              name,
+                              PrayerStatus.notRecorded,
+                            );
+                        ref
+                            .read(todayPrayerRecordProvider.notifier)
+                            .markCompleted(
+                              name,
+                              status: PrayerStatus.notRecorded,
+                            );
+                        setModalState(() {});
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                '$name ${context.tr('clear_prayer_status').toLowerCase()}'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.refresh_rounded,
+                          size: 16, color: AppColors.textMuted),
+                      label: Text(
+                        context.tr('clear_prayer_status'),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPrayerLogButton({
+    required BuildContext ctx,
+    required WidgetRef ref,
+    required String name,
+    required PrayerStatus targetStatus,
+    required String label,
+    required IconData icon,
+    required Color color,
+    required bool isSelected,
+    required StateSetter setModalState,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          final newStatus =
+              isSelected ? PrayerStatus.notRecorded : targetStatus;
+          ref.read(prayerConsistencyProvider.notifier).updatePrayerStatus(
+                DateTime.now(),
+                name,
+                newStatus,
+              );
+          ref.read(todayPrayerRecordProvider.notifier).markCompleted(
+                name,
+                status: newStatus,
+              );
+          setModalState(() {});
+          Navigator.pop(ctx);
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(
+              content: Text(isSelected
+                  ? '$name ${ctx.tr('clear_prayer_status').toLowerCase()}'
+                  : '$name marked as $label'),
+              duration: const Duration(seconds: 2),
+              backgroundColor: isSelected ? AppColors.surfaceHighlight : color,
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.2)
+                : Theme.of(ctx).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? color : AppColors.surfaceHighlight,
+              width: isSelected ? 1.8 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 20, color: color),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  color:
+                      isSelected ? color : Theme.of(ctx).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -1146,211 +1916,592 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen>
     );
   }
 
-  void _startSessionTracker(
-    BuildContext context,
-    GameProfile game,
-    GameActivity activity,
-    int plannedDuration,
-  ) {
-    final startTime = DateTime.now();
-    showDialog(
+  void _showSessionSummaryModal({
+    required BuildContext context,
+    required DateTime startTime,
+    required DateTime endTime,
+    required int plannedDuration,
+    required bool isOpenSession,
+    required int gamingMinutes,
+    required int prayerCount,
+    bool is24Hour = false,
+  }) {
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        title: Row(
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GameIconWidget(
-                iconName: game.iconName, size: 24, fallbackColor: game.color),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                '${game.name} · ${activity.name}',
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceHighlight,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.timer_outlined,
+                      color: AppColors.primaryCyan, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isOpenSession
+                            ? 'Open Session Plan'
+                            : '${TimeUtils.formatMinutes(plannedDuration)} Session Plan',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${TimeUtils.formatTime(startTime, is24Hour: is24Hour)} – ${TimeUtils.formatTime(endTime, is24Hour: is24Hour)}',
+                        style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryCyan),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest
+                    .withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.surfaceHighlight,
+                  width: 0.8,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'TOTAL GAMING TIME',
+                          style: TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textMuted,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          TimeUtils.formatMinutes(gamingMinutes),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryCyan,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    height: 28,
+                    width: 1,
+                    color: AppColors.surfaceHighlight,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'PRAYER BREAKS',
+                          style: TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textMuted,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          prayerCount == 0
+                              ? 'Zero breaks'
+                              : '$prayerCount break${prayerCount > 1 ? 's' : ''} (15m ea)',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: prayerCount > 0
+                                ? AppColors.warningAmber
+                                : AppColors.successGreen,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+      ),
+    );
+  }
+
+  Widget _buildCategorizedGames({
+    required List<GameProfile> userGames,
+    required int minutesUntilPrayer,
+    required int bufferMinutes,
+  }) {
+    if (userGames.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: GlassmorphicDecoration.card(context: context),
+        child: Column(
           children: [
-            const Text(
-              'Session in progress! Have fun and remember your prayer reminder.',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 14),
+            const Icon(Icons.sports_esports_outlined,
+                size: 36, color: AppColors.textMuted),
+            const SizedBox(height: 10),
             Text(
-              'Planned: $plannedDuration min',
-              style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryCyan),
+              context.tr('no_games_selected_title'),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              context.tr('no_games_selected_sub'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(context.tr('keep_playing_btn')),
+      );
+    }
+
+    // Filter games based on the selected game filter tab
+    final evaluatingGames = _selectedGameFilter == 'all'
+        ? userGames
+        : userGames.where((g) => g.id == _selectedGameFilter).toList();
+
+    final recommendedNow =
+        <({GameProfile game, GameActivity activity, RiskLevel risk})>[];
+    final useCaution =
+        <({GameProfile game, GameActivity activity, RiskLevel risk})>[];
+    final notRecommended =
+        <({GameProfile game, GameActivity activity, RiskLevel risk})>[];
+
+    for (final game in evaluatingGames) {
+      for (final activity in game.enabledActivities) {
+        final effectiveBuffer = activity.safetyBuffer ?? bufferMinutes;
+        final risk = RiskCalculator.calculateRisk(
+          activity,
+          minutesUntilPrayer,
+          bufferMinutes: effectiveBuffer,
+          desiredSessionMinutes: _desiredSessionMinutes,
+        );
+
+        final item = (game: game, activity: activity, risk: risk);
+
+        if (activity.canPause && !activity.requiresCompletion) {
+          recommendedNow.add(item);
+        } else if (risk == RiskLevel.low) {
+          recommendedNow.add(item);
+        } else if (risk == RiskLevel.medium) {
+          useCaution.add(item);
+        } else {
+          notRecommended.add(item);
+        }
+      }
+    }
+
+    final allGamesCount =
+        userGames.fold<int>(0, (sum, g) => sum + g.enabledActivities.length);
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Responsive Game Filter Tab Navigation Bar (Wrap prevents edge clipping)
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _buildGameFilterTab(
+              id: 'all',
+              label: context.tr('tab_all_games'),
+              icon: Icons.sports_esports_rounded,
+              count: allGamesCount,
+              isSelected: _selectedGameFilter == 'all',
+              primaryColor: primaryColor,
+            ),
+            ...userGames.map((game) => _buildGameFilterTab(
+                  id: game.id,
+                  label: game.name,
+                  iconName: game.iconName,
+                  fallbackColor: game.color,
+                  count: game.enabledActivities.length,
+                  isSelected: _selectedGameFilter == game.id,
+                  primaryColor: primaryColor,
+                )),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        // Recommended now
+        if (recommendedNow.isNotEmpty) ...[
+          _buildCategoryHeader(
+            icon: Icons.check_circle_rounded,
+            title: context.tr('rec_now_title'),
+            subtitle: context.tr('rec_now_sub'),
+            color: AppColors.successGreen,
+            count: recommendedNow.length,
           ),
-          ElevatedButton(
-            onPressed: () async {
-              final endTime = DateTime.now();
-              final duration =
-                  endTime.difference(startTime).inMinutes.clamp(1, 999);
-              final record = GameSessionRecord(
-                id: 'sess_${DateTime.now().millisecondsSinceEpoch}',
-                gameId: game.id,
-                gameName: game.name,
-                activityId: activity.id,
-                activityName: activity.name,
-                startedAt: startTime,
-                endedAt: endTime,
-                durationMinutes: duration,
-              );
-              await ref
-                  .read(gameSessionHistoryProvider.notifier)
-                  .logSession(record);
-              if (ctx.mounted) {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                        'Session logged ($duration min)! Personal history updated.'),
-                    duration: const Duration(seconds: 2),
+          const SizedBox(height: 8),
+          ...recommendedNow.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _buildGameCard(item: item),
+              )),
+          const SizedBox(height: 16),
+        ],
+
+        // Use caution
+        if (useCaution.isNotEmpty) ...[
+          _buildCategoryHeader(
+            icon: Icons.warning_rounded,
+            title: context.tr('use_caution_title'),
+            subtitle: context.tr('use_caution_sub'),
+            color: AppColors.warningAmber,
+            count: useCaution.length,
+          ),
+          const SizedBox(height: 8),
+          ...useCaution.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _buildGameCard(item: item),
+              )),
+          const SizedBox(height: 16),
+        ],
+
+        // Not recommended right now
+        if (notRecommended.isNotEmpty) ...[
+          _buildCategoryHeader(
+            icon: Icons.block_rounded,
+            title: context.tr('not_rec_title'),
+            subtitle: context.tr('not_rec_sub'),
+            color: AppColors.dangerRed,
+            count: notRecommended.length,
+          ),
+          const SizedBox(height: 8),
+          ...notRecommended.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _buildGameCard(item: item),
+              )),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCategoryHeader({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required int count,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 360;
+
+        if (isNarrow) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 15, color: color),
+                  const SizedBox(width: 6),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                    ),
                   ),
-                );
-                setState(() {});
-              }
-            },
-            child: Text(context.tr('finish_session_btn')),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Icon(icon, size: 15, color: color),
+            const SizedBox(width: 6),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: color,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                subtitle,
+                textAlign: TextAlign.end,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    const TextStyle(fontSize: 10.5, color: AppColors.textMuted),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildGameCard({
+    required ({GameProfile game, GameActivity activity, RiskLevel risk}) item,
+  }) {
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final surfaceHighlight =
+        Theme.of(context).dividerTheme.color ?? AppColors.surfaceHighlight;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: surfaceHighlight,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          GameIconWidget(
+            iconName: item.game.iconName,
+            size: 24,
+            fallbackColor: item.game.color,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${item.game.name} · ${item.activity.name}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  item.activity.canPause && !item.activity.requiresCompletion
+                      ? context.tr('can_pause_safely')
+                      : '${TimeUtils.formatMinutes(item.activity.typicalDuration)} (${TimeUtils.formatMinutes(item.activity.minMinutes)}–${TimeUtils.formatMinutes(item.activity.maxMinutes)})',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+            decoration: BoxDecoration(
+              color: item.risk.color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: Text(
+              RiskCalculator.getRiskLabel(item.risk),
+              style: TextStyle(
+                fontSize: 9.5,
+                fontWeight: FontWeight.w800,
+                color: item.risk.color,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-}
 
-class _TimeComparisonBar extends StatelessWidget {
-  final int matchDuration;
-  final int minutesUntilPrayer;
-  final int bufferMinutes;
-  final Color color;
+  Widget _buildGameFilterTab({
+    required String id,
+    required String label,
+    IconData? icon,
+    String? iconName,
+    int? fallbackColor,
+    required int count,
+    required bool isSelected,
+    required Color primaryColor,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final surfaceColor = theme.colorScheme.surface;
+    final borderColor = isSelected
+        ? primaryColor
+        : (theme.dividerTheme.color ?? (isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)));
 
-  const _TimeComparisonBar({
-    required this.matchDuration,
-    required this.minutesUntilPrayer,
-    required this.bufferMinutes,
-    required this.color,
-  });
+    final containerColor = isSelected
+        ? primaryColor.withValues(alpha: isDark ? 0.20 : 0.12)
+        : surfaceColor;
 
-  @override
-  Widget build(BuildContext context) {
-    final maxVal = (matchDuration > minutesUntilPrayer
-            ? matchDuration
-            : minutesUntilPrayer)
-        .toDouble();
-    final matchWidth = maxVal > 0 ? (matchDuration / maxVal) : 0.0;
-    final prayerWidth = maxVal > 0 ? (minutesUntilPrayer / maxVal) : 0.0;
+    final textColor = isSelected
+        ? primaryColor
+        : theme.colorScheme.onSurface.withValues(alpha: isDark ? 0.9 : 0.85);
 
-    return Column(
-      children: [
-        // Match Duration
-        Row(
-          children: [
-            SizedBox(
-              width: 80,
-              child: Text(
-                context.tr('planned_session_label'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
-                    fontWeight: FontWeight.w600),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceHighlight,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: matchWidth.clamp(0.05, 1.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+    final badgeBg = isSelected
+        ? primaryColor.withValues(alpha: isDark ? 0.30 : 0.18)
+        : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06));
+
+    final badgeTextColor = isSelected
+        ? primaryColor
+        : (isDark ? Colors.white70 : Colors.black87);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedGameFilter = id;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+        decoration: BoxDecoration(
+          color: containerColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: borderColor,
+            width: isSelected ? 1.5 : 1.0,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: isDark ? 0.25 : 0.15),
+                    blurRadius: 6,
+                    offset: const Offset(0, 1.5),
                   ),
-                ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (iconName != null)
+              GameIconWidget(
+                iconName: iconName,
+                size: 13,
+                fallbackColor: fallbackColor ?? primaryColor.toARGB32(),
+              )
+            else if (icon != null)
+              Icon(
+                icon,
+                size: 13,
+                color: isSelected ? primaryColor : textColor.withValues(alpha: 0.7),
+              ),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: textColor,
               ),
             ),
-            SizedBox(
-              width: 55,
+            const SizedBox(width: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5.5, vertical: 1.2),
+              decoration: BoxDecoration(
+                color: badgeBg,
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Text(
-                '$matchDuration ${context.tr('min')}',
-                textAlign: TextAlign.end,
+                '$count',
                 style: TextStyle(
-                    fontSize: 11, color: color, fontWeight: FontWeight.w700),
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  color: badgeTextColor,
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 6),
-
-        // Available Prayer Time
-        Row(
-          children: [
-            SizedBox(
-              width: 80,
-              child: Text(
-                context.tr('next_salah_label'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
-                    fontWeight: FontWeight.w600),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceHighlight,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: prayerWidth.clamp(0.05, 1.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryCyan,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 55,
-              child: Text(
-                '$minutesUntilPrayer ${context.tr('min')}',
-                textAlign: TextAlign.end,
-                style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.primaryCyan,
-                    fontWeight: FontWeight.w700),
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 }

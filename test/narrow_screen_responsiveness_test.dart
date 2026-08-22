@@ -94,7 +94,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
-            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight),
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight)
+                .copyWith(splashFactory: InkRipple.splashFactory),
             home: const GameProfilesScreen(),
           ),
         ),
@@ -154,7 +155,9 @@ void main() {
             ),
           ],
           child: MaterialApp(
-            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight),
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight).copyWith(
+              splashFactory: NoSplash.splashFactory,
+            ),
             home: const QueueCheckScreen(),
           ),
         ),
@@ -163,6 +166,58 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
 
       expect(find.byType(QueueCheckScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // Open Custom Duration Bottom Sheet
+      await tester.scrollUntilVisible(
+        find.byIcon(Icons.tune_rounded),
+        50.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.tune_rounded));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Custom Session Duration'), findsOneWidget);
+
+      // Tap Set Duration
+      await tester.tap(find.text('Set Duration'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        'QueueCheckScreen session timeline spreads proportionally across wide tablet viewport (800px)',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800 * 2, 1024 * 2);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            liveSecondTickerProvider.overrideWith(
+              (ref) => Stream.value(DateTime.now()),
+            ),
+          ],
+          child: MaterialApp(
+            theme: PrayThenPlayTheme.getTheme(AppGamingTheme.midnight).copyWith(
+              splashFactory: NoSplash.splashFactory,
+            ),
+            home: const QueueCheckScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byType(QueueCheckScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      // Select 8h session
+      await tester.tap(find.text('8h').first);
+      await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
 
@@ -195,19 +250,31 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
-      // Scroll back up and position on tabs
+      // Scroll back up and position on sub-tabs
       await tester.drag(find.byType(CustomScrollView), const Offset(0, 1200));
       await tester.pumpAndSettle();
-      await tester.drag(find.byType(CustomScrollView), const Offset(0, -350));
-      await tester.pumpAndSettle();
 
-      // Tab 1: 5-Prayer Matrix
-      await tester.tap(find.text('5-Prayer Matrix').first);
+      // Main Tab 2: Decisions & Badges
+      await tester.tap(find.byIcon(Icons.emoji_events_rounded).first);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
-      // Tab 2: Gaming Decisions
-      await tester.tap(find.text('Gaming Decisions').first);
+      // Scroll down Decisions & Badges content
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Switch back to Consistency Tab
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, 800));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.auto_graph_rounded).first);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // Scroll to Sub-tab: 5-Prayer Matrix
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -250));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('5-Prayer Matrix').first);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
