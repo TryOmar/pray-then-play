@@ -1114,9 +1114,13 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                               child: SizedBox(
                                 width: nodeMaxWidth,
                                 child: _buildMilestoneNode(
-                                  label: '$prayerNameTranslated Break',
+                                  label: context.trFormat('prayer_break_title', {
+                                    'prayer': prayerNameTranslated,
+                                  }),
                                   time: timeFormat.format(seg.startTime),
-                                  sublabel: '${seg.duration}m break',
+                                  sublabel: context.trFormat('minutes_break_short', {
+                                    'minutes': seg.duration.toString(),
+                                  }),
                                   color: AppColors.warningAmber,
                                   icon: Icons.mosque_rounded,
                                   alignment: CrossAxisAlignment.center,
@@ -1288,8 +1292,13 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                     onTap: () =>
                                         _showWindowInspectionModal(
                                       context: context,
-                                      title:
-                                          '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
+                                      title: context.trFormat(
+                                        'gaming_window_title_format',
+                                        {
+                                          'start': timeFormat.format(seg.startTime),
+                                          'end': timeFormat.format(seg.endTime),
+                                        },
+                                      ),
                                       durationMinutes: seg.duration,
                                       startTime: seg.startTime,
                                       endTime: seg.endTime,
@@ -1368,8 +1377,13 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                     onTap: () =>
                                         _showWindowInspectionModal(
                                       context: context,
-                                      title:
-                                          '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
+                                      title: context.trFormat(
+                                        'gaming_window_title_format',
+                                        {
+                                          'start': timeFormat.format(seg.startTime),
+                                          'end': timeFormat.format(seg.endTime),
+                                        },
+                                      ),
                                       durationMinutes: seg.duration,
                                       startTime: seg.startTime,
                                       endTime: seg.endTime,
@@ -1448,8 +1462,13 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                     onTap: () =>
                                         _showWindowInspectionModal(
                                       context: context,
-                                      title:
-                                          '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
+                                      title: context.trFormat(
+                                        'gaming_window_title_format',
+                                        {
+                                          'start': timeFormat.format(seg.startTime),
+                                          'end': timeFormat.format(seg.endTime),
+                                        },
+                                      ),
                                       durationMinutes: seg.duration,
                                       startTime: seg.startTime,
                                       endTime: seg.endTime,
@@ -1846,14 +1865,16 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${context.tr('prayer_${name.toLowerCase()}')} Break',
+                            context.trFormat('prayer_break_title', {
+                              'prayer': context.tr('prayer_${name.toLowerCase()}'),
+                            }),
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           Text(
-                            '${TimeUtils.formatTime(time, is24Hour: is24Hour)} – ${TimeUtils.formatTime(time.add(Duration(minutes: breakMinutes)), is24Hour: is24Hour)} ($breakMinutes min buffer)',
+                            '${TimeUtils.formatTime(time, is24Hour: is24Hour)} – ${TimeUtils.formatTime(time.add(Duration(minutes: breakMinutes)), is24Hour: is24Hour)} ${context.trFormat('prayer_buffer_sub', {'minutes': breakMinutes.toString()})}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textMuted,
@@ -1893,41 +1914,77 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                 ),
                 const SizedBox(height: 16),
                 if (isFuture) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryCyan.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: AppColors.primaryCyan.withValues(alpha: 0.35),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.schedule_rounded,
-                            size: 16, color: AppColors.primaryCyan),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            context.tr('future_prayer_notice'),
-                            style: const TextStyle(
-                              fontSize: 11.5,
-                              height: 1.35,
-                              color: AppColors.primaryCyan,
-                              fontWeight: FontWeight.w600,
-                            ),
+                  Builder(
+                    builder: (context) {
+                      final diffMinutes = time.difference(DateTime.now()).inMinutes;
+                      final timeLeftStr = diffMinutes > 0
+                          ? TimeUtils.formatMinutes(diffMinutes)
+                          : '';
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryCyan.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.primaryCyan.withValues(alpha: 0.35),
+                            width: 0.8,
                           ),
                         ),
-                      ],
-                    ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (diffMinutes > 0) ...[
+                              Row(
+                                children: [
+                                  const Icon(Icons.timer_outlined,
+                                      size: 15, color: AppColors.primaryCyan),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    context.trFormat('minutes_left_until_prayer', {
+                                      'time': timeLeftStr,
+                                    }),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.primaryCyan,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                            ],
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.schedule_rounded,
+                                    size: 16, color: AppColors.primaryCyan),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    context.tr('future_prayer_notice'),
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      height: 1.35,
+                                      color: AppColors.primaryCyan,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 14),
                 ],
                 Text(
-                  'Pause your games, make wudhu, and perform ${context.tr('prayer_${name.toLowerCase()}')} on time.',
+                  context.trFormat('prayer_guidance_prompt', {
+                    'prayer': context.tr('prayer_${name.toLowerCase()}'),
+                  }),
                   style: TextStyle(
                     fontSize: 13,
                     color: Theme.of(context).textTheme.bodyMedium?.color ??
@@ -1935,9 +1992,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'MARK PRAYER STATUS TODAY',
-                  style: TextStyle(
+                Text(
+                  context.tr('mark_prayer_status_title'),
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textMuted,
