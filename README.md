@@ -36,7 +36,6 @@ By cross-referencing high-precision astronomical prayer calculations against mat
 - [Key Capabilities](#key-capabilities)
   - [Smart Queue Decision Engine](#smart-queue-decision-engine)
   - [High-Precision Astronomical Prayer Engine](#high-precision-astronomical-prayer-engine)
-  - [In-Match HUD and Session Planner](#in-match-hud-and-session-planner)
   - [5-Prayer Consistency Heatmap](#5-prayer-consistency-heatmap)
   - [Preconfigured Game Catalog and Custom Creator](#preconfigured-game-catalog-and-custom-creator)
   - [11-Theme Matrix and Lighting Engine](#11-theme-matrix-and-lighting-engine)
@@ -125,14 +124,6 @@ $$\text{Available Window} = \text{Time Until Adhan} - \text{Safety Buffer}$$
 - **Specialized Modes**:
   - **Jumu'ah Mode**: Automatically expands Friday Dhuhr buffers to accommodate the sermon (*Khutbah*) and congregational prayer.
   - **Fajr Protection Mode**: High-priority alert threshold to protect dawn prayer habits.
-
----
-
-### In-Match HUD and Session Planner
-
-- **Live In-Match HUD**: An active overlay tracking match progression, elapsed game time, remaining prayer countdown, and color-coded safety status.
-- **Post-Match Logger**: Records match conclusion, logs whether prayer was performed on time, and increments discipline streaks.
-- **Interactive Session Planner**: Allows players to simulate multi-hour gaming sessions (1 to 6+ hours) with automatically mapped Salah pauses and 15-minute resumption checkpoints.
 
 ---
 
@@ -308,11 +299,9 @@ pray-then-play-app/
 │   │   ├── game_profiles/               # Game catalog & custom activity builder
 │   │   ├── heatmap/                     # 12-week consistency habit matrix
 │   │   ├── home/                        # Main dashboard & prayer countdown HUD
-│   │   ├── in_match/                    # Live match overlay timer & summary logger
 │   │   ├── onboarding/                  # First-run setup wizard
 │   │   ├── prayer_times/                # Monthly prayer schedules & city selector
 │   │   ├── queue_check/                 # Queue safety calculator & evaluator
-│   │   ├── session_planning/            # Multi-hour timeline session generator
 │   │   └── settings/                    # Preferences, themes, buffers, and audio
 │   └── main.dart                        # Application bootstrap
 └── pubspec.yaml                         # Dependency definitions

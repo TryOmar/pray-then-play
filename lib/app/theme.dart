@@ -489,8 +489,17 @@ class PrayThenPlayTheme {
           if (states.contains(WidgetState.selected)) {
             return gamingTheme.primaryAccent;
           }
-          return gamingTheme.surfaceHighlight;
+          return gamingTheme.surfaceHighlight.withValues(alpha: 0.6);
         }),
+        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return Colors.transparent;
+          }
+          return gamingTheme.borderColor.withValues(alpha: 0.5);
+        }),
+        trackOutlineWidth: WidgetStateProperty.all(1.0),
+        overlayColor: WidgetStateProperty.all(
+            gamingTheme.primaryAccent.withValues(alpha: 0.12)),
       ),
     );
   }

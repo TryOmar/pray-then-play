@@ -18,12 +18,9 @@ class AppConstants {
   static const String keyCityName = 'city_name';
   static const String keyCountryName = 'country_name';
   static const String keyConfiguredGames = 'configured_games_v2';
-  static const String keyGameSessions = 'game_session_history_v1';
   static const String keyPrayerLog = 'prayer_log';
   static const String keyJumuahMode = 'jumuah_mode';
   static const String keyFajrMode = 'fajr_mode';
-  static const String keyInMatch = 'in_match';
-  static const String keyMatchStartTime = 'match_start_time';
   static const String keyIs24HourFormat = 'time_format_is_24h';
   static const String keyAppLanguage = 'app_language_code_v1';
 
