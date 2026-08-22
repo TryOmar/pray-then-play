@@ -917,15 +917,14 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                 width: 0.8,
               ),
             ),
-            clipBehavior: Clip.antiAlias,
             child: Row(
               children: sessionSegments.map((seg) {
                 final pct = totalSegMinutes > 0
                     ? (seg.duration / totalSegMinutes * 100).round()
                     : 100;
                 final flex = seg.type == 'prayer'
-                    ? seg.duration.clamp(35, 99999)
-                    : seg.duration.clamp(25, 99999);
+                    ? seg.duration.clamp(20, 99999)
+                    : seg.duration.clamp(15, 99999);
 
                 return Expanded(
                   flex: flex,
@@ -1054,226 +1053,364 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
           ),
           const SizedBox(height: 14),
 
-          // 2. Synchronized Proportional Multi-Milestone Flow (Seamless Node-to-Node Connectors & 100% Contained Circles)
+          // 2. Synchronized Proportional Multi-Milestone Flow (100% Exact Alignment with Visualizer Bar Above)
           Builder(
             builder: (context) {
-              final segmentWidgets = <Widget>[];
-              final prayerSegments = sessionSegments
-                  .where((s) => s.type == 'prayer')
-                  .toList();
-              final playSegments = sessionSegments
-                  .where((s) => s.type == 'play')
-                  .toList();
-
-              if (prayerSegments.isEmpty) {
-                // Single uninterrupted play session (Now -> Session Ends)
-                final playSeg = playSegments.isNotEmpty
-                    ? playSegments.first
-                    : null;
-                final duration = playSeg?.duration ?? plannedDuration;
-
-                segmentWidgets.addAll([
-                  _buildMilestoneNode(
-                    label: context.tr('timeline_now'),
-                    time: timeFormat.format(now),
-                    color: AppColors.primaryCyan,
-                    icon: Icons.sports_esports_rounded,
-                    alignment: CrossAxisAlignment.start,
-                    textAlign: TextAlign.start,
-                    maxWidth: 54.0,
-                    onTap: () => _showSessionSummaryModal(
-                      context: context,
-                      startTime: now,
-                      endTime: sessionEndTime,
-                      plannedDuration: plannedDuration,
-                      isOpenSession: isOpenSession,
-                      gamingMinutes: totalGamingMinutes,
-                      prayerCount: 0,
-                      is24Hour: is24Hour,
-                    ),
-                  ),
-                  Expanded(
-                    child: _buildTimelineConnector(
-                      color: AppColors.successGreen,
-                      durationMinutes: duration,
-                      customLabel: context.tr('timeline_resume'),
-                      onTap: () => _showWindowInspectionModal(
-                        context: context,
-                        title:
-                            '${timeFormat.format(now)} ➔ ${timeFormat.format(sessionEndTime)} Gaming Window',
-                        durationMinutes: duration,
-                        startTime: now,
-                        endTime: sessionEndTime,
-                        status: GamingStatus.safe,
-                        userGames: userGames,
-                        is24Hour: is24Hour,
-                      ),
-                    ),
-                  ),
-                  _buildMilestoneNode(
-                    label: context.tr('timeline_session_end'),
-                    time: timeFormat.format(sessionEndTime),
-                    color: AppColors.successGreen,
-                    icon: Icons.check_circle_rounded,
-                    alignment: CrossAxisAlignment.end,
-                    textAlign: TextAlign.end,
-                    maxWidth: 58.0,
-                    onTap: () => _showSessionSummaryModal(
-                      context: context,
-                      startTime: now,
-                      endTime: sessionEndTime,
-                      plannedDuration: plannedDuration,
-                      isOpenSession: isOpenSession,
-                      gamingMinutes: totalGamingMinutes,
-                      prayerCount: 0,
-                      is24Hour: is24Hour,
-                    ),
-                  ),
-                ]);
-              } else {
-                // Multi-prayer session: Alternating [Now Node] -> [Play Connector 0] -> [Prayer Node 0] -> [Play Connector 1] ... -> [Session End Node]
-                // 1. First Node: Now
-                segmentWidgets.add(
-                  _buildMilestoneNode(
-                    label: context.tr('timeline_now'),
-                    time: timeFormat.format(now),
-                    color: AppColors.primaryCyan,
-                    icon: Icons.sports_esports_rounded,
-                    alignment: CrossAxisAlignment.start,
-                    textAlign: TextAlign.start,
-                    maxWidth: 54.0,
-                    onTap: () => _showSessionSummaryModal(
-                      context: context,
-                      startTime: now,
-                      endTime: sessionEndTime,
-                      plannedDuration: plannedDuration,
-                      isOpenSession: isOpenSession,
-                      gamingMinutes: totalGamingMinutes,
-                      prayerCount: upcomingPrayersInSession.length,
-                      is24Hour: is24Hour,
-                    ),
-                  ),
-                );
-
-                // 2. Interleave: [Play Connector i] -> [Prayer Node i]
-                for (int i = 0; i < prayerSegments.length; i++) {
-                  final prayerSeg = prayerSegments[i];
-                  final playBefore = (i < playSegments.length)
-                      ? playSegments[i]
-                      : null;
-                  final playDuration = playBefore?.duration ?? 0;
-                  final flex = playDuration.clamp(20, 99999);
-
-                  // Connector between previous milestone and this prayer
-                  segmentWidgets.add(
-                    Expanded(
-                      flex: flex,
-                      child: _buildTimelineConnector(
-                        color: AppColors.primaryCyan,
-                        durationMinutes: playDuration,
-                        customLabel: context.tr('timeline_resume'),
-                        onTap: playBefore != null
-                            ? () => _showWindowInspectionModal(
-                                  context: context,
-                                  title:
-                                      '${timeFormat.format(playBefore.startTime)} ➔ ${timeFormat.format(playBefore.endTime)} Gaming Window',
-                                  durationMinutes: playBefore.duration,
-                                  startTime: playBefore.startTime,
-                                  endTime: playBefore.endTime,
-                                  status: GamingStatus.safe,
-                                  userGames: userGames,
-                                  is24Hour: is24Hour,
-                                )
-                            : null,
-                      ),
-                    ),
-                  );
-
-                  // Prayer Milestone Node
-                  final prayerNameTranslated = prayerSeg.prayerName != null
-                      ? context.tr('prayer_${prayerSeg.prayerName!.toLowerCase()}')
-                      : 'Prayer';
-
-                  segmentWidgets.add(
-                    _buildMilestoneNode(
-                      label: '$prayerNameTranslated Break',
-                      time: timeFormat.format(prayerSeg.startTime),
-                      sublabel: '${prayerSeg.duration}m break',
-                      color: AppColors.warningAmber,
-                      icon: Icons.mosque_rounded,
-                      alignment: CrossAxisAlignment.center,
-                      textAlign: TextAlign.center,
-                      maxWidth: 64.0,
-                      onTap: () => _showPrayerInfoModal(
-                        context: context,
-                        ref: ref,
-                        name: prayerSeg.prayerName ?? 'Prayer',
-                        time: prayerSeg.startTime,
-                        breakMinutes: prayerSeg.duration,
-                        is24Hour: is24Hour,
-                      ),
-                    ),
-                  );
-                }
-
-                // 3. Final Play Connector after last prayer (if any play window left)
-                final finalPlay = playSegments.length > prayerSegments.length
-                    ? playSegments.last
-                    : null;
-                final finalPlayDuration = finalPlay?.duration ?? 0;
-                final finalFlex = finalPlayDuration.clamp(20, 99999);
-
-                segmentWidgets.add(
-                  Expanded(
-                    flex: finalFlex,
-                    child: _buildTimelineConnector(
-                      color: AppColors.primaryCyan,
-                      durationMinutes: finalPlayDuration,
-                      customLabel: context.tr('timeline_resume'),
-                      onTap: finalPlay != null
-                          ? () => _showWindowInspectionModal(
-                                context: context,
-                                title:
-                                    '${timeFormat.format(finalPlay.startTime)} ➔ ${timeFormat.format(finalPlay.endTime)} Gaming Window',
-                                durationMinutes: finalPlay.duration,
-                                startTime: finalPlay.startTime,
-                                endTime: finalPlay.endTime,
-                                status: GamingStatus.safe,
-                                userGames: userGames,
-                                is24Hour: is24Hour,
-                              )
-                          : null,
-                    ),
-                  ),
-                );
-
-                // 4. Final Node: Session Ends
-                segmentWidgets.add(
-                  _buildMilestoneNode(
-                    label: context.tr('timeline_session_end'),
-                    time: timeFormat.format(sessionEndTime),
-                    color: AppColors.primaryCyan,
-                    icon: Icons.sports_esports_rounded,
-                    alignment: CrossAxisAlignment.end,
-                    textAlign: TextAlign.end,
-                    maxWidth: 58.0,
-                    onTap: () => _showSessionSummaryModal(
-                      context: context,
-                      startTime: now,
-                      endTime: sessionEndTime,
-                      plannedDuration: plannedDuration,
-                      isOpenSession: isOpenSession,
-                      gamingMinutes: totalGamingMinutes,
-                      prayerCount: upcomingPrayersInSession.length,
-                      is24Hour: is24Hour,
-                    ),
-                  ),
-                );
-              }
-
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: segmentWidgets,
+                children: sessionSegments.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final seg = entry.value;
+                  final isFirst = index == 0;
+                  final isLast = index == sessionSegments.length - 1;
+                  final flex = seg.type == 'prayer'
+                      ? seg.duration.clamp(20, 99999)
+                      : seg.duration.clamp(15, 99999);
+
+                  if (seg.type == 'prayer') {
+                    final prayerNameTranslated = seg.prayerName != null
+                        ? context.tr('prayer_${seg.prayerName!.toLowerCase()}')
+                        : 'Prayer';
+
+                    return Expanded(
+                      flex: flex,
+                      child: SizedBox(
+                        height: 64,
+                        child: Stack(
+                          alignment: Alignment.topCenter,
+                          clipBehavior: Clip.none,
+                          children: [
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: 10.0,
+                              child: Container(
+                                height: 2.0,
+                                color: AppColors.primaryCyan
+                                    .withValues(alpha: 0.45),
+                              ),
+                            ),
+                            Center(
+                              child: _buildMilestoneNode(
+                                label: '$prayerNameTranslated Break',
+                                time: timeFormat.format(seg.startTime),
+                                sublabel: '${seg.duration}m break',
+                                color: AppColors.warningAmber,
+                                icon: Icons.mosque_rounded,
+                                alignment: CrossAxisAlignment.center,
+                                textAlign: TextAlign.center,
+                                maxWidth: 68.0,
+                                onTap: () => _showPrayerInfoModal(
+                                  context: context,
+                                  ref: ref,
+                                  name: seg.prayerName ?? 'Prayer',
+                                  time: seg.startTime,
+                                  breakMinutes: seg.duration,
+                                  is24Hour: is24Hour,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  } else {
+                    // Play Segment
+                    if (isFirst && isLast) {
+                      // Single window session
+                      return Expanded(
+                        flex: flex,
+                        child: SizedBox(
+                          height: 64,
+                          child: Stack(
+                            alignment: Alignment.topCenter,
+                            clipBehavior: Clip.none,
+                            children: [
+                              Positioned(
+                                left: 11.0,
+                                right: 11.0,
+                                top: 10.0,
+                                child: Container(
+                                  height: 2.0,
+                                  color: AppColors.successGreen
+                                      .withValues(alpha: 0.45),
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 30),
+                                    child: _buildTimelineBadge(
+                                      color: AppColors.successGreen,
+                                      durationMinutes: seg.duration,
+                                      customLabel:
+                                          context.tr('timeline_resume'),
+                                      onTap: () =>
+                                          _showWindowInspectionModal(
+                                        context: context,
+                                        title:
+                                            '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
+                                        durationMinutes: seg.duration,
+                                        startTime: seg.startTime,
+                                        endTime: seg.endTime,
+                                        status: GamingStatus.safe,
+                                        userGames: userGames,
+                                        is24Hour: is24Hour,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: 0,
+                                top: 0,
+                                child: _buildMilestoneNode(
+                                  label: context.tr('timeline_now'),
+                                  time: timeFormat.format(seg.startTime),
+                                  color: AppColors.primaryCyan,
+                                  icon: Icons.sports_esports_rounded,
+                                  alignment: CrossAxisAlignment.start,
+                                  textAlign: TextAlign.start,
+                                  maxWidth: 54.0,
+                                  onTap: () => _showSessionSummaryModal(
+                                    context: context,
+                                    startTime: now,
+                                    endTime: sessionEndTime,
+                                    plannedDuration: plannedDuration,
+                                    isOpenSession: isOpenSession,
+                                    gamingMinutes: totalGamingMinutes,
+                                    prayerCount:
+                                        upcomingPrayersInSession.length,
+                                    is24Hour: is24Hour,
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: _buildMilestoneNode(
+                                  label: context.tr('timeline_session_end'),
+                                  time: timeFormat.format(seg.endTime),
+                                  color: AppColors.successGreen,
+                                  icon: Icons.check_circle_rounded,
+                                  alignment: CrossAxisAlignment.end,
+                                  textAlign: TextAlign.end,
+                                  maxWidth: 58.0,
+                                  onTap: () => _showSessionSummaryModal(
+                                    context: context,
+                                    startTime: now,
+                                    endTime: sessionEndTime,
+                                    plannedDuration: plannedDuration,
+                                    isOpenSession: isOpenSession,
+                                    gamingMinutes: totalGamingMinutes,
+                                    prayerCount:
+                                        upcomingPrayersInSession.length,
+                                    is24Hour: is24Hour,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else if (isFirst) {
+                      // First play window leading up to first prayer
+                      return Expanded(
+                        flex: flex,
+                        child: SizedBox(
+                          height: 64,
+                          child: Stack(
+                            alignment: Alignment.topCenter,
+                            clipBehavior: Clip.none,
+                            children: [
+                              Positioned(
+                                left: 11.0,
+                                right: 0,
+                                top: 10.0,
+                                child: Container(
+                                  height: 2.0,
+                                  color: AppColors.primaryCyan
+                                      .withValues(alpha: 0.45),
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 28, right: 6),
+                                    child: _buildTimelineBadge(
+                                      color: AppColors.primaryCyan,
+                                      durationMinutes: seg.duration,
+                                      customLabel:
+                                          context.tr('timeline_resume'),
+                                      onTap: () =>
+                                          _showWindowInspectionModal(
+                                        context: context,
+                                        title:
+                                            '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
+                                        durationMinutes: seg.duration,
+                                        startTime: seg.startTime,
+                                        endTime: seg.endTime,
+                                        status: GamingStatus.safe,
+                                        userGames: userGames,
+                                        is24Hour: is24Hour,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: 0,
+                                top: 0,
+                                child: _buildMilestoneNode(
+                                  label: context.tr('timeline_now'),
+                                  time: timeFormat.format(seg.startTime),
+                                  color: AppColors.primaryCyan,
+                                  icon: Icons.sports_esports_rounded,
+                                  alignment: CrossAxisAlignment.start,
+                                  textAlign: TextAlign.start,
+                                  maxWidth: 54.0,
+                                  onTap: () => _showSessionSummaryModal(
+                                    context: context,
+                                    startTime: now,
+                                    endTime: sessionEndTime,
+                                    plannedDuration: plannedDuration,
+                                    isOpenSession: isOpenSession,
+                                    gamingMinutes: totalGamingMinutes,
+                                    prayerCount:
+                                        upcomingPrayersInSession.length,
+                                    is24Hour: is24Hour,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else if (isLast) {
+                      // Final play window ending at session end
+                      return Expanded(
+                        flex: flex,
+                        child: SizedBox(
+                          height: 64,
+                          child: Stack(
+                            alignment: Alignment.topCenter,
+                            clipBehavior: Clip.none,
+                            children: [
+                              Positioned(
+                                left: 0,
+                                right: 11.0,
+                                top: 10.0,
+                                child: Container(
+                                  height: 2.0,
+                                  color: AppColors.primaryCyan
+                                      .withValues(alpha: 0.45),
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 6, right: 28),
+                                    child: _buildTimelineBadge(
+                                      color: AppColors.primaryCyan,
+                                      durationMinutes: seg.duration,
+                                      customLabel:
+                                          context.tr('timeline_resume'),
+                                      onTap: () =>
+                                          _showWindowInspectionModal(
+                                        context: context,
+                                        title:
+                                            '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
+                                        durationMinutes: seg.duration,
+                                        startTime: seg.startTime,
+                                        endTime: seg.endTime,
+                                        status: GamingStatus.safe,
+                                        userGames: userGames,
+                                        is24Hour: is24Hour,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: _buildMilestoneNode(
+                                  label: context.tr('timeline_session_end'),
+                                  time: timeFormat.format(seg.endTime),
+                                  color: AppColors.primaryCyan,
+                                  icon: Icons.sports_esports_rounded,
+                                  alignment: CrossAxisAlignment.end,
+                                  textAlign: TextAlign.end,
+                                  maxWidth: 58.0,
+                                  onTap: () => _showSessionSummaryModal(
+                                    context: context,
+                                    startTime: now,
+                                    endTime: sessionEndTime,
+                                    plannedDuration: plannedDuration,
+                                    isOpenSession: isOpenSession,
+                                    gamingMinutes: totalGamingMinutes,
+                                    prayerCount:
+                                        upcomingPrayersInSession.length,
+                                    is24Hour: is24Hour,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else {
+                      // Intermediate play window
+                      return Expanded(
+                        flex: flex,
+                        child: SizedBox(
+                          height: 64,
+                          child: Stack(
+                            alignment: Alignment.topCenter,
+                            clipBehavior: Clip.none,
+                            children: [
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                top: 10.0,
+                                child: Container(
+                                  height: 2.0,
+                                  color: AppColors.primaryCyan
+                                      .withValues(alpha: 0.45),
+                                ),
+                              ),
+                              Positioned.fill(
+                                child: Center(
+                                  child: _buildTimelineBadge(
+                                    color: AppColors.primaryCyan,
+                                    durationMinutes: seg.duration,
+                                    customLabel:
+                                        context.tr('timeline_resume'),
+                                    onTap: () =>
+                                        _showWindowInspectionModal(
+                                      context: context,
+                                      title:
+                                          '${timeFormat.format(seg.startTime)} ➔ ${timeFormat.format(seg.endTime)} Gaming Window',
+                                      durationMinutes: seg.duration,
+                                      startTime: seg.startTime,
+                                      endTime: seg.endTime,
+                                      status: GamingStatus.safe,
+                                      userGames: userGames,
+                                      is24Hour: is24Hour,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                }).toList(),
               );
             },
           ),
@@ -1304,13 +1441,16 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
             height: 22,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.16),
+              color: Color.alphaBlend(
+                color.withValues(alpha: 0.18),
+                Theme.of(context).colorScheme.surface,
+              ),
               shape: BoxShape.circle,
-              border: Border.all(color: color, width: 1.2),
+              border: Border.all(color: color, width: 1.3),
               boxShadow: [
                 BoxShadow(
                   color: color.withValues(alpha: 0.22),
-                  blurRadius: 3,
+                  blurRadius: 3.5,
                   offset: const Offset(0, 1),
                 ),
               ],
@@ -1376,106 +1516,88 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
     return nodeContent;
   }
 
-  Widget _buildTimelineConnector({
+  Widget _buildTimelineBadge({
     required Color color,
     int? durationMinutes,
     String? customLabel,
     VoidCallback? onTap,
   }) {
-    final connectorContent = Padding(
-      padding: const EdgeInsets.only(top: 10.0),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final w = constraints.maxWidth;
-          Widget? badge;
+    if (durationMinutes == null || durationMinutes <= 0) {
+      return const SizedBox.shrink();
+    }
 
-          if (durationMinutes != null && durationMinutes > 0 && w >= 18) {
-            final formatted = TimeUtils.formatMinutes(durationMinutes);
-            String text;
-            if (w >= 75) {
-              text = customLabel != null
-                  ? '$formatted • $customLabel'
-                  : formatted;
-            } else {
-              text = formatted;
-            }
+    final badgeContent = LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        if (w < 18) return const SizedBox.shrink();
 
-            badge = Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
-                  color: color.withValues(alpha: 0.5),
-                  width: 0.8,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 3,
-                    offset: const Offset(0, 1),
+        final formatted = TimeUtils.formatMinutes(durationMinutes);
+        String text;
+        if (w >= 75) {
+          text = customLabel != null ? '$formatted • $customLabel' : formatted;
+        } else {
+          text = formatted;
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: color.withValues(alpha: 0.5),
+              width: 0.8,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 3,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: (w - 4).clamp(10.0, 9999.0),
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (w >= 44) ...[
+                    Icon(
+                      Icons.sports_esports_rounded,
+                      size: 9,
+                      color: color,
+                    ),
+                    const SizedBox(width: 2.5),
+                  ],
+                  Text(
+                    text,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 7.5,
+                      fontWeight: FontWeight.w800,
+                      color: color,
+                    ),
                   ),
                 ],
               ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: (w - 4).clamp(10.0, 9999.0),
-                ),
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (w >= 44) ...[
-                        Icon(
-                          Icons.sports_esports_rounded,
-                          size: 9,
-                          color: color,
-                        ),
-                        const SizedBox(width: 2.5),
-                      ],
-                      Text(
-                        text,
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: 7.5,
-                          fontWeight: FontWeight.w800,
-                          color: color,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }
-
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                height: 2.0,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(1),
-                ),
-              ),
-              if (badge != null) badge,
-            ],
-          );
-        },
-      ),
+            ),
+          ),
+        );
+      },
     );
 
     if (onTap != null) {
       return GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: connectorContent,
+        child: badgeContent,
       );
     }
-    return connectorContent;
+    return badgeContent;
   }
 
   void _showWindowInspectionModal({
