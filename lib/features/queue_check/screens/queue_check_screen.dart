@@ -1053,9 +1053,29 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
           ),
           const SizedBox(height: 14),
 
-          // 2. Synchronized Proportional Multi-Milestone Flow (100% Exact Alignment with Visualizer Bar Above)
+          // 2. Synchronized Proportional Multi-Milestone Flow (Adaptive Density & Responsive Typography)
           Builder(
             builder: (context) {
+              final prayerCount = sessionSegments
+                  .where((s) => s.type == 'prayer')
+                  .length;
+              final isCrowded = prayerCount >= 3;
+              final isMedium = prayerCount == 2;
+
+              final double circleSize =
+                  isCrowded ? 18.0 : (isMedium ? 19.5 : 21.0);
+              final double iconSize =
+                  isCrowded ? 8.5 : (isMedium ? 9.2 : 10.0);
+              final double timeFontSize =
+                  isCrowded ? 8.0 : (isMedium ? 8.5 : 9.0);
+              final double labelFontSize =
+                  isCrowded ? 7.0 : (isMedium ? 7.5 : 8.0);
+              final double sublabelFontSize =
+                  isCrowded ? 6.0 : (isMedium ? 6.5 : 7.0);
+              final double nodeMaxWidth = isCrowded ? 56.0 : 64.0;
+              final double lineTop = (circleSize / 2.0) - 1.0;
+              final double circleCenterOffset = circleSize / 2.0;
+
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: sessionSegments.asMap().entries.map((entry) {
@@ -1083,31 +1103,38 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                             Positioned(
                               left: 0,
                               right: 0,
-                              top: 10.0,
+                              top: lineTop,
                               child: Container(
                                 height: 2.0,
                                 color: AppColors.primaryCyan
                                     .withValues(alpha: 0.45),
                               ),
                             ),
-                            Align(
-                              alignment: Alignment.topCenter,
-                              child: _buildMilestoneNode(
-                                label: '$prayerNameTranslated Break',
-                                time: timeFormat.format(seg.startTime),
-                                sublabel: '${seg.duration}m break',
-                                color: AppColors.warningAmber,
-                                icon: Icons.mosque_rounded,
-                                alignment: CrossAxisAlignment.center,
-                                textAlign: TextAlign.center,
-                                maxWidth: 68.0,
-                                onTap: () => _showPrayerInfoModal(
-                                  context: context,
-                                  ref: ref,
-                                  name: seg.prayerName ?? 'Prayer',
-                                  time: seg.startTime,
-                                  breakMinutes: seg.duration,
-                                  is24Hour: is24Hour,
+                            Center(
+                              child: SizedBox(
+                                width: nodeMaxWidth,
+                                child: _buildMilestoneNode(
+                                  label: '$prayerNameTranslated Break',
+                                  time: timeFormat.format(seg.startTime),
+                                  sublabel: '${seg.duration}m break',
+                                  color: AppColors.warningAmber,
+                                  icon: Icons.mosque_rounded,
+                                  alignment: CrossAxisAlignment.center,
+                                  textAlign: TextAlign.center,
+                                  maxWidth: nodeMaxWidth,
+                                  circleSize: circleSize,
+                                  iconSize: iconSize,
+                                  timeFontSize: timeFontSize,
+                                  labelFontSize: labelFontSize,
+                                  sublabelFontSize: sublabelFontSize,
+                                  onTap: () => _showPrayerInfoModal(
+                                    context: context,
+                                    ref: ref,
+                                    name: seg.prayerName ?? 'Prayer',
+                                    time: seg.startTime,
+                                    breakMinutes: seg.duration,
+                                    is24Hour: is24Hour,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1128,9 +1155,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                             clipBehavior: Clip.none,
                             children: [
                               Positioned(
-                                left: 11.0,
-                                right: 11.0,
-                                top: 10.0,
+                                left: circleCenterOffset,
+                                right: circleCenterOffset,
+                                top: lineTop,
                                 child: Container(
                                   height: 2.0,
                                   color: AppColors.successGreen
@@ -1138,13 +1165,14 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                 ),
                               ),
                               Positioned(
-                                left: 24.0,
-                                right: 24.0,
-                                top: 1.0,
+                                left: circleSize + 4.0,
+                                right: circleSize + 4.0,
+                                top: lineTop - 7.5,
                                 child: Center(
                                   child: _buildTimelineBadge(
                                     color: AppColors.successGreen,
                                     durationMinutes: seg.duration,
+                                    isCrowded: isCrowded,
                                     customLabel:
                                         context.tr('timeline_resume'),
                                     onTap: () =>
@@ -1165,6 +1193,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                               Positioned(
                                 left: 0,
                                 top: 0,
+                                width: nodeMaxWidth,
                                 child: _buildMilestoneNode(
                                   label: context.tr('timeline_now'),
                                   time: timeFormat.format(seg.startTime),
@@ -1172,7 +1201,12 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                   icon: Icons.sports_esports_rounded,
                                   alignment: CrossAxisAlignment.start,
                                   textAlign: TextAlign.start,
-                                  maxWidth: 54.0,
+                                  maxWidth: nodeMaxWidth,
+                                  circleSize: circleSize,
+                                  iconSize: iconSize,
+                                  timeFontSize: timeFontSize,
+                                  labelFontSize: labelFontSize,
+                                  sublabelFontSize: sublabelFontSize,
                                   onTap: () => _showSessionSummaryModal(
                                     context: context,
                                     startTime: now,
@@ -1189,6 +1223,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                               Positioned(
                                 right: 0,
                                 top: 0,
+                                width: nodeMaxWidth,
                                 child: _buildMilestoneNode(
                                   label: context.tr('timeline_session_end'),
                                   time: timeFormat.format(seg.endTime),
@@ -1196,7 +1231,12 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                   icon: Icons.check_circle_rounded,
                                   alignment: CrossAxisAlignment.end,
                                   textAlign: TextAlign.end,
-                                  maxWidth: 58.0,
+                                  maxWidth: nodeMaxWidth,
+                                  circleSize: circleSize,
+                                  iconSize: iconSize,
+                                  timeFontSize: timeFontSize,
+                                  labelFontSize: labelFontSize,
+                                  sublabelFontSize: sublabelFontSize,
                                   onTap: () => _showSessionSummaryModal(
                                     context: context,
                                     startTime: now,
@@ -1225,9 +1265,9 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                             clipBehavior: Clip.none,
                             children: [
                               Positioned(
-                                left: 11.0,
+                                left: circleCenterOffset,
                                 right: 0,
-                                top: 10.0,
+                                top: lineTop,
                                 child: Container(
                                   height: 2.0,
                                   color: AppColors.primaryCyan
@@ -1235,13 +1275,14 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                 ),
                               ),
                               Positioned(
-                                left: 24.0,
+                                left: circleSize + 2.0,
                                 right: 0,
-                                top: 1.0,
+                                top: lineTop - 7.5,
                                 child: Center(
                                   child: _buildTimelineBadge(
                                     color: AppColors.primaryCyan,
                                     durationMinutes: seg.duration,
+                                    isCrowded: isCrowded,
                                     customLabel:
                                         context.tr('timeline_resume'),
                                     onTap: () =>
@@ -1262,6 +1303,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                               Positioned(
                                 left: 0,
                                 top: 0,
+                                width: nodeMaxWidth,
                                 child: _buildMilestoneNode(
                                   label: context.tr('timeline_now'),
                                   time: timeFormat.format(seg.startTime),
@@ -1269,7 +1311,12 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                   icon: Icons.sports_esports_rounded,
                                   alignment: CrossAxisAlignment.start,
                                   textAlign: TextAlign.start,
-                                  maxWidth: 54.0,
+                                  maxWidth: nodeMaxWidth,
+                                  circleSize: circleSize,
+                                  iconSize: iconSize,
+                                  timeFontSize: timeFontSize,
+                                  labelFontSize: labelFontSize,
+                                  sublabelFontSize: sublabelFontSize,
                                   onTap: () => _showSessionSummaryModal(
                                     context: context,
                                     startTime: now,
@@ -1299,8 +1346,8 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                             children: [
                               Positioned(
                                 left: 0,
-                                right: 11.0,
-                                top: 10.0,
+                                right: circleCenterOffset,
+                                top: lineTop,
                                 child: Container(
                                   height: 2.0,
                                   color: AppColors.primaryCyan
@@ -1309,12 +1356,13 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                               ),
                               Positioned(
                                 left: 0,
-                                right: 24.0,
-                                top: 1.0,
+                                right: circleSize + 2.0,
+                                top: lineTop - 7.5,
                                 child: Center(
                                   child: _buildTimelineBadge(
                                     color: AppColors.primaryCyan,
                                     durationMinutes: seg.duration,
+                                    isCrowded: isCrowded,
                                     customLabel:
                                         context.tr('timeline_resume'),
                                     onTap: () =>
@@ -1335,6 +1383,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                               Positioned(
                                 right: 0,
                                 top: 0,
+                                width: nodeMaxWidth,
                                 child: _buildMilestoneNode(
                                   label: context.tr('timeline_session_end'),
                                   time: timeFormat.format(seg.endTime),
@@ -1342,7 +1391,12 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                   icon: Icons.sports_esports_rounded,
                                   alignment: CrossAxisAlignment.end,
                                   textAlign: TextAlign.end,
-                                  maxWidth: 58.0,
+                                  maxWidth: nodeMaxWidth,
+                                  circleSize: circleSize,
+                                  iconSize: iconSize,
+                                  timeFontSize: timeFontSize,
+                                  labelFontSize: labelFontSize,
+                                  sublabelFontSize: sublabelFontSize,
                                   onTap: () => _showSessionSummaryModal(
                                     context: context,
                                     startTime: now,
@@ -1373,7 +1427,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                               Positioned(
                                 left: 0,
                                 right: 0,
-                                top: 10.0,
+                                top: lineTop,
                                 child: Container(
                                   height: 2.0,
                                   color: AppColors.primaryCyan
@@ -1383,11 +1437,12 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                               Positioned(
                                 left: 0,
                                 right: 0,
-                                top: 1.0,
+                                top: lineTop - 7.5,
                                 child: Center(
                                   child: _buildTimelineBadge(
                                     color: AppColors.primaryCyan,
                                     durationMinutes: seg.duration,
+                                    isCrowded: isCrowded,
                                     customLabel:
                                         context.tr('timeline_resume'),
                                     onTap: () =>
@@ -1430,6 +1485,11 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
     CrossAxisAlignment alignment = CrossAxisAlignment.center,
     TextAlign textAlign = TextAlign.center,
     double? maxWidth,
+    double circleSize = 20.0,
+    double iconSize = 9.5,
+    double timeFontSize = 9.0,
+    double labelFontSize = 7.5,
+    double sublabelFontSize = 6.5,
   }) {
     final nodeContent = ConstrainedBox(
       constraints: BoxConstraints(maxWidth: maxWidth ?? 64.0),
@@ -1438,8 +1498,8 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
         crossAxisAlignment: alignment,
         children: [
           Container(
-            width: 22,
-            height: 22,
+            width: circleSize,
+            height: circleSize,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: Color.alphaBlend(
@@ -1447,22 +1507,22 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                 Theme.of(context).colorScheme.surface,
               ),
               shape: BoxShape.circle,
-              border: Border.all(color: color, width: 1.3),
+              border: Border.all(color: color, width: 1.1),
               boxShadow: [
                 BoxShadow(
                   color: color.withValues(alpha: 0.22),
-                  blurRadius: 3.5,
+                  blurRadius: 3.0,
                   offset: const Offset(0, 1),
                 ),
               ],
             ),
             child: Icon(
               icon,
-              size: 11,
+              size: iconSize,
               color: color,
             ),
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 2.5),
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
@@ -1470,7 +1530,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
               maxLines: 1,
               textAlign: textAlign,
               style: TextStyle(
-                fontSize: 9.5,
+                fontSize: timeFontSize,
                 fontWeight: FontWeight.w800,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
@@ -1482,8 +1542,8 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
               label,
               maxLines: 1,
               textAlign: textAlign,
-              style: const TextStyle(
-                fontSize: 8.0,
+              style: TextStyle(
+                fontSize: labelFontSize,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textMuted,
               ),
@@ -1497,7 +1557,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                 maxLines: 1,
                 textAlign: textAlign,
                 style: TextStyle(
-                  fontSize: 7.0,
+                  fontSize: sublabelFontSize,
                   fontWeight: FontWeight.w700,
                   color: color.withValues(alpha: 0.9),
                 ),
@@ -1521,6 +1581,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
     required Color color,
     int? durationMinutes,
     String? customLabel,
+    bool isCrowded = false,
     VoidCallback? onTap,
   }) {
     if (durationMinutes == null || durationMinutes <= 0) {
@@ -1530,18 +1591,20 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
     final badgeContent = LayoutBuilder(
       builder: (context, constraints) {
         final w = constraints.maxWidth;
-        if (w < 18) return const SizedBox.shrink();
+        if (w < 14) return const SizedBox.shrink();
 
         final formatted = TimeUtils.formatMinutes(durationMinutes);
         String text;
-        if (w >= 75) {
+        if (w >= 75 && !isCrowded) {
           text = customLabel != null ? '$formatted • $customLabel' : formatted;
         } else {
           text = formatted;
         }
 
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+          padding: EdgeInsets.symmetric(
+              horizontal: isCrowded ? 4.0 : 5.0,
+              vertical: isCrowded ? 1.0 : 1.5),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(6),
@@ -1559,26 +1622,26 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: (w - 4).clamp(10.0, 9999.0),
+              maxWidth: (w - 2).clamp(8.0, 9999.0),
             ),
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (w >= 44) ...[
+                  if (w >= 48 && !isCrowded) ...[
                     Icon(
                       Icons.sports_esports_rounded,
-                      size: 9,
+                      size: 8.5,
                       color: color,
                     ),
-                    const SizedBox(width: 2.5),
+                    const SizedBox(width: 2.0),
                   ],
                   Text(
                     text,
                     maxLines: 1,
                     style: TextStyle(
-                      fontSize: 7.5,
+                      fontSize: isCrowded ? 7.0 : 7.5,
                       fontWeight: FontWeight.w800,
                       color: color,
                     ),
