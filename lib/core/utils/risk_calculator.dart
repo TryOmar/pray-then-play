@@ -1,6 +1,8 @@
+import 'dart:math';
 import '../constants/app_constants.dart';
 import '../models/game_profile.dart';
 import '../models/gaming_window.dart';
+import 'time_utils.dart';
 
 class RiskCalculator {
   /// Calculate the general gaming status based on minutes remaining until prayer and safety buffer
@@ -41,12 +43,16 @@ class RiskCalculator {
       return RiskLevel.low;
     }
 
-    // If user specified a target session duration
+    // If user specified a target session duration, the activity must fit BOTH within the planned session AND safe prayer window
     if (desiredSessionMinutes != null && desiredSessionMinutes > 0) {
-      if (desiredSessionMinutes <= safeAvailableTime) {
+      final effectiveSafeWindow = min(safeAvailableTime, desiredSessionMinutes);
+      final effectiveRawWindow = min(minutesUntilPrayer, desiredSessionMinutes);
+
+      if (activity.maxMinutes <= effectiveSafeWindow) {
         return RiskLevel.low;
       }
-      if (desiredSessionMinutes <= minutesUntilPrayer) {
+      if (activity.typicalDuration <= effectiveRawWindow &&
+          activity.minMinutes <= effectiveSafeWindow) {
         return RiskLevel.medium;
       }
       return RiskLevel.high;
@@ -91,11 +97,14 @@ class RiskCalculator {
     List<String> alternatives = [];
     int? tightMargin;
 
+    final formattedRemaining = TimeUtils.formatMinutes(minutesUntilPrayer);
+    final formattedSafe = TimeUtils.formatMinutes(safeAvailableMinutes);
+
     if (activity.canPause && !activity.requiresCompletion) {
       if (minutesUntilPrayer <= effectiveBuffer) {
         verdictTitle = '⚠ PRAYER IMMINENT (PAUSEABLE)';
         message =
-            '$nextPrayerName is in only $minutesUntilPrayer min (inside your ${effectiveBuffer}m safety buffer).';
+            '$nextPrayerName is in only $formattedRemaining (inside your ${effectiveBuffer}m safety buffer).';
         recommendation =
             'While ${game.name} · ${activity.name} can be left anytime without penalty, we recommend preparing for Salah instead of starting a new match.';
       } else {
@@ -103,27 +112,28 @@ class RiskCalculator {
         message =
             'You can pause, save, or leave ${game.name} · ${activity.name} anytime without penalties.';
         recommendation =
-            '$nextPrayerName is in $minutesUntilPrayer min ($safeAvailableMinutes min safe window). Enjoy your session and pause when prayer arrives.';
+            '$nextPrayerName is in $formattedRemaining ($formattedSafe safe window). Enjoy your session and pause when prayer arrives.';
       }
     } else {
       if (desiredSessionMinutes != null && desiredSessionMinutes > 0) {
         tightMargin = (minutesUntilPrayer - desiredSessionMinutes).clamp(0, 999);
+        final formattedDesired = TimeUtils.formatMinutes(desiredSessionMinutes);
 
         switch (risk) {
           case RiskLevel.low:
             verdictTitle = '✓ SAFE TO START';
             message =
-                'Your desired session ($desiredSessionMinutes min) fits comfortably inside the safe window ($safeAvailableMinutes min before ${effectiveBuffer}m buffer).';
+                'Your desired session ($formattedDesired) fits comfortably inside the safe window ($formattedSafe before ${effectiveBuffer}m buffer).';
             recommendation =
-                '$nextPrayerName is in $minutesUntilPrayer min. You have sufficient time to finish with zero rush.';
+                '$nextPrayerName is in $formattedRemaining. You have sufficient time to finish with zero rush.';
             break;
 
           case RiskLevel.medium:
             verdictTitle = '⚠ TIGHT WINDOW — USE CAUTION';
             message =
-                'A $desiredSessionMinutes min session will finish before $nextPrayerName ($minutesUntilPrayer min), but cuts into your ${effectiveBuffer}m safety buffer.';
+                'A $formattedDesired session will finish before $nextPrayerName ($formattedRemaining), but cuts into your ${effectiveBuffer}m safety buffer.';
             recommendation =
-                'You have roughly $tightMargin min margin. If a match runs long, you may need to rush to prayer.';
+                'You have roughly ${TimeUtils.formatMinutes(tightMargin)} margin. If a match runs long, you may need to rush to prayer.';
             alternatives = _findAlternatives(
               minutesUntilPrayer,
               userGames,
@@ -136,7 +146,7 @@ class RiskCalculator {
           case RiskLevel.high:
             verdictTitle = '✕ NOT RECOMMENDED (PRAY FIRST)';
             message =
-                '$nextPrayerName is in $minutesUntilPrayer min. Your requested session ($desiredSessionMinutes min) is too long for the safe window ($safeAvailableMinutes min).';
+                '$nextPrayerName is in $formattedRemaining. Your requested session ($formattedDesired) is too long for the safe window ($formattedSafe).';
             recommendation =
                 'Pray $nextPrayerName first, then queue with total focus and peace of mind.';
             alternatives = _findAlternatives(
@@ -150,6 +160,9 @@ class RiskCalculator {
         }
       } else {
         tightMargin = (minutesUntilPrayer - activity.typicalDuration).clamp(0, 999);
+        final formattedTypical = TimeUtils.formatMinutes(activity.typicalDuration);
+        final formattedMin = TimeUtils.formatMinutes(activity.minMinutes);
+        final formattedMax = TimeUtils.formatMinutes(activity.maxMinutes);
 
         switch (risk) {
           case RiskLevel.low:
@@ -157,7 +170,7 @@ class RiskCalculator {
                 ? '✓ SAFE FOR A SHORT SESSION'
                 : '✓ SAFE TO START';
             message =
-                'Typical match: ${activity.minMinutes}–${activity.maxMinutes} min. $nextPrayerName begins in $minutesUntilPrayer min.';
+                'Typical match: $formattedMin–$formattedMax. $nextPrayerName begins in $formattedRemaining.';
             recommendation =
                 'You have a comfortable window with a ${effectiveBuffer}m safety buffer preserved.';
             break;
@@ -165,9 +178,9 @@ class RiskCalculator {
           case RiskLevel.medium:
             verdictTitle = '⚠ TIGHT WINDOW — USE CAUTION';
             message =
-                'A normal match (~${activity.typicalDuration} min) fits, but overtime or delay (${activity.maxMinutes} min) could overlap with $nextPrayerName in $minutesUntilPrayer min.';
+                'A normal match (~$formattedTypical) fits, but overtime or delay ($formattedMax) could overlap with $nextPrayerName in $formattedRemaining.';
             recommendation =
-                'You have roughly $tightMargin min margin. Consider a shorter mode or pauseable activity if you want zero risk.';
+                'You have roughly ${TimeUtils.formatMinutes(tightMargin)} margin. Consider a shorter mode or pauseable activity if you want zero risk.';
             alternatives = _findAlternatives(
               minutesUntilPrayer,
               userGames,
@@ -180,7 +193,7 @@ class RiskCalculator {
           case RiskLevel.high:
             verdictTitle = '✕ NOT RECOMMENDED (PRAY FIRST)';
             message =
-                '$nextPrayerName is in $minutesUntilPrayer min. A typical ${game.name} · ${activity.name} session (${activity.typicalDuration} min) is too long.';
+                '$nextPrayerName is in $formattedRemaining. A typical ${game.name} · ${activity.name} session ($formattedTypical) is too long.';
             recommendation =
                 'Pray $nextPrayerName first, then queue with complete peace of mind.';
             alternatives = _findAlternatives(
@@ -235,7 +248,7 @@ class RiskCalculator {
             alternatives.add('${game.name} · ${activity.name} (Pauseable)');
           } else {
             alternatives.add(
-                '${game.name} · ${activity.name} (~${activity.typicalDuration} min)');
+                '${game.name} · ${activity.name} (~${TimeUtils.formatMinutes(activity.typicalDuration)})');
           }
         }
       }

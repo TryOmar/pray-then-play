@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
 import '../constants/game_data.dart';
 import '../models/game_profile.dart';
-import '../models/game_session_record.dart';
 import '../models/gaming_window.dart';
 import '../services/storage_service.dart';
 import 'prayer_provider.dart';
@@ -137,29 +136,6 @@ final activeSelectedGamesProvider = Provider<List<GameProfile>>((ref) {
   return all.where((g) => g.isSelected && g.enabledActivities.isNotEmpty).toList();
 });
 
-// Gaming Session History Provider
-final gameSessionHistoryProvider =
-    StateNotifierProvider<GameSessionHistoryNotifier, List<GameSessionRecord>>(
-        (ref) {
-  return GameSessionHistoryNotifier();
-});
-
-class GameSessionHistoryNotifier
-    extends StateNotifier<List<GameSessionRecord>> {
-  GameSessionHistoryNotifier() : super(StorageService.getGameSessionHistory());
-
-  Future<void> logSession(GameSessionRecord record) async {
-    await StorageService.saveGameSession(record);
-    state = StorageService.getGameSessionHistory();
-  }
-}
-
-// Activity Session Statistics Family Provider
-final activityStatsProvider = Provider.family<ActivitySessionStats, ({String gameId, String activityId})>((ref, args) {
-  ref.watch(gameSessionHistoryProvider);
-  return StorageService.getActivitySessionStats(args.gameId, args.activityId);
-});
-
 // Gaming Windows for today
 final gamingWindowsProvider = Provider<List<GamingWindow>>((ref) {
   final prayerTimes = ref.watch(dailyPrayerTimesProvider);
@@ -221,24 +197,3 @@ final gamingWindowsProvider = Provider<List<GamingWindow>>((ref) {
 
   return windows;
 });
-
-// In-match tracking
-final inMatchProvider = StateNotifierProvider<InMatchNotifier, bool>((ref) {
-  return InMatchNotifier();
-});
-
-class InMatchNotifier extends StateNotifier<bool> {
-  InMatchNotifier() : super(StorageService.isInMatch);
-
-  void startMatch() {
-    state = true;
-    StorageService.setInMatch(true);
-    StorageService.setMatchStartTime(DateTime.now());
-  }
-
-  void endMatch() {
-    state = false;
-    StorageService.setInMatch(false);
-    StorageService.setMatchStartTime(null);
-  }
-}

@@ -6,7 +6,6 @@ import '../constants/game_data.dart';
 import '../constants/prayer_constants.dart';
 import '../localization/app_language.dart';
 import '../models/game_profile.dart';
-import '../models/game_session_record.dart';
 import '../models/prayer_record.dart';
 
 class StorageService {
@@ -145,11 +144,17 @@ class StorageService {
   static List<GameProfile> getUserGames() {
     final jsonStr = _prefs.getString(AppConstants.keyConfiguredGames);
     if (jsonStr == null || jsonStr.isEmpty) {
-      // If user hasn't selected yet, default to top 3 popular games
+      // By default, initial games in library start toggled OFF
       return [
-        GameData.defaultCatalog.firstWhere((g) => g.id == 'valorant'),
-        GameData.defaultCatalog.firstWhere((g) => g.id == 'league_of_legends'),
-        GameData.defaultCatalog.firstWhere((g) => g.id == 'minecraft'),
+        GameData.defaultCatalog
+            .firstWhere((g) => g.id == 'valorant')
+            .copyWith(isSelected: false),
+        GameData.defaultCatalog
+            .firstWhere((g) => g.id == 'league_of_legends')
+            .copyWith(isSelected: false),
+        GameData.defaultCatalog
+            .firstWhere((g) => g.id == 'minecraft')
+            .copyWith(isSelected: false),
       ];
     }
     try {
@@ -190,9 +195,15 @@ class StorageService {
       }).toList();
     } catch (_) {
       return [
-        GameData.defaultCatalog.firstWhere((g) => g.id == 'valorant'),
-        GameData.defaultCatalog.firstWhere((g) => g.id == 'league_of_legends'),
-        GameData.defaultCatalog.firstWhere((g) => g.id == 'minecraft'),
+        GameData.defaultCatalog
+            .firstWhere((g) => g.id == 'valorant')
+            .copyWith(isSelected: false),
+        GameData.defaultCatalog
+            .firstWhere((g) => g.id == 'league_of_legends')
+            .copyWith(isSelected: false),
+        GameData.defaultCatalog
+            .firstWhere((g) => g.id == 'minecraft')
+            .copyWith(isSelected: false),
       ];
     }
   }
@@ -200,55 +211,6 @@ class StorageService {
   static Future<void> setUserGames(List<GameProfile> games) async {
     final jsonStr = jsonEncode(games.map((g) => g.toJson()).toList());
     await _prefs.setString(AppConstants.keyConfiguredGames, jsonStr);
-  }
-
-  // Gaming Session History & Personal Statistics
-  static List<GameSessionRecord> getGameSessionHistory() {
-    final jsonStr = _prefs.getString(AppConstants.keyGameSessions);
-    if (jsonStr == null || jsonStr.isEmpty) return [];
-    try {
-      final list = jsonDecode(jsonStr) as List;
-      return list
-          .map((e) => GameSessionRecord.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  static Future<void> saveGameSession(GameSessionRecord record) async {
-    final history = getGameSessionHistory();
-    history.insert(0, record);
-    // Keep last 100 sessions
-    if (history.length > 100) {
-      history.removeRange(100, history.length);
-    }
-    final jsonStr = jsonEncode(history.map((s) => s.toJson()).toList());
-    await _prefs.setString(AppConstants.keyGameSessions, jsonStr);
-  }
-
-  static ActivitySessionStats getActivitySessionStats(
-      String gameId, String activityId) {
-    final history = getGameSessionHistory().where((s) =>
-        s.gameId == gameId &&
-        (s.activityId == activityId || s.activityName == activityId));
-
-    if (history.isEmpty) {
-      return ActivitySessionStats.empty;
-    }
-
-    final durations = history.map((s) => s.durationMinutes).toList();
-    final count = durations.length;
-    final avg = (durations.reduce((a, b) => a + b) / count).round();
-    final longest = durations.reduce((a, b) => a > b ? a : b);
-    final shortest = durations.reduce((a, b) => a < b ? a : b);
-
-    return ActivitySessionStats(
-      sessionCount: count,
-      averageDurationMinutes: avg,
-      longestDurationMinutes: longest,
-      shortestDurationMinutes: shortest,
-    );
   }
 
   // Prayer tracking (Boolean quick check)
@@ -294,7 +256,11 @@ class StorageService {
     );
 
     final updatedDetails = Map<String, PrayerRecordItem>.from(record.detailedRecords ?? {});
-    updatedDetails[prayerName] = item;
+    if (status == PrayerStatus.notRecorded) {
+      updatedDetails.remove(prayerName);
+    } else {
+      updatedDetails[prayerName] = item;
+    }
 
     final updatedRecord = record.copyWith(
       prayers: Map.from(record.prayers)..[prayerName] = status,
@@ -492,28 +458,6 @@ class StorageService {
     final set = getUnlockedAchievements();
     set.add(id);
     await _prefs.setStringList('unlocked_achievements', set.toList());
-  }
-
-  // In-match state
-  static bool get isInMatch =>
-      _prefs.getBool(AppConstants.keyInMatch) ?? false;
-
-  static Future<void> setInMatch(bool value) =>
-      _prefs.setBool(AppConstants.keyInMatch, value);
-
-  static DateTime? get matchStartTime {
-    final ms = _prefs.getInt(AppConstants.keyMatchStartTime);
-    if (ms == null) return null;
-    return DateTime.fromMillisecondsSinceEpoch(ms);
-  }
-
-  static Future<void> setMatchStartTime(DateTime? time) async {
-    if (time == null) {
-      await _prefs.remove(AppConstants.keyMatchStartTime);
-    } else {
-      await _prefs.setInt(
-          AppConstants.keyMatchStartTime, time.millisecondsSinceEpoch);
-    }
   }
 
   // Special Modes

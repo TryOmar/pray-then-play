@@ -172,7 +172,7 @@ class GameProfile {
     required this.color,
     required this.activities,
     this.isCustom = false,
-    this.isSelected = true,
+    this.isSelected = false,
     this.notes,
   });
 
@@ -232,7 +232,7 @@ class GameProfile {
           .map((m) => GameActivity.fromJson(m as Map<String, dynamic>))
           .toList(),
       isCustom: json['isCustom'] as bool? ?? false,
-      isSelected: json['isSelected'] as bool? ?? true,
+      isSelected: json['isSelected'] as bool? ?? false,
       notes: json['notes'] as String?,
     );
   }

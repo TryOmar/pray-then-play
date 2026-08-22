@@ -37,6 +37,37 @@ void main() {
           equals(RiskLevel.high));
     });
 
+    test('calculateRisk bounds activities by desired session duration', () {
+      const longMode = GameActivity(
+        name: 'Ranked 5v5',
+        typicalDuration: 40,
+        minMinutes: 30,
+        maxMinutes: 50,
+        canPause: false,
+        requiresCompletion: true,
+      );
+      const shortMode = GameActivity(
+        name: 'Swiftplay',
+        typicalDuration: 15,
+        minMinutes: 10,
+        maxMinutes: 20,
+        canPause: false,
+        requiresCompletion: true,
+      );
+
+      // Even with 300 minutes until prayer, if user chooses 30 min session:
+      // - 50m max ranked is NOT low risk (exceeds 30m session)
+      // - 20m max swiftplay IS low risk (fits in 30m session)
+      expect(
+        RiskCalculator.calculateRisk(longMode, 300, desiredSessionMinutes: 30),
+        isNot(equals(RiskLevel.low)),
+      );
+      expect(
+        RiskCalculator.calculateRisk(shortMode, 300, desiredSessionMinutes: 30),
+        equals(RiskLevel.low),
+      );
+    });
+
     test('Flexible games are always low risk', () {
       const flexMode = GameActivity(
         name: 'Singleplayer Survival',
