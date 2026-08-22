@@ -32,26 +32,29 @@
   <title>Pray Then Play</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    body {
+    html, body {
       margin: 0;
       padding: 0;
+      width: 100%;
+      height: 100%;
       background-color: #0B1020;
-      color: #F8FAFC;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      width: 100vw;
       overflow: hidden;
-      user-select: none;
     }
-    .loading-wrapper {
+    #loading {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #0B1020;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 16px;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .loading-spinner {
       width: 44px;
@@ -73,10 +76,21 @@
   </style>
 </head>
 <body>
-  <div id="loading" class="loading-wrapper">
+  <div id="loading">
     <div class="loading-spinner"></div>
     <div class="loading-title">Pray Then Play</div>
   </div>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var el = document.getElementById('loading');
+      if (el) {
+        el.style.opacity = '0';
+        setTimeout(function () {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, 300);
+      }
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
