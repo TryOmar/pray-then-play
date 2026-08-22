@@ -16,10 +16,8 @@ final liveSecondTickerProvider = StreamProvider.autoDispose<DateTime>((ref) {
 final dailyPrayerTimesProvider = Provider<DailyPrayerTimes?>((ref) {
   final method = ref.watch(calculationMethodProvider);
   final asrMethod = ref.watch(asrMethodProvider);
-  final lat = StorageService.latitude;
-  final lng = StorageService.longitude;
-
-  if (lat == null || lng == null) return null;
+  final lat = StorageService.latitude ?? 21.4225;
+  final lng = StorageService.longitude ?? 39.8262;
 
   return PrayerService.calculatePrayerTimes(
     latitude: lat,
@@ -34,10 +32,8 @@ final dailyPrayerTimesProvider = Provider<DailyPrayerTimes?>((ref) {
 final nextPrayerProvider = Provider<MapEntry<String, DateTime>?>((ref) {
   final method = ref.watch(calculationMethodProvider);
   final asrMethod = ref.watch(asrMethodProvider);
-  final lat = StorageService.latitude;
-  final lng = StorageService.longitude;
-
-  if (lat == null || lng == null) return null;
+  final lat = StorageService.latitude ?? 21.4225;
+  final lng = StorageService.longitude ?? 39.8262;
 
   return PrayerService.getNextPrayer(
     latitude: lat,

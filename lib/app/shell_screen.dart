@@ -34,7 +34,9 @@ class ShellScreen extends ConsumerWidget {
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 960),
-            child: child,
+            child: SizedBox.expand(
+              child: child,
+            ),
           ),
         ),
         bottomNavigationBar: Container(
