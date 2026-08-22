@@ -31,14 +31,7 @@ class ShellScreen extends ConsumerWidget {
       data: PrayThenPlayTheme.buildTheme(activeTheme),
       child: Scaffold(
         backgroundColor: activeTheme.background,
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 960),
-            child: SizedBox.expand(
-              child: child,
-            ),
-          ),
-        ),
+        body: child,
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             color: activeTheme.surface,
