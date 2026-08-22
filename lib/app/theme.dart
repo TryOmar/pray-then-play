@@ -326,6 +326,7 @@ class PrayThenPlayTheme {
 
     return ThemeData(
       useMaterial3: true,
+      splashFactory: InkRipple.splashFactory,
       brightness: isLight ? Brightness.light : Brightness.dark,
       primaryColor: gamingTheme.primaryAccent,
       scaffoldBackgroundColor: gamingTheme.background,
