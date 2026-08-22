@@ -12,11 +12,11 @@ class ShellScreen extends ConsumerWidget {
 
   int _getCurrentIndex(BuildContext context) {
     try {
-      final location = GoRouterState.of(context).uri.toString();
+      final location = GoRouterState.of(context).matchedLocation;
       if (location == '/' || location == '/queue-check') return 0;
-      if (location == '/consistency') return 1;
-      if (location == '/games') return 2;
-      if (location == '/settings') return 3;
+      if (location.startsWith('/consistency')) return 1;
+      if (location.startsWith('/games')) return 2;
+      if (location.startsWith('/settings')) return 3;
     } catch (_) {}
     return 0;
   }

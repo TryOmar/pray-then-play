@@ -148,7 +148,6 @@ class _PrayThenPlayAppState extends ConsumerState<PrayThenPlayApp>
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
       child: MaterialApp.router(
-        key: ValueKey('app_${currentLanguage.code}_${activeTheme.name}'),
         title: 'Pray Then Play',
         debugShowCheckedModeBanner: false,
         theme: PrayThenPlayTheme.getTheme(activeTheme),
