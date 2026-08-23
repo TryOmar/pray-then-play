@@ -84,3 +84,9 @@ app.*.map.json
 
 # Widget Preview
 .widget_preview/
+
+# Tester & Email Lists (Private)
+*tester*
+*testers*
+*.csv
+*.txt
