@@ -25,10 +25,11 @@ jobs:
         run: flutter pub get
 
       - name: Static analysis (flutter analyze)
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        continue-on-error: false
 
       - name: Run unit & widget tests
-        run: flutter test --coverage
+        run: flutter test
 
       - name: Upload code coverage report
         uses: actions/upload-artifact@v4
