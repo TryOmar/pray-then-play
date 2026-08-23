@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pray_then_play/main.dart';
-import 'package:pray_then_play/app/router.dart';
 import 'package:pray_then_play/app/shell_screen.dart';
 import 'package:pray_then_play/features/queue_check/screens/queue_check_screen.dart';
 import 'package:pray_then_play/core/services/storage_service.dart';
