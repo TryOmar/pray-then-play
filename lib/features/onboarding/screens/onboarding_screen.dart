@@ -1239,11 +1239,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   // STEP 6: Gaming Theme Selection
   Widget _buildThemePage() {
-    final filteredThemes = AppGamingTheme.values.where((t) {
+    final filteredThemes = AppGamingTheme.orderedThemes.where((t) {
       if (_themeFilterIndex == 1) {
-        return !t.isLight &&
-            t != AppGamingTheme.oled &&
-            t != AppGamingTheme.tactical;
+        return !t.isLight && t != AppGamingTheme.oled;
       }
       if (_themeFilterIndex == 2) return t.isLight;
       if (_themeFilterIndex == 3) {

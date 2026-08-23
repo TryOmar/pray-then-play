@@ -244,6 +244,21 @@ enum AppGamingTheme {
   final Color buttonTextColor;
   final bool isLight;
 
+  /// Balanced alternating Dark & Light sequence for preview lists
+  static const List<AppGamingTheme> orderedThemes = [
+    AppGamingTheme.forest,    // Dark (Emerald Green)
+    AppGamingTheme.dawn,      // Light (Sunrise Coral)
+    AppGamingTheme.midnight,  // Dark (Deep Navy Obsidian)
+    AppGamingTheme.arctic,    // Light (Glacial Royal Blue)
+    AppGamingTheme.crimson,   // Dark (Gaming Ruby Red)
+    AppGamingTheme.sand,      // Light (Desert Gold Ivory)
+    AppGamingTheme.ember,     // Dark (Warm Charcoal Amber)
+    AppGamingTheme.sky,       // Light (Daylight Sky Cyan)
+    AppGamingTheme.tactical,  // Dark / Spec-Ops (Hazard Lime)
+    AppGamingTheme.lavender,  // Light (Soft Violet Mist)
+    AppGamingTheme.oled,      // Dark / Spec-Ops (Pure True Black)
+  ];
+
   ThemeTokens get tokens => ThemeTokens(this);
 }
 

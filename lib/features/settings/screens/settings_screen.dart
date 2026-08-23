@@ -669,8 +669,8 @@ class SettingsScreen extends ConsumerWidget {
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModalState) {
-          final filteredThemes = AppGamingTheme.values.where((t) {
-            if (filterIndex == 1) return !t.isLight && t != AppGamingTheme.tactical;
+          final filteredThemes = AppGamingTheme.orderedThemes.where((t) {
+            if (filterIndex == 1) return !t.isLight && t != AppGamingTheme.oled;
             if (filterIndex == 2) return t.isLight;
             if (filterIndex == 3) return t == AppGamingTheme.tactical || t == AppGamingTheme.oled;
             return true;
