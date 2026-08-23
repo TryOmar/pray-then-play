@@ -77,15 +77,23 @@ class StorageService {
 
   // Gaming Theme
   static AppGamingTheme get gamingTheme {
-    final index = _prefs.getInt(AppConstants.keyGamingTheme) ?? 0;
-    if (index >= 0 && index < AppGamingTheme.values.length) {
+    final rawString = _prefs.getString(AppConstants.keyGamingTheme);
+    if (rawString != null) {
+      for (final t in AppGamingTheme.values) {
+        if (t.name == rawString) return t;
+      }
+    }
+    final index = _prefs.getInt(AppConstants.keyGamingTheme);
+    if (index != null && index >= 0 && index < AppGamingTheme.values.length) {
       return AppGamingTheme.values[index];
     }
-    return AppGamingTheme.midnight;
+    return AppGamingTheme.forest;
   }
 
-  static Future<void> setGamingTheme(AppGamingTheme theme) =>
-      _prefs.setInt(AppConstants.keyGamingTheme, theme.index);
+  static Future<void> setGamingTheme(AppGamingTheme theme) async {
+    await _prefs.setString(AppConstants.keyGamingTheme, theme.name);
+    await _prefs.setInt(AppConstants.keyGamingTheme, theme.index);
+  }
 
   // Theme Mode (Manual, System, Sunrise/Sunset)
   static ThemeModeOption get themeMode {

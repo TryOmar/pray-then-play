@@ -45,7 +45,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ProtectionLevel _protectionLevel = ProtectionLevel.balanced;
 
   // Step 6: Gaming Theme
-  AppGamingTheme _selectedTheme = AppGamingTheme.midnight;
+  AppGamingTheme _selectedTheme = AppGamingTheme.forest;
 
   @override
   void initState() {
