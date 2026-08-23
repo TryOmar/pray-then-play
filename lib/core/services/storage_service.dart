@@ -77,27 +77,27 @@ class StorageService {
 
   // Gaming Theme
   static AppGamingTheme get gamingTheme {
-    final rawString = _prefs.getString(AppConstants.keyGamingTheme);
-    if (rawString != null) {
+    final raw = _prefs.get(AppConstants.keyGamingTheme);
+    if (raw is String) {
       for (final t in AppGamingTheme.values) {
-        if (t.name == rawString) return t;
+        if (t.name == raw) return t;
       }
-    }
-    final index = _prefs.getInt(AppConstants.keyGamingTheme);
-    if (index != null && index >= 0 && index < AppGamingTheme.values.length) {
-      return AppGamingTheme.values[index];
+    } else if (raw is int) {
+      if (raw >= 0 && raw < AppGamingTheme.values.length) {
+        return AppGamingTheme.values[raw];
+      }
     }
     return AppGamingTheme.forest;
   }
 
   static Future<void> setGamingTheme(AppGamingTheme theme) async {
     await _prefs.setString(AppConstants.keyGamingTheme, theme.name);
-    await _prefs.setInt(AppConstants.keyGamingTheme, theme.index);
   }
 
   // Theme Mode (Manual, System, Sunrise/Sunset)
   static ThemeModeOption get themeMode {
-    final index = _prefs.getInt(AppConstants.keyThemeMode) ?? 0;
+    final raw = _prefs.get(AppConstants.keyThemeMode);
+    final index = (raw is int) ? raw : 0;
     if (index >= 0 && index < ThemeModeOption.values.length) {
       return ThemeModeOption.values[index];
     }
@@ -109,8 +109,11 @@ class StorageService {
 
   // App Language
   static AppLanguage get appLanguage {
-    final code = _prefs.getString(AppConstants.keyAppLanguage);
-    return AppLanguage.fromCode(code);
+    final raw = _prefs.get(AppConstants.keyAppLanguage);
+    if (raw is String) {
+      return AppLanguage.fromCode(raw);
+    }
+    return AppLanguage.english;
   }
 
   static Future<void> setAppLanguage(AppLanguage language) =>
