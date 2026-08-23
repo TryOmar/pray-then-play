@@ -20,20 +20,40 @@ class AboutScreen extends ConsumerWidget {
 
   Future<void> _launchUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
+    bool launched = false;
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not open link: $url')),
-          );
-        }
-      }
+      launched = await launchUrl(
+        uri,
+        mode: LaunchMode.platformDefault,
+        webOnlyWindowName: '_blank',
+      );
     } catch (_) {
+      launched = false;
+    }
+
+    if (!launched) {
+      await Clipboard.setData(ClipboardData(text: url));
       if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open link: $url')),
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.copy_rounded, color: AppColors.primaryCyan, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Link copied to clipboard: $url',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     }
