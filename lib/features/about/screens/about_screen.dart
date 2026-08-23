@@ -11,12 +11,12 @@ import '../../../core/widgets/app_logo_widget.dart';
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
-  static const String discordUrl = 'https://discord.gg/praythenplay';
-  static const String githubUrl = 'https://github.com/TryOmar/pray-then-play';
-  static const String websiteUrl = 'https://tryomar.github.io/pray-then-play-website/';
-  static const String buyMeACoffeeUrl = 'https://buymeacoffee.com/praythenplay';
-  static const String githubSponsorsUrl = 'https://github.com/sponsors/TryOmar';
-  static const String privacyDocUrl = 'https://docs.google.com/document/d/1oB3hbs18U-4M1be5CMT_nYH5x0UelSYAHoMxNwf-q7Y/edit?usp=sharing';
+  static const String discordUrl = AppConstants.discordInviteUrl;
+  static const String githubUrl = AppConstants.githubRepoUrl;
+  static const String websiteUrl = AppConstants.websiteUrl;
+  static const String buyMeACoffeeUrl = AppConstants.buyMeACoffeeUrl;
+  static const String githubSponsorsUrl = AppConstants.githubSponsorsUrl;
+  static const String privacyDocUrl = AppConstants.privacyPolicyDocUrl;
 
   Future<void> _launchUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
