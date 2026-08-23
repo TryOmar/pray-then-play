@@ -28,8 +28,9 @@ class AppConstants {
   static const String discordInviteUrl = 'https://discord.gg/FKVAh24ycG';
   static const String githubRepoUrl = 'https://github.com/TryOmar/pray-then-play';
   static const String websiteUrl = 'https://tryomar.github.io/pray-then-play-website/';
-  static const String buyMeACoffeeUrl = 'https://buymeacoffee.com/praythenplay';
+  static const String buyMeACoffeeUrl = 'https://buymeacoffee.com/tryomar';
   static const String githubSponsorsUrl = 'https://github.com/sponsors/TryOmar';
+  static const String paypalDonateUrl = 'https://paypal.me/OmarAbbas905';
   static const String privacyPolicyDocUrl = 'https://docs.google.com/document/d/1oB3hbs18U-4M1be5CMT_nYH5x0UelSYAHoMxNwf-q7Y/edit?usp=sharing';
 
   // Notification channels

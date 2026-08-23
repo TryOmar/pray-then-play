@@ -16,6 +16,7 @@ class AboutScreen extends ConsumerWidget {
   static const String websiteUrl = AppConstants.websiteUrl;
   static const String buyMeACoffeeUrl = AppConstants.buyMeACoffeeUrl;
   static const String githubSponsorsUrl = AppConstants.githubSponsorsUrl;
+  static const String paypalUrl = AppConstants.paypalDonateUrl;
   static const String privacyDocUrl = AppConstants.privacyPolicyDocUrl;
 
   Future<void> _launchUrl(BuildContext context, String url) async {
@@ -459,28 +460,31 @@ class AboutScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _launchUrl(context, buyMeACoffeeUrl),
-                  icon: const Icon(Icons.coffee_rounded, size: 16, color: Colors.black87),
-                  label: Text(
-                    ref.tr('about_donate_coffee'),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFDD00),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _launchUrl(context, buyMeACoffeeUrl),
+              icon: const Icon(Icons.coffee_rounded, size: 18, color: Colors.black87),
+              label: Text(
+                ref.tr('about_donate_coffee'),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black87,
                 ),
               ),
-              const SizedBox(width: 10),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFDD00),
+                foregroundColor: Colors.black87,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () => _launchUrl(context, githubSponsorsUrl),
@@ -495,6 +499,25 @@ class AboutScreen extends ConsumerWidget {
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     side: BorderSide(color: const Color(0xFFEA4AAA).withValues(alpha: 0.6)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _launchUrl(context, paypalUrl),
+                  icon: const Icon(Icons.payment_rounded, size: 15, color: Color(0xFF0079C1)),
+                  label: const Text(
+                    'PayPal',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: BorderSide(color: const Color(0xFF0079C1).withValues(alpha: 0.6)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
