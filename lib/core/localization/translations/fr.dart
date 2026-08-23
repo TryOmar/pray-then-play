@@ -441,6 +441,8 @@ const Map<String, String> frTranslations = {
   "about_methodology_title": "Méthode de Calcul",
   "about_methodology_desc": "Les horaires sont calculés avec la bibliothèque astronomique Adhan.",
   "about_feedback_title": "Suggestions & Retours",
+  "about_feedback_hub_title": "Suggérer des Jeux, Signaler des Bogues & Avis",
+  "about_feedback_hub_sub": "Rejoignez #💡・feedback sur Discord pour proposer des jeux ou signaler des problèmes",
   "about_suggest_game": "Suggérer un Jeu",
   "about_report_issue": "Signaler un Problème",
   "about_version_label": "Version {version} ({build})",

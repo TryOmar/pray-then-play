@@ -441,6 +441,8 @@ const Map<String, String> enTranslations = {
   "about_methodology_title": "Calculation Methodology",
   "about_methodology_desc": "Prayer calculations are powered by the open-source Adhan library, supporting major worldwide Islamic authorities (MWL, Egyptian Authority, ISNA, Umm al-Qura, Karachi, etc.) and both standard and Hanafi Asr Madhhabs.",
   "about_feedback_title": "Feedback & Suggestions",
+  "about_feedback_hub_title": "Suggest Games, Report Bugs & Feedback",
+  "about_feedback_hub_sub": "Join #💡・feedback on Discord to suggest games, report bugs, or share ideas",
   "about_suggest_game": "Suggest a Game",
   "about_report_issue": "Report a Bug",
   "about_version_label": "Version {version} ({build})",

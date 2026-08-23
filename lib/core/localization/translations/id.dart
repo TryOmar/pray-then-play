@@ -441,6 +441,8 @@ const Map<String, String> idTranslations = {
   "about_methodology_title": "Metode Perhitungan",
   "about_methodology_desc": "Perhitungan menggunakan pustaka astronomi Adhan.",
   "about_feedback_title": "Saran & Masukan",
+  "about_feedback_hub_title": "Sarankan Game, Laporkan Bug & Masukan",
+  "about_feedback_hub_sub": "Gabung ke #💡・feedback di Discord untuk menyarankan game atau melaporkan masalah",
   "about_suggest_game": "Sarankan Game",
   "about_report_issue": "Laporkan Masalah",
   "about_version_label": "Versi {version} ({build})",

@@ -12,6 +12,7 @@ class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
   static const String discordUrl = AppConstants.discordInviteUrl;
+  static const String discordFeedbackUrl = AppConstants.discordFeedbackInviteUrl;
   static const String githubUrl = AppConstants.githubRepoUrl;
   static const String websiteUrl = AppConstants.websiteUrl;
   static const String buyMeACoffeeUrl = AppConstants.buyMeACoffeeUrl;
@@ -673,32 +674,37 @@ class AboutScreen extends ConsumerWidget {
   }
 
   Widget _buildFeedbackSection(BuildContext context, WidgetRef ref, AppGamingTheme theme) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildActionTile(
-            icon: Icons.lightbulb_outline_rounded,
-            iconColor: const Color(0xFFF59E0B),
-            iconBg: const Color(0xFFF59E0B).withValues(alpha: 0.12),
-            title: ref.tr('about_suggest_game'),
-            subtitle: 'Discord #suggestions',
-            theme: theme,
-            onTap: () => _launchUrl(context, discordUrl),
-          ),
+    return _buildActionTile(
+      icon: Icons.tips_and_updates_rounded,
+      iconColor: const Color(0xFFF59E0B),
+      iconBg: const Color(0xFFF59E0B).withValues(alpha: 0.14),
+      title: ref.tr('about_feedback_hub_title'),
+      subtitle: ref.tr('about_feedback_hub_sub'),
+      theme: theme,
+      trailing: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: const Color(0xFF5865F2).withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFF5865F2).withValues(alpha: 0.3)),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _buildActionTile(
-            icon: Icons.bug_report_outlined,
-            iconColor: const Color(0xFFEF4444),
-            iconBg: const Color(0xFFEF4444).withValues(alpha: 0.12),
-            title: ref.tr('about_report_issue'),
-            subtitle: 'Discord #support',
-            theme: theme,
-            onTap: () => _launchUrl(context, discordUrl),
-          ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.open_in_new_rounded, size: 14, color: Color(0xFF5865F2)),
+            SizedBox(width: 4),
+            Text(
+              'Discord',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF5865F2),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
+      onTap: () => _launchUrl(context, discordFeedbackUrl),
     );
   }
 

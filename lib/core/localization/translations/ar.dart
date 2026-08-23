@@ -441,6 +441,8 @@ const Map<String, String> arTranslations = {
   "about_methodology_title": "منهجية الحساب الفلكي",
   "about_methodology_desc": "يعتمد التطبيق على مكتبة Adhan الفلكية المعتمدة عالمياً، مع دعم الهيئات الإسلامية الكبرى (رابطة العالم الإسلامي، الهيئة المصرية العامة، أم القرى، كراتشي، وغيرها) ومذهبي العصر (الجمهور والحنفي).",
   "about_feedback_title": "الاقتراحات والتواصل",
+  "about_feedback_hub_title": "اقترح لعبة أو أبلغ عن خطأ وشاركنا رأيك",
+  "about_feedback_hub_sub": "انضم إلى قناة #💡・feedback على ديسكورد لاقتراح ألعاب جديدة أو الإبلاغ عن أي ملاحظات",
   "about_suggest_game": "اقترح لعبة",
   "about_report_issue": "الإبلاغ عن خطأ",
   "about_version_label": "الإصدار {version} ({build})",

@@ -441,6 +441,8 @@ const Map<String, String> ruTranslations = {
   "about_methodology_title": "Методология расчетов",
   "about_methodology_desc": "Расчеты основаны на астрономической библиотеке Adhan.",
   "about_feedback_title": "Отзывы и предложения",
+  "about_feedback_hub_title": "Предложить игру, сообщить об ошибке и отзывы",
+  "about_feedback_hub_sub": "Присоединяйтесь к #💡・feedback в Discord, чтобы предложить игру или сообщить об ошибке",
   "about_suggest_game": "Предложить игру",
   "about_report_issue": "Сообщить об ошибке",
   "about_version_label": "Версия {version} ({build})",

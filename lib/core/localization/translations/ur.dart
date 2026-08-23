@@ -441,6 +441,8 @@ const Map<String, String> urTranslations = {
   "about_methodology_title": "حساب کا طریقہ کار",
   "about_methodology_desc": "نمازوں کا حساب معروف فلکیاتی لائبریری Adhan کے ذریعے کیا جاتا ہے۔",
   "about_feedback_title": "تجاویز اور رابطہ",
+  "about_feedback_hub_title": "گیمز تجویز کریں اور کیڑے رپورٹ کریں",
+  "about_feedback_hub_sub": "ڈسکارڈ پر #💡・feedback چینل میں شامل ہوں",
   "about_suggest_game": "نئی گیم تجویز کریں",
   "about_report_issue": "مسئلہ رپورٹ کریں",
   "about_version_label": "ورژن {version} ({build})",

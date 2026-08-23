@@ -441,6 +441,8 @@ const Map<String, String> msTranslations = {
   "about_methodology_title": "Kaedah Pengiraan",
   "about_methodology_desc": "Pengiraan menggunakan pustaka astronomi Adhan.",
   "about_feedback_title": "Maklum Balas & Cadangan",
+  "about_feedback_hub_title": "Cadang Permainan, Lapor Isu & Maklum Balas",
+  "about_feedback_hub_sub": "Sertai saluran #💡・feedback di Discord untuk mencadangkan permainan atau melaporkan isu",
   "about_suggest_game": "Cadang Permainan",
   "about_report_issue": "Lapor Masalah",
   "about_version_label": "Versi {version} ({build})",

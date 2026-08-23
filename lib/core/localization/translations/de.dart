@@ -441,6 +441,8 @@ const Map<String, String> deTranslations = {
   "about_methodology_title": "Berechnungsmethode",
   "about_methodology_desc": "Berechnungen basieren auf der astronomischen Adhan-Bibliothek.",
   "about_feedback_title": "Feedback & Vorschläge",
+  "about_feedback_hub_title": "Spiele vorschlagen, Fehler melden & Feedback",
+  "about_feedback_hub_sub": "Trete #💡・feedback auf Discord bei, um Spiele vorzuschlagen oder Fehler zu melden",
   "about_suggest_game": "Spiel vorschlagen",
   "about_report_issue": "Problem melden",
   "about_version_label": "Version {version} ({build})",

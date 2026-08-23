@@ -26,6 +26,7 @@ class AppConstants {
 
   // Ecosystem & Community URLs
   static const String discordInviteUrl = 'https://discord.gg/FKVAh24ycG';
+  static const String discordFeedbackInviteUrl = 'https://discord.gg/xqeJ3UAZHn';
   static const String githubRepoUrl = 'https://github.com/TryOmar/pray-then-play';
   static const String websiteUrl = 'https://tryomar.github.io/pray-then-play-website/';
   static const String buyMeACoffeeUrl = 'https://buymeacoffee.com/tryomar';

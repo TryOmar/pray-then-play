@@ -441,6 +441,8 @@ const Map<String, String> esTranslations = {
   "about_methodology_title": "Metodología de Cálculo",
   "about_methodology_desc": "Los cálculos se basan en la librería astronómica Adhan.",
   "about_feedback_title": "Sugerencias y Comentarios",
+  "about_feedback_hub_title": "Sugerir Juegos, Reportar Errores y Feedback",
+  "about_feedback_hub_sub": "Únete a #💡・feedback en Discord para sugerir juegos o reportar problemas",
   "about_suggest_game": "Sugerir Juego",
   "about_report_issue": "Reportar Error",
   "about_version_label": "Versión {version} ({build})",

@@ -441,6 +441,8 @@ const Map<String, String> trTranslations = {
   "about_methodology_title": "Hesaplama Metodolojisi",
   "about_methodology_desc": "Namaz vakitleri astronomik Adhan kütüphanesi ile hesaplanır.",
   "about_feedback_title": "Geri Bildirim",
+  "about_feedback_hub_title": "Oyun Öner, Hata Bildir & Geri Bildirim",
+  "about_feedback_hub_sub": "Oyun önermek veya sorun bildirmek için Discord'daki #💡・feedback kanalına katılın",
   "about_suggest_game": "Oyun Öner",
   "about_report_issue": "Hata Bildir",
   "about_version_label": "Sürüm {version} ({build})",
