@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppConstants {
   static const String appName = 'Pray Then Play';
   static const String tagline = 'Stay on time. Play with peace of mind.';
-  static const String version = '2.0.0';
+  static const String version = '2.0.1';
 
   // Storage keys
   static const String keyOnboardingComplete = 'onboarding_complete';
