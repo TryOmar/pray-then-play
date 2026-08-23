@@ -14,7 +14,7 @@ void main() {
       expect(AppConstants.appName, equals('Pray Then Play'));
       expect(AppConstants.tagline,
           equals('Stay on time. Play with peace of mind.'));
-      expect(AppConstants.version, equals('2.0.0'));
+      expect(AppConstants.version, equals('2.0.1'));
     });
 
     test('11-Theme Matrix has exactly 5 Dark, 5 Light, and 1 Special theme', () {
