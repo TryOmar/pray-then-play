@@ -3,7 +3,7 @@
 ; =====================================================================
 
 #define MyAppName "Pray Then Play"
-#define MyAppVersion "2.0.0"
+#define MyAppVersion "2.0.1"
 #define MyAppPublisher "Pray Then Play Team"
 #define MyAppURL "https://github.com/TryOmar/pray-then-play"
 #define MyAppExeName "pray_then_play.exe"
