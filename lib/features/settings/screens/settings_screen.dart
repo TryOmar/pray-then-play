@@ -83,21 +83,6 @@ class SettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // GAMES & ACTIVITIES
-                  _SettingsSection(
-                    title: ref.tr('my_games_title'),
-                    children: [
-                      _SettingsTile(
-                        icon: Icons.sports_esports_rounded,
-                        title: ref.tr('setting_configure_games'),
-                        subtitle: ref.tr('setting_configure_games_sub'),
-                        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
-                        onTap: () => context.go('/games'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
                   // LANGUAGE
                   _SettingsSection(
                     title: ref.tr('section_language'),
