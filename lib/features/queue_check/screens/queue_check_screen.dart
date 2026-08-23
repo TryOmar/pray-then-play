@@ -13,6 +13,7 @@ import '../../../core/providers/prayer_provider.dart';
 import '../../../core/providers/settings_provider.dart';
 import '../../../core/services/desktop_service.dart';
 import '../../../core/services/home_widget_service.dart';
+import '../../../core/services/prayer_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/risk_calculator.dart';
 import '../../../core/utils/time_utils.dart';
@@ -703,37 +704,98 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
   }) {
     final now = DateTime.now();
     final isOpenSession = _desiredSessionMinutes == null;
-    final plannedDuration = _desiredSessionMinutes ??
-        (nextPrayerTime != null
-            ? (nextPrayerTime.difference(now).inMinutes - bufferMinutes)
-                .clamp(1, 1440)
-            : 60);
-    final sessionEndTime =
-        _desiredSessionMinutes == null && nextPrayerTime != null
-            ? nextPrayerTime.subtract(Duration(minutes: bufferMinutes))
-            : now.add(Duration(minutes: plannedDuration));
 
     final is24Hour = StorageService.is24HourFormat;
     final timeFormat = DateFormat(is24Hour ? 'HH:mm' : 'h:mm a');
     final userGames = ref.watch(userGamesProvider);
 
-    // Retrieve today's prayer times
+    // Retrieve today's and tomorrow's upcoming prayer times
     final prayerTimes = ref.watch(dailyPrayerTimesProvider);
-    final upcomingPrayersInSession = <MapEntry<String, DateTime>>[];
+    final allUpcomingPrayers = <MapEntry<String, DateTime>>[];
 
     if (prayerTimes != null) {
+      // Add today's prayers (including active prayer within its 15m break)
       for (final entry in prayerTimes.allPrayers) {
         if (entry.key.toLowerCase() == 'sunrise') continue;
-        if (entry.value.isAfter(now) && entry.value.isBefore(sessionEndTime)) {
-          upcomingPrayersInSession.add(entry);
+        if (entry.value.isAfter(now.subtract(const Duration(minutes: 15)))) {
+          allUpcomingPrayers.add(entry);
         }
+      }
+
+      // Add tomorrow's prayers for continuous timeline horizon
+      final tomorrow = now.add(const Duration(days: 1));
+      final lat = StorageService.latitude ?? 21.4225;
+      final lng = StorageService.longitude ?? 39.8262;
+      final method = ref.watch(calculationMethodProvider);
+      final asrMethod = ref.watch(asrMethodProvider);
+      final tomorrowPrayers = PrayerService.calculatePrayerTimes(
+        latitude: lat,
+        longitude: lng,
+        date: tomorrow,
+        method: method,
+        asrMethod: asrMethod,
+      );
+      for (final entry in tomorrowPrayers.allPrayers) {
+        if (entry.key.toLowerCase() == 'sunrise') continue;
+        allUpcomingPrayers.add(entry);
       }
     }
 
-    final hasPrayerBreak = upcomingPrayersInSession.isNotEmpty;
-    final isOverrunningNext = nextPrayerTime != null &&
+    final firstPrayer =
+        allUpcomingPrayers.isNotEmpty ? allUpcomingPrayers.first : null;
+    final int minsToFirst =
+        firstPrayer != null ? firstPrayer.value.difference(now).inMinutes : 9999;
+    // Prayer is at the very start if it's within buffer, within 15 mins, or currently active (<= 0)
+    final bool isFirstPrayerAtStart =
+        firstPrayer != null && (minsToFirst <= bufferMinutes || minsToFirst <= 15);
+
+    MapEntry<String, DateTime>? targetEndPrayer;
+    DateTime sessionEndTime;
+    int plannedDuration;
+    final prayersInTimeline = <MapEntry<String, DateTime>>[];
+
+    if (isOpenSession) {
+      if (isFirstPrayerAtStart && allUpcomingPrayers.length >= 2) {
+        // First prayer is at the very start -> Timeline shows 2 prayers (first at start, second at end!)
+        prayersInTimeline.add(allUpcomingPrayers[0]);
+        prayersInTimeline.add(allUpcomingPrayers[1]);
+        targetEndPrayer = allUpcomingPrayers[1];
+        sessionEndTime =
+            targetEndPrayer.value.subtract(Duration(minutes: bufferMinutes));
+        plannedDuration =
+            sessionEndTime.difference(now).inMinutes.clamp(1, 1440);
+      } else if (firstPrayer != null) {
+        // First prayer is in the future -> Timeline shows 1 prayer at the end!
+        prayersInTimeline.add(firstPrayer);
+        targetEndPrayer = firstPrayer;
+        sessionEndTime =
+            targetEndPrayer.value.subtract(Duration(minutes: bufferMinutes));
+        plannedDuration =
+            sessionEndTime.difference(now).inMinutes.clamp(1, 1440);
+      } else {
+        plannedDuration = 60;
+        sessionEndTime = now.add(Duration(minutes: plannedDuration));
+      }
+    } else {
+      plannedDuration = _desiredSessionMinutes!;
+      sessionEndTime = now.add(Duration(minutes: plannedDuration));
+      for (final p in allUpcomingPrayers) {
+        if (p.value.isBefore(sessionEndTime) ||
+            (prayersInTimeline.isEmpty &&
+                p.value.isBefore(
+                    sessionEndTime.add(const Duration(minutes: 15))))) {
+          prayersInTimeline.add(p);
+        }
+      }
+      targetEndPrayer = prayersInTimeline.isNotEmpty
+          ? prayersInTimeline.last
+          : firstPrayer;
+    }
+
+    final hasPrayerBreak = prayersInTimeline.isNotEmpty;
+    final isOverrunningNext = targetEndPrayer != null &&
         sessionEndTime.isAfter(
-            nextPrayerTime.subtract(Duration(minutes: bufferMinutes)));
+            targetEndPrayer.value.subtract(Duration(minutes: bufferMinutes)));
 
     final statusColor = hasPrayerBreak || isOverrunningNext
         ? AppColors.primaryCyan
@@ -752,8 +814,8 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
     })>[];
     DateTime cursorTime = now;
 
-    if (upcomingPrayersInSession.isNotEmpty) {
-      for (final prayer in upcomingPrayersInSession) {
+    if (prayersInTimeline.isNotEmpty) {
+      for (final prayer in prayersInTimeline) {
         final playMinutes = prayer.value.difference(cursorTime).inMinutes;
         if (playMinutes > 0) {
           sessionSegments.add((
@@ -770,12 +832,14 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
 
         const prayerBreakMinutes = 15;
         final prayerLabel = context.tr('prayer_${prayer.key.toLowerCase()}');
+        final breakStartTime = prayer.value;
         final breakEndTime =
-            prayer.value.add(const Duration(minutes: prayerBreakMinutes));
+            breakStartTime.add(const Duration(minutes: prayerBreakMinutes));
+
         sessionSegments.add((
           type: 'prayer',
           duration: prayerBreakMinutes,
-          startTime: prayer.value,
+          startTime: breakStartTime,
           endTime: breakEndTime,
           label: '$prayerLabel (15m)',
           color: AppColors.warningAmber,
@@ -786,45 +850,21 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
         cursorTime = breakEndTime;
       }
 
-      final remainingPlay = sessionEndTime.difference(cursorTime).inMinutes;
-      if (remainingPlay > 0) {
-        sessionSegments.add((
-          type: 'play',
-          duration: remainingPlay,
-          startTime: cursorTime,
-          endTime: sessionEndTime,
-          label: TimeUtils.formatMinutes(remainingPlay),
-          color: AppColors.primaryCyan,
-          icon: Icons.sports_esports_rounded,
-          prayerName: null,
-        ));
+      if (sessionEndTime.isAfter(cursorTime)) {
+        final remainingPlay = sessionEndTime.difference(cursorTime).inMinutes;
+        if (remainingPlay > 0) {
+          sessionSegments.add((
+            type: 'play',
+            duration: remainingPlay,
+            startTime: cursorTime,
+            endTime: sessionEndTime,
+            label: TimeUtils.formatMinutes(remainingPlay),
+            color: AppColors.primaryCyan,
+            icon: Icons.sports_esports_rounded,
+            prayerName: null,
+          ));
+        }
       }
-    } else if (isOpenSession &&
-        nextPrayerTime != null &&
-        nextPrayerName.isNotEmpty) {
-      sessionSegments.add((
-        type: 'play',
-        duration: plannedDuration,
-        startTime: now,
-        endTime: sessionEndTime,
-        label: '${TimeUtils.formatMinutes(plannedDuration)} Play',
-        color: AppColors.primaryCyan,
-        icon: Icons.sports_esports_rounded,
-        prayerName: null,
-      ));
-
-      const prayerBreakMinutes = 15;
-      final prayerLabel = context.tr('prayer_${nextPrayerName.toLowerCase()}');
-      sessionSegments.add((
-        type: 'prayer',
-        duration: prayerBreakMinutes,
-        startTime: nextPrayerTime,
-        endTime: nextPrayerTime.add(const Duration(minutes: prayerBreakMinutes)),
-        label: '$prayerLabel (15m)',
-        color: AppColors.warningAmber,
-        icon: Icons.mosque_rounded,
-        prayerName: nextPrayerName,
-      ));
     } else {
       sessionSegments.add((
         type: 'play',
@@ -885,8 +925,8 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                   ),
                   child: Text(
                     isOpenSession
-                        ? (nextPrayerName.isNotEmpty
-                            ? 'Until ${context.tr('prayer_${nextPrayerName.toLowerCase()}')} (${TimeUtils.formatMinutes(plannedDuration)})'
+                        ? (targetEndPrayer != null
+                            ? 'Until ${context.tr('prayer_${targetEndPrayer.key.toLowerCase()}')} (${TimeUtils.formatMinutes(plannedDuration)})'
                             : context.tr('duration_open'))
                         : '${TimeUtils.formatMinutes(plannedDuration)} Planned',
                     maxLines: 1,
@@ -1092,6 +1132,40 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                         ? context.tr('prayer_${seg.prayerName!.toLowerCase()}')
                         : 'Prayer';
 
+                    final nodeWidget = _buildMilestoneNode(
+                      label: context.trFormat('prayer_break_title', {
+                        'prayer': prayerNameTranslated,
+                      }),
+                      time: timeFormat.format(seg.startTime),
+                      sublabel: context.trFormat('minutes_break_short', {
+                        'minutes': seg.duration.toString(),
+                      }),
+                      color: AppColors.warningAmber,
+                      icon: Icons.mosque_rounded,
+                      alignment: isFirst
+                          ? CrossAxisAlignment.start
+                          : (isLast
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.center),
+                      textAlign: isFirst
+                          ? TextAlign.start
+                          : (isLast ? TextAlign.end : TextAlign.center),
+                      maxWidth: nodeMaxWidth,
+                      circleSize: circleSize,
+                      iconSize: iconSize,
+                      timeFontSize: timeFontSize,
+                      labelFontSize: labelFontSize,
+                      sublabelFontSize: sublabelFontSize,
+                      onTap: () => _showPrayerInfoModal(
+                        context: context,
+                        ref: ref,
+                        name: seg.prayerName ?? 'Prayer',
+                        time: seg.startTime,
+                        breakMinutes: seg.duration,
+                        is24Hour: is24Hour,
+                      ),
+                    );
+
                     return Expanded(
                       flex: flex,
                       child: SizedBox(
@@ -1101,8 +1175,8 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                           clipBehavior: Clip.none,
                           children: [
                             Positioned(
-                              left: 0,
-                              right: 0,
+                              left: isFirst ? circleCenterOffset : 0,
+                              right: isLast ? circleCenterOffset : 0,
                               top: lineTop,
                               child: Container(
                                 height: 2.0,
@@ -1110,38 +1184,27 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                     .withValues(alpha: 0.45),
                               ),
                             ),
-                            Center(
-                              child: SizedBox(
+                            if (isFirst)
+                              Positioned(
+                                left: 0,
+                                top: 0,
                                 width: nodeMaxWidth,
-                                child: _buildMilestoneNode(
-                                  label: context.trFormat('prayer_break_title', {
-                                    'prayer': prayerNameTranslated,
-                                  }),
-                                  time: timeFormat.format(seg.startTime),
-                                  sublabel: context.trFormat('minutes_break_short', {
-                                    'minutes': seg.duration.toString(),
-                                  }),
-                                  color: AppColors.warningAmber,
-                                  icon: Icons.mosque_rounded,
-                                  alignment: CrossAxisAlignment.center,
-                                  textAlign: TextAlign.center,
-                                  maxWidth: nodeMaxWidth,
-                                  circleSize: circleSize,
-                                  iconSize: iconSize,
-                                  timeFontSize: timeFontSize,
-                                  labelFontSize: labelFontSize,
-                                  sublabelFontSize: sublabelFontSize,
-                                  onTap: () => _showPrayerInfoModal(
-                                    context: context,
-                                    ref: ref,
-                                    name: seg.prayerName ?? 'Prayer',
-                                    time: seg.startTime,
-                                    breakMinutes: seg.duration,
-                                    is24Hour: is24Hour,
-                                  ),
+                                child: nodeWidget,
+                              )
+                            else if (isLast)
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                width: nodeMaxWidth,
+                                child: nodeWidget,
+                              )
+                            else
+                              Center(
+                                child: SizedBox(
+                                  width: nodeMaxWidth,
+                                  child: nodeWidget,
                                 ),
                               ),
-                            ),
                           ],
                         ),
                       ),
@@ -1219,7 +1282,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                     isOpenSession: isOpenSession,
                                     gamingMinutes: totalGamingMinutes,
                                     prayerCount:
-                                        upcomingPrayersInSession.length,
+                                        prayersInTimeline.length,
                                     is24Hour: is24Hour,
                                   ),
                                 ),
@@ -1249,7 +1312,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                     isOpenSession: isOpenSession,
                                     gamingMinutes: totalGamingMinutes,
                                     prayerCount:
-                                        upcomingPrayersInSession.length,
+                                        prayersInTimeline.length,
                                     is24Hour: is24Hour,
                                   ),
                                 ),
@@ -1334,7 +1397,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                     isOpenSession: isOpenSession,
                                     gamingMinutes: totalGamingMinutes,
                                     prayerCount:
-                                        upcomingPrayersInSession.length,
+                                        prayersInTimeline.length,
                                     is24Hour: is24Hour,
                                   ),
                                 ),
@@ -1419,7 +1482,7 @@ class _QueueCheckScreenState extends ConsumerState<QueueCheckScreen> {
                                     isOpenSession: isOpenSession,
                                     gamingMinutes: totalGamingMinutes,
                                     prayerCount:
-                                        upcomingPrayersInSession.length,
+                                        prayersInTimeline.length,
                                     is24Hour: is24Hour,
                                   ),
                                 ),
