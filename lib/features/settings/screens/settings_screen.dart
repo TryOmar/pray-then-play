@@ -416,10 +416,12 @@ class SettingsScreen extends ConsumerWidget {
                   _SettingsSection(
                     title: ref.tr('section_about'),
                     children: [
-                      const _SettingsTile(
+                      _SettingsTile(
                         icon: Icons.info_outline_rounded,
                         title: AppConstants.appName,
-                        subtitle: 'v${AppConstants.version} • ${AppConstants.tagline}',
+                        subtitle: 'v${AppConstants.version} • ${ref.tr('about_subtitle')}',
+                        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                        onTap: () => context.go('/about'),
                       ),
                     ],
                   ),

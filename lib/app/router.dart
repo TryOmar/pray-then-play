@@ -5,6 +5,7 @@ import '../features/onboarding/screens/onboarding_screen.dart';
 import '../features/queue_check/screens/queue_check_screen.dart';
 import '../features/game_profiles/screens/game_profiles_screen.dart';
 import '../features/settings/screens/settings_screen.dart';
+import '../features/about/screens/about_screen.dart';
 import '../features/heatmap/screens/prayer_consistency_screen.dart';
 import 'shell_screen.dart';
 
@@ -41,18 +42,25 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: PrayerConsistencyScreen(),
             ),
           ),
-          // Hub 3: Settings & Games Configuration
+          // Hub 3: Game Library Management
+          GoRoute(
+            path: '/games',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: GameProfilesScreen(),
+            ),
+          ),
+          // Hub 4: Settings & Configuration
           GoRoute(
             path: '/settings',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: SettingsScreen(),
             ),
           ),
-          // Sub-route: Game Library Management
+          // Hub 5: About & Community
           GoRoute(
-            path: '/games',
+            path: '/about',
             pageBuilder: (context, state) => const NoTransitionPage(
-              child: GameProfilesScreen(),
+              child: AboutScreen(),
             ),
           ),
         ],

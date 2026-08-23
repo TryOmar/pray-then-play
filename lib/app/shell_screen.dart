@@ -17,6 +17,7 @@ class ShellScreen extends ConsumerWidget {
       if (location.startsWith('/consistency')) return 1;
       if (location.startsWith('/games')) return 2;
       if (location.startsWith('/settings')) return 3;
+      if (location.startsWith('/about')) return 4;
     } catch (_) {}
     return 0;
   }
@@ -55,7 +56,7 @@ class ShellScreen extends ConsumerWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 640),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   child: Row(
                     children: [
                       _NavItem(
@@ -89,6 +90,14 @@ class ShellScreen extends ConsumerWidget {
                         activeColor: activeTheme.primaryAccent,
                         unselectedColor: activeTheme.textMuted,
                         onTap: () => context.go('/settings'),
+                      ),
+                      _NavItem(
+                        icon: Icons.info_outline_rounded,
+                        label: context.tr('nav_about'),
+                        isSelected: currentIndex == 4,
+                        activeColor: activeTheme.primaryAccent,
+                        unselectedColor: activeTheme.textMuted,
+                        onTap: () => context.go('/about'),
                       ),
                     ],
                   ),
